@@ -126,9 +126,15 @@ export class Registry {
     // Returns all components of a single type
     getComponentsByType = (type: string) => {
         const components = []
-        for (const value of this.entitiesToComponents.values()) {
-            // Pluck components that match the type we passed in
-            components.push(value.filter((component) => component.type == type)[0]) // We can use [0] here because there can only be one component of each type per entity
+        const entities = this.componentTypesToEntities.get(type)
+
+        if (entities) {
+            for (let i = 0; i < entities.length; i++) {
+                const component = this.getComponent(entities[i], type) // We should always only have one component per entity
+                if (component) {
+                    components.push(component)
+                }
+            }
         }
         return components
     }
