@@ -47,7 +47,7 @@ export class MoveModeSystem implements ISystem {
 
                 // Convert pointer world coordinates and convert to our map so we can calculate the path
                 const toX = Math.floor(Phaser.Math.Snap.To(this.scene.input.mousePointer.worldX, GRID_SIZE) / GRID_SIZE)
-                const toY = Math.floor(Phaser.Math.Snap.To(this.scene.input.mousePointer.worldY + 30, GRID_SIZE) / GRID_SIZE) // Adjusts display position based on
+                const toY = Math.floor(Phaser.Math.Snap.To(this.scene.input.mousePointer.worldY, GRID_SIZE) / GRID_SIZE) // Adjusts display position based on
 
                 const moveMode = this.ecs.getComponent(entities[i], 'movemode') as MoveMode
 

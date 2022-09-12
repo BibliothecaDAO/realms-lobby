@@ -1,8 +1,10 @@
 // floatingText - Pops up a little floating text whenever an event happens
 
-import { GameObjects } from 'phaser'
-import { Sprite } from '../components/sprite'
 import { Registry } from '../engine/registry'
+import { DEPTH } from '../config'
+
+ // Components
+import { Sprite } from '../components/sprite'
 
 export type transfer = {
     type: string
@@ -61,6 +63,7 @@ export class FloatingTextUI {
 
             // const floater = targetSprite.sprite.scene.add.text(x, y, `+1 ${item}`, { color: '#FFFF00', fontSize: 'x-large' })
             const floater = targetSprite.sprite.scene.add.sprite(x, y, itemSprite.filename)
+            floater.setDepth(DEPTH.UI)
 
             targetSprite.sprite.scene.tweens.add({
                 targets: floater,

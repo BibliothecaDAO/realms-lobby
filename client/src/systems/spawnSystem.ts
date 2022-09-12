@@ -13,6 +13,7 @@ import { Player } from '../components/player'
 import { Sprite } from '../components/sprite'
 import { Transform } from '../components/transform'
 import { Velocity } from '../components/velocity'
+import { DEPTH } from '../config'
 
 export class SpawnSystem implements ISystem {
     private events: EventEmitter
@@ -59,6 +60,7 @@ export class SpawnSystem implements ISystem {
                     break
                 case 'sprite':
                     const sprite = this.scene.add.sprite(-100, -100, components[index].name)
+                        .setDepth(DEPTH.Characters) // Make sure foreground sprites appear on top
                     component = new Sprite(components[index].name, sprite)
                     break
                 case 'transform':
