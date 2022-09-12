@@ -4,7 +4,7 @@ import { Button } from '../button'
 
 export class SelectButton extends Button {
     constructor(scene, state, size, callback) {
-        const xOffset = -123
+        const xOffset = -40
         super(scene, state, xOffset, 0, size, size, '➤', { rotation: 43 }, callback)
     }
 

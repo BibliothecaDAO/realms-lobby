@@ -1,8 +1,8 @@
 // debugButton.ts - Contains ui logic to enable debug mode
 
-import { Button } from './button'
+import { Button } from '../button'
 import { GameObjects } from 'phaser'
-import { GRID_SIZE } from '../config'
+import { GRID_SIZE } from '../../config'
 
 export class DebugButton extends Button {
     private worldEvents: Phaser.Events.EventEmitter
@@ -11,7 +11,7 @@ export class DebugButton extends Button {
     private debugCursor!: GameObjects.Text // Displays a small label above the mouse cursor with the current 'grid' position we would pass to the server
 
     constructor(scene, state, size, data, callback) {
-        const xOffset = 125
+        const xOffset = 40
         super(scene, state, xOffset, 0, size, size, '⋮⋮', null, callback)
 
         if (data.events) {

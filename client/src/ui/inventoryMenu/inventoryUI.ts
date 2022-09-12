@@ -1,9 +1,9 @@
 // inventoryUI - Display any items in our inventory
 
 import { GameObjects } from 'phaser'
-import { Inventory } from '../components/inventory'
-import { Sprite } from '../components/sprite'
-import { Registry } from '../engine/registry'
+import { Inventory } from '../../components/inventory'
+import { Sprite } from '../../components/sprite'
+import { Registry } from '../../engine/registry'
 
 export class InventoryUI {
     private ecs: Registry

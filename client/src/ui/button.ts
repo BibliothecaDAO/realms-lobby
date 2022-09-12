@@ -21,7 +21,7 @@ export class Button extends Phaser.GameObjects.Container {
     private styles = {
         selected: {
             bg: 0xffffff,
-            color: '#000'
+            color: '#000',
         },
         unselected: {
             bg: 0x000000,
@@ -63,7 +63,7 @@ export class Button extends Phaser.GameObjects.Container {
                 text,
                 this.styles.unselected // Button is not selected by default
             )
-            .setFontSize(30)
+            .setFontSize(this.fontSize)
         this.buttonText.setOrigin(0.5) // Center text within container
 
         // Assign the text/backgorund to the container (this object)

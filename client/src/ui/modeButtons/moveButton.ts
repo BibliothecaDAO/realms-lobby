@@ -18,7 +18,8 @@ export class MoveButton extends Button {
     private debugCursor: GameObjects.Text
 
     constructor(scene, state, size, data, callback) {
-        const xOffset = -78
+        // TODO - Make button offsets a factor of number of buttons
+        const xOffset = -24
 
         super(scene, state, xOffset, 0, size, size, '✥', null, callback)
 

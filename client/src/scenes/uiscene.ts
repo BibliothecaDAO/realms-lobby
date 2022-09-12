@@ -1,21 +1,28 @@
 // gameui.ts - In-game menu overlays for selecting actions / state and toggling settings/debug.
 
-import { MoveButton, SelectButton } from '../ui/modeButtons'
 import { State, StateMachine } from '../engine/statemachine'
 import { GameObjects } from 'phaser'
 import { DEPTH } from '../config'
 import { Registry } from '../engine/registry'
-import { World } from 'matter'
-import { DebugButton } from '../ui/debugButton'
-import { DebugUI } from '../ui/debugUI'
-import { InventoryUI } from '../ui/inventoryUI'
-import { InventoryButton } from '../ui/inventoryButton'
+import { GRID_SIZE } from '../config'
+
+// UI Modes
+import { MoveButton, SelectButton } from '../ui/modeButtons'
+
+// Inventory
+import { InventoryUI } from '../ui/inventoryMenu/inventoryUI'
+import { InventoryButton } from '../ui/inventoryMenu/inventoryButton'
+
+// Floating text (e.g. damage numbers)
 import { FloatingTextUI } from '../ui/floatingTextUI'
-import { DebugCursorUI } from '../ui/debugCursorUI'
+
+// Debug
+import { DebugUI } from '../ui/debugMenu/debugUI'
+import { DebugButton } from '../ui/debugMenu/debugButton'
+import { DebugCursorUI } from '../ui/debugMenu/debugCursorUI'
 
 export class GameUIScene extends Phaser.Scene {
     // Configuration variables
-    private buttonSize = 44 // 44 pixels width/height
     public static Name = 'ui-scene'
 
     // Layers to control the z-axis of our ui
@@ -40,7 +47,6 @@ export class GameUIScene extends Phaser.Scene {
     // Other Systems we need to query
     private worldEvents: Phaser.Events.EventEmitter
     private ecs: Registry
-    private world: World
 
     // State Machine for which UI mode the player is in (Move character / Attack / etc)
     private state: StateMachine
@@ -68,7 +74,7 @@ export class GameUIScene extends Phaser.Scene {
         // Setup dynamic UI's (that get hidden/shown throughout)
         this.debugPanel = new DebugUI(this.ecs, this.worldEvents, this)
         this.debugCursor = new DebugCursorUI(this.ecs, this.worldEvents, this)
-         this.inventoryUI = new InventoryUI(this.ecs, this.worldEvents, this)
+        this.inventoryUI = new InventoryUI(this.ecs, this.worldEvents, this)
         this.floatingTextUI = new FloatingTextUI(this.ecs, this.worldEvents, this)
 
         // Setup keybinds
@@ -116,38 +122,43 @@ export class GameUIScene extends Phaser.Scene {
 
     createUIContainer = () => {
         // Creates the overarching container that houses the UI
-        const width = 300
-        const height = 50
+        this.ui = this.add.container(
+            this.cameras.main.width / GRID_SIZE * 2,    // Center in the middle of the screen
+            GRID_SIZE / 2,  // Clamp to top of screen
+        )
+        this.ui.setDepth(DEPTH.UI)
+    
+        // Create the background for our UI
+        const width = 6 * GRID_SIZE
+        const height = GRID_SIZE
+        // x, y are set relative to the UI container
         const bg = this.add.rectangle(0, 0, width, height, 0x000000)
+
+        const buttonSize = GRID_SIZE
 
         // Modes (e.g. select stuff, move around, attack, take an action)
         // Only one mode can be active at a time, managed by a state machine
-        this.selectButton = new SelectButton(this, this.States.Select, this.buttonSize, () => {
+        this.selectButton = new SelectButton(this, this.States.Select, buttonSize, () => {
             this.state.transition(this.States.Select)
         })
 
-        this.moveButton = new MoveButton(this, this.States.Move, this.buttonSize, { events: this.worldEvents }, () => {
+        this.moveButton = new MoveButton(this, this.States.Move, buttonSize, { events: this.worldEvents }, () => {
             this.state.transition(this.States.Move)
         })
 
         // Utilities (e.g. open inventory)
         // Many utility UI functions can be active at a time
-        this.inventoryButton = new InventoryButton(this, null, this.buttonSize, { events: this.worldEvents }, () => {
+        this.inventoryButton = new InventoryButton(this, null, buttonSize, { events: this.worldEvents }, () => {
             this.inventoryButton.toggleInventory() // Hacky but we pass in a callback inside the function
         })
 
-        this.debugButton = new DebugButton(this, null, this.buttonSize, { events: this.worldEvents }, () => {
+        this.debugButton = new DebugButton(this, null, buttonSize, { events: this.worldEvents }, () => {
             this.debugButton.toggleDebugGrid() // Hacky but we pass in a callback inside the function
         })
 
         // Group the UI in a single container so we can toggle it on/off if needed
-        this.ui = this.add.container(
-            this.sys.game.canvas.width / 2,
-            height / 2, // clamp bar to top of screen so it's easier to see
-            [bg, this.selectButton, this.moveButton, this.debugButton, this.inventoryButton]
-        )
+        this.ui.add([bg, this.selectButton, this.moveButton, this.debugButton, this.inventoryButton])
 
-        this.ui.setDepth(DEPTH.UI)
 
         // Configure menu state machine to keep track of what's selected
         // Do this at the end to make sure the buttons are available when we call it
