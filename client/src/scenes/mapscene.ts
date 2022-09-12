@@ -4,10 +4,9 @@ import { Registry } from '../engine/registry'
 import { js as Finder } from 'easystarjs' // https://github.com/prettymuchbryce/easystarjs
 
 import { GameUIScene } from './uiscene'
-import { GRID_SIZE, WORLD_SIZE } from '../config'
 
 // Initialize systems
-import { FollowMouseSystem } from '../systems/followMouseSystem'
+import { AttachToCursorSystem } from '../systems/attachToCursorSystem'
 import { RenderSystem } from '../systems/renderSystem'
 import { MoveSystem } from '../systems/moveSystem'
 import { MoveModeSystem } from '../systems/moveModeSystem'
@@ -52,7 +51,7 @@ export class MapScene extends Phaser.Scene {
         this.ecs.addSystem(new MoveSystem(this.events, this.ecs))
         this.ecs.addSystem(new MoveModeSystem(this.events, this.ecs, this, finder))
         this.ecs.addSystem(new MapSystem(this.events, this.ecs, this, finder))
-        this.ecs.addSystem(new FollowMouseSystem(this.events, this.ecs, this)) // Create map cursor
+        this.ecs.addSystem(new AttachToCursorSystem(this.events, this.ecs, this)) // Create map cursor
         this.ecs.addSystem(new RenderSystem(this.events, this.ecs)) // Update any transforms that moved this turn
         this.ecs.addSystem(new SpawnSystem(this.events, this.ecs, this))
         this.ecs.addSystem(new InventorySystem(this.events, this.ecs))

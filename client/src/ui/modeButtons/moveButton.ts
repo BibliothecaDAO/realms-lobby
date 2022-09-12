@@ -5,14 +5,12 @@
 
 import { GameObjects } from 'phaser'
 import { Button } from '../button'
-import { FollowMouseSystem } from '../../systems/followMouseSystem'
 
 export class MoveButton extends Button {
     private worldEvents: Phaser.Events.EventEmitter
     private player: string
 
     // Setup components
-    private followMouse: FollowMouseSystem
 
     // Debug cursor
     private debugCursor: GameObjects.Text

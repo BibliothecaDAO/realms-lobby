@@ -10,7 +10,7 @@ import { Sprite } from '../components/sprite'
 import { Transform } from '../components/transform'
 import { Enabled } from '../components/enabled'
 
-export class FollowMouseSystem implements ISystem {
+export class AttachToCursorSystem implements ISystem {
     events: Phaser.Events.EventEmitter
     ecs: Registry
     scene: Phaser.Scene
