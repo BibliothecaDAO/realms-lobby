@@ -25,25 +25,14 @@ export class MapSystem implements ISystem {
         // HACK - manually create a map entity
         // const map = new Map(30, 30) // HACK - Reduced map size for perf reasons. Need to figure out how to efficently handle larger maps.
         const zone = new Zone(100, 50)
-
-        // Create a grid of tiles to represent our map
-        this.setupTiles(zone)
-
-        // Setup graphical tileset so we can render the map
-        this.setupTileset(zone)
-
-        // Add tiles to A*Star pathfinding system
-        this.setupPathing(zone)
-
-        this.finder.setGrid(zone.tiles) // Submit a 2d grid of tiles with id's to consider
-        this.finder.setAcceptableTiles([0]) // The ID's of tiles that can be walked (not walls)
-
+    
         // Create the entity and add our map to it
         const entity = this.ecs.createEntity()
         this.ecs.addComponent(entity, zone)
 
         // Listen for events
         // When anything with a collider spawns, update pathfinding so entities can't move to that spot
+        this.events.on('spawnZone', this.setupMap)
         this.events.on('spawnSuccess', this.placeStaticColliders)
 
         // When something moves, update pathfinding so entities can't move to that spot
@@ -55,6 +44,15 @@ export class MapSystem implements ISystem {
     }
 
     // Event functions
+    // Received a map component, setup tilemap and pathing
+    setupMap = (entity: string, zone: Zone) => {
+        // Setup graphical tileset so we can render the map
+        this.setupTileset(zone)
+
+        // Add tiles to A*Star pathfinding system
+        this.setupPathing(zone)
+    }
+
     // Place a blocker in pathfinding for any static objects (no velocity / cannot move)
     placeStaticColliders = (entity) => {
         // Make sure this is a static object (velocity means it can move)
@@ -72,20 +70,6 @@ export class MapSystem implements ISystem {
     }
 
     // Utility functions
-    setupTiles = (zone: Zone) => {
-        const tiles = []
-
-        for (let y = 0; y < zone.height; y++) {
-            const col = []
-            for (let x = 0; x < zone.width; x++) {
-                col.push(0) // Push a '1' because the tile should be acceptable
-            }
-            tiles.push(col)
-        }
-
-        zone.tiles = tiles
-    }
-
     // Create a tileset/tilemap so we can display the map in Phaser
     setupTileset = (zone: Zone) => {
         // setup tilemap
@@ -96,11 +80,10 @@ export class MapSystem implements ISystem {
             tileHeight: tileSize
         })
 
-        const tileSet = tilemap.addTilesetImage('palace-floor')
+        const tileSet = tilemap.addTilesetImage('tilemap')
 
         // TODO - Look into cheaper ways to create this tilemap
-        tilemap.createLayer(0, tileSet, 0, 0).randomize(0, 0, tilemap.width, tilemap.height, [0, 1])
-        // tilemap.createBlankLayer('layer1', tileSet).randomize(0, 0, tilemap.width, tilemap.height, [0, 1])
+        tilemap.createLayer(0, tileSet, 0, 0).randomize(0, 0, tilemap.width, tilemap.height, [0, 1, 2, 3, 4, 5])
         zone.tileMap = tilemap
     }
 
@@ -111,6 +94,6 @@ export class MapSystem implements ISystem {
     // height: height of tilemap
     setupPathing = (zone: Zone) => {
         this.finder.setGrid(zone.tiles) // Submit a 2d grid of tiles with id's to consider
-        this.finder.setAcceptableTiles([0]) // The ID's of tiles that can be walked (not walls)
+        this.finder.setAcceptableTiles([0,1]) // The ID's of tiles that can be walked (not walls)
     }
 }

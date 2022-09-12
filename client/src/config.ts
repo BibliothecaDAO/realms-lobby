@@ -4,7 +4,7 @@
 export const DEBUG = false // Used to flip on/off debug values globally
 // export const DEBUG = true
 
-export const GRID_SIZE = 64 // How big is the grid for movement? (Note this might be different from the UI tile size)
+export const GRID_SIZE = 16 // How big is the grid for movement? (Note this might be different from the UI tile size)
 export const WORLD_SIZE = 2000 // How many tiles across is our world?
 
 // Enums for depth sorting UI elements. Objects are sorted by height from menu (front) to background (back)

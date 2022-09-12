@@ -14,12 +14,10 @@ import { MoveModeSystem } from '../systems/moveModeSystem'
 import { SpawnSystem } from '../systems/spawnSystem'
 import { MapSystem } from '../systems/mapSystem'
 import { InventorySystem } from '../systems/inventorySystem'
+import { CameraSystem } from '../systems/cameraSystem'
 
 // Components
 import { Player } from '../components/player'
-import { Sprite } from '../components/sprite'
-import { Zone } from '../components/zone'
-
 
 export class MapScene extends Phaser.Scene {
     public static Name = 'map-scene'
@@ -58,6 +56,7 @@ export class MapScene extends Phaser.Scene {
         this.ecs.addSystem(new RenderSystem(this.events, this.ecs)) // Update any transforms that moved this turn
         this.ecs.addSystem(new SpawnSystem(this.events, this.ecs, this))
         this.ecs.addSystem(new InventorySystem(this.events, this.ecs))
+        this.ecs.addSystem(new CameraSystem(this.events, this.ecs, this))
 
         // Running this up front because the camera can scroll before setPollAlways has been called (Resulting in improper values)
         this.input.setPollAlways() // The cursor should poll for new positions while the camera is moving
@@ -90,17 +89,6 @@ export class MapScene extends Phaser.Scene {
     }
 
     initCamera = (entity) => {
-        // Set bounds of world to the same size as our tilemap.
-        const mapEntities = this.ecs.getEntitiesByComponentType('zone')
-        const map = this.ecs.getComponent(mapEntities[0], 'zone') as Zone
-
-        // This allows us to call world coordinates (e.g. via mouse pointer)
-        this.physics.world.setBounds(0, 0, map.width * GRID_SIZE, map.height * GRID_SIZE)
-
-        // Setup camera to follow player around
-        this.cameras.main.setBounds(0, 0, map.width * GRID_SIZE, map.height * GRID_SIZE)
-
-        const sprite = this.ecs.getComponent(entity, 'sprite') as Sprite
-        this.cameras.main.startFollow(sprite.sprite, false, 0.01, 0.01)
+       
     }
 }

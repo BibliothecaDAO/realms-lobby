@@ -24,7 +24,8 @@ const gameConfig: Types.Core.GameConfig = {
     scale: {
         mode: Phaser.Scale.ScaleModes.NONE,
         width: window.innerWidth,
-        height: window.innerHeight
+        height: window.innerHeight,
+        zoom: 4
     },
     physics: {
         default: 'arcade',

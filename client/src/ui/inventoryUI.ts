@@ -119,7 +119,7 @@ export class InventoryUI {
         const y = -startY + this.itemSpacer + sprite.sprite.height * row
 
         // Add the sprite to the scene so we can render it
-        const cloneSprite = this.scene.add.sprite(x, y, sprite.filename).setScale(4)
+        const cloneSprite = this.scene.add.sprite(x, y, sprite.filename)
 
         return cloneSprite
     }

@@ -87,6 +87,12 @@ export class SpawnSystem implements ISystem {
             if (!component.hidden) {
                 componentsToSend[components[i].type] = component
             }
+
+            // HACK - special case zone spawn so the client can load pathfinding and tilemaps
+            // Otherwise the zone component has to query every time anything spawns
+            if (component.type == 'zone') {
+                this.events.emit('spawnZone', entity, component)
+            }
         }
 
         // HACK - Cache the entity and its components in case we need to respawn them

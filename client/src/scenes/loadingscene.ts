@@ -23,22 +23,19 @@ export class LoadingScene extends Scene {
         ) // Pass in this as context so we can call the next scene
 
         this.load.baseURL = 'assets/'
-        this.load.spritesheet('flame', 'sprites/flame.png', { frameWidth: 128, frameHeight: 128, endFrame: 7 })
 
         // Load Characters
         this.load.image('_character', 'sprites/characters/_character.png')
 
         // Load environment assets
         this.load.image('_resource', 'sprites/environment/_resource.png')
-        this.load.image('_resource-empty', 'sprites/environment/_resource-empty.png')
-
-        this.load.image('_wall', 'sprites/environment/_wall.png')
+        // this.load.image('_resource-empty', 'sprites/environment/_resource-empty.png')
 
         // Load enemies
         this.load.image('_enemy', 'sprites/enemies/_enemy.png')
 
         // Load world tiles
-        this.load.image('_floor', 'sprites/environment/_floor.png')
+        this.load.image('tilemap', 'tilemaps/tinydungeon_packed.png')
     }
 
     create(): void {

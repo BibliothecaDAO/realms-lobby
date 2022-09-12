@@ -115,7 +115,7 @@ export class MoveModeSystem implements ISystem {
             const end = path.length > 1 ? path.length - 1 : path.length
             for (let i = 1; i < end; i++) {
                 // Adjust where we draw when we scroll the map
-                moveMode.line[i] = this.scene.add.circle(path[i].x * GRID_SIZE, path[i].y * GRID_SIZE, 5, 0xfffdfd0f)
+                moveMode.line[i] = this.scene.add.circle(path[i].x * GRID_SIZE, path[i].y * GRID_SIZE, 2, 0xfffdfd0f)
                 moveMode.line[i].setDepth(DEPTH.Terrain)
             }
         }

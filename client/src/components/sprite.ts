@@ -12,6 +12,5 @@ export class Sprite implements IComponent {
     constructor(filename: string, sprite: GameObjects.Sprite) {
         this.filename = filename
         this.sprite = sprite
-        console.log(sprite.texture.key)
     }
 }

@@ -21,16 +21,8 @@ export class MapSystem implements ISystem {
 
         this.finder = finder
 
-        // HACK - manually create a map entity
-        const zone = this.constructMap(100, 50)
-        this.finder.setGrid(zone.tiles) // Submit a 2d grid of tiles with id's to consider
-        this.finder.setAcceptableTiles([0]) // The ID's of tiles that can be walked (not walls)
-
-        // Create the entity and add our map to it
-        const entity = this.ecs.createEntity()
-        this.ecs.addComponent(entity, zone)
-
         // Listen for events
+        this.events.on('spawnZone', this.setupPathfinding)
         this.events.on('spawnSuccess', this.placeStaticColliders)
         this.events.on('validMove', this.placeDynamicColliders)
     }
@@ -41,7 +33,6 @@ export class MapSystem implements ISystem {
 
     // Event functions
     // Place a blocker in pathfinding for any static objects (no velocity / cannot move)
-    // TODO: Figure out how to place dynamic objects without having them block themselves 🙃
     placeStaticColliders = (entity) => {
         // Make sure this is a static object (velocity means it can move)
         const transform = this.ecs.getComponent(entity, 'transform') as Transform
@@ -57,20 +48,9 @@ export class MapSystem implements ISystem {
     }
 
     // Utility functions
-    constructMap = (width, height) => {
-        const zone = new Zone(width, height)
-        const tiles = []
-
-        for (let y = 0; y < height; y++) {
-            const col = []
-            for (let x = 0; x < width; x++) {
-                col.push(0) // Push a '1' because the tile should be acceptable
-            }
-            tiles.push(col)
-        }
-
-        zone.tiles = tiles
-
-        return zone
+    setupPathfinding = (entity: string, zone: Zone) => {
+        // Check if this is a map entity so we can load tileset, etc
+        this.finder.setGrid(zone.tiles) // Submit a 2d grid of tiles with id's to consider for pathfinding
+        this.finder.setAcceptableTiles([0]) // The ID's of tiles that can be walked (not walls)
     }
 }

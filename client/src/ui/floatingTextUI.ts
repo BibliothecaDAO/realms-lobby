@@ -60,7 +60,7 @@ export class FloatingTextUI {
             const itemSprite = this.ecs.getComponent(item, 'sprite') as Sprite
 
             // const floater = targetSprite.sprite.scene.add.text(x, y, `+1 ${item}`, { color: '#FFFF00', fontSize: 'x-large' })
-            const floater = targetSprite.sprite.scene.add.sprite(x, y, itemSprite.filename).setScale(4)
+            const floater = targetSprite.sprite.scene.add.sprite(x, y, itemSprite.filename)
 
             targetSprite.sprite.scene.tweens.add({
                 targets: floater,

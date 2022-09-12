@@ -58,7 +58,7 @@ export class SpawnSystem implements ISystem {
                     component = new Player()
                     break
                 case 'sprite':
-                    const sprite = this.scene.add.sprite(-100, -100, components[index].name).setScale(4) // Add scale component so our 1:1 pixel sprites show at a reasonable size
+                    const sprite = this.scene.add.sprite(-100, -100, components[index].name)
                     component = new Sprite(components[index].name, sprite)
                     break
                 case 'transform':
@@ -71,6 +71,12 @@ export class SpawnSystem implements ISystem {
                     throw new Error(`component '${index}' not found`)
             }
             this.ecs.addComponent(entity, component)
+
+            // HACK - special case zone spawn so the client can load pathfinding and tilemaps
+            // Otherwise the zone component has to query every time anything spawns
+            if (component.type == 'zone') {
+                this.events.emit('spawnZone', entity, component)
+            }
         }
         // Let other systems know we've intiialized a new entity
         this.events.emit('spawnSuccess', entity)
