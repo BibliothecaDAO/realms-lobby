@@ -1,6 +1,6 @@
 {
   "name": "realms-lobby",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "index.ts",
   "repository": "git@github.com:BibliothecaForAdventurers/realms-lobby.git",
   "author": "threepwave <threepwave@gmail.com>",
