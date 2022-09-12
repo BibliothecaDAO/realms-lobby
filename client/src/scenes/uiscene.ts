@@ -129,7 +129,9 @@ export class GameUIScene extends Phaser.Scene {
         this.ui.setDepth(DEPTH.UI)
     
         // Create the background for our UI
-        const width = 6 * GRID_SIZE
+        const numButtons = 4
+        const numSpacers = 2
+        const width = (numButtons + numSpacers) * GRID_SIZE // Create space for ~6 buttons (4 buttons + 2 spacers)
         const height = GRID_SIZE
         // x, y are set relative to the UI container
         const bg = this.add.rectangle(0, 0, width, height, 0x000000)
