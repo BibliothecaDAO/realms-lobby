@@ -29,7 +29,7 @@ export class CameraSystem implements ISystem {
 
     // Event responders
     // Set the bounds of the world so we know when to start panning
-    setMapBounds = (zone: Zone) => { 
+    setMapBounds = (entity, zone: Zone) => {
          // Set bounds of world to the same size as our tilemap.
         // This allows us to call world coordinates (e.g. via mouse pointer)
         this.scene.physics.world.setBounds(0, 0, zone.width * GRID_SIZE, zone.height * GRID_SIZE)

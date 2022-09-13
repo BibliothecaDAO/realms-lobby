@@ -4,6 +4,7 @@ import { Registry } from '../engine/registry'
 import { js as Finder } from 'easystarjs' // https://github.com/prettymuchbryce/easystarjs
 
 import { GameUIScene } from './uiscene'
+import { GRID_SIZE } from '../config'
 
 // Initialize systems
 import { AttachToCursorSystem } from '../systems/attachToCursorSystem'
@@ -17,6 +18,7 @@ import { CameraSystem } from '../systems/cameraSystem'
 
 // Components
 import { Player } from '../components/player'
+import { Sprite } from '../components/sprite'
 
 export class MapScene extends Phaser.Scene {
     public static Name = 'map-scene'
@@ -88,6 +90,16 @@ export class MapScene extends Phaser.Scene {
     }
 
     initCamera = (entity) => {
+        const zone = this.ecs.getComponentsByType('zone')[0]
+        // this.physics.world.setBounds(0, 0, zone.width * GRID_SIZE * 4, zone.height * GRID_SIZE * 4)
+        this.physics.world.setBounds(0, 0, 9000, 9000)
+
+        this.input.setPollAlways() // The cursor should poll for new positions while the camera is moving
+        // Setup camera to follow player around
+        this.cameras.main.setBounds(0, 0, 500, 500, true)
+        const sprite = this.ecs.getComponent(entity, 'sprite') as Sprite
+        this.cameras.main.startFollow(sprite.sprite, true, 0.01, 0.01)
+        this.cameras.main.setDeadzone(100, 100)
        
     }
 }

@@ -79,7 +79,6 @@ export class LoadData {
                         if (components[i].tileMap) {
                             const tileMap = await fs.readFile(`${this.dataDirectory}/tilemaps/${components[i].tileMap}`, 'utf8')
                             components[i].tileMap = JSON.parse(tileMap)
-                            // console.log(components[i].tileMap)
                         }else {
                             throw new Error('No tilemap found for zone')
                         }
