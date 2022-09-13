@@ -4,6 +4,7 @@
 // 'move' - sent when a player clicks to move their character
 
 import { GameObjects } from 'phaser'
+import { GRID_SIZE } from '../../config'
 import { Button } from '../button'
 
 export class MoveButton extends Button {
@@ -17,7 +18,7 @@ export class MoveButton extends Button {
 
     constructor(scene, state, size, data, callback) {
         // TODO - Make button offsets a factor of number of buttons
-        const xOffset = -24
+        const xOffset = -6 * GRID_SIZE
 
         super(scene, state, xOffset, 0, size, size, '✥', null, callback)
 

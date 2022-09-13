@@ -27,6 +27,8 @@ export class LoadingScene extends Scene {
         // Load Characters
         this.load.image('_character', 'sprites/characters/_character.png')
         this.load.image('knight', 'sprites/characters/knight.png')
+        this.load.image('mage', 'sprites/characters/mage.png')
+        this.load.image('hunter', 'sprites/characters/hunter.png')
 
         // Load environment assets
         this.load.image('_resource', 'sprites/environment/_resource.png')

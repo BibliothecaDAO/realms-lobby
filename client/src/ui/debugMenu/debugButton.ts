@@ -11,7 +11,7 @@ export class DebugButton extends Button {
     private debugCursor!: GameObjects.Text // Displays a small label above the mouse cursor with the current 'grid' position we would pass to the server
 
     constructor(scene, state, size, data, callback) {
-        const xOffset = 40
+        const xOffset = 10 * GRID_SIZE
         super(scene, state, xOffset, 0, size, size, '⋮⋮', null, callback)
 
         if (data.events) {
@@ -26,16 +26,17 @@ export class DebugButton extends Button {
         if (!this.debugGrid) {
             // Draw our grid - might take a few seconds but we rarely use this (vs slowing down startup every time)
             this.debugGrid = this.scene.add.grid(
-                0,
-                0,
+                12,
+                10,
                 this.scene.sys.game.canvas.width * 2,
                 this.scene.sys.game.canvas.height * 2,
-                GRID_SIZE,
-                GRID_SIZE,
+                GRID_SIZE * 4,
+                GRID_SIZE * 4,
                 null,
                 0,
                 0xfffdfd0f,
-                100
+                80
+                
             )
         } else {
             // Show or hide the grid

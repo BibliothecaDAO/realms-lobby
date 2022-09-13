@@ -32,11 +32,10 @@ export class CameraSystem implements ISystem {
     setMapBounds = (entity, zone: Zone) => {
         // HACK - Zoom the screen and pan to player
         // If we call zoom in the game constructor, followPlayer breaks.
-        this.scene.cameras.main.zoomTo(4, 10)
+        this.scene.cameras.main.zoomTo(4, 100)
 
-                 // Set bounds of world to the same size as our tilemap.
+        // Set bounds of world to the same size as our tilemap.
         // This allows us to call world coordinates (e.g. via mouse pointer)
-
         this.scene.physics.world.setBounds(0, 0, zone.width * GRID_SIZE, zone.height * GRID_SIZE)
 
         // Setup camera to follow player around
@@ -46,7 +45,7 @@ export class CameraSystem implements ISystem {
     // Follow the player as they move around
     enableCameraFollow = (entity) => {
         const sprite = this.ecs.getComponent(entity, 'sprite') as Sprite
-        this.scene.cameras.main.startFollow(sprite.sprite, false, 0.01, 0.01)
+        this.scene.cameras.main.startFollow(sprite.sprite, true, 0.1, 0.1)
     }
 
     // Utility functions

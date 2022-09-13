@@ -2,9 +2,8 @@
 
 import { State, StateMachine } from '../engine/statemachine'
 import { GameObjects } from 'phaser'
-import { DEPTH } from '../config'
+import { DEPTH, GRID_SIZE } from '../config'
 import { Registry } from '../engine/registry'
-import { GRID_SIZE } from '../config'
 
 // UI Modes
 import { MoveButton, SelectButton } from '../ui/modeButtons'
@@ -122,21 +121,20 @@ export class GameUIScene extends Phaser.Scene {
 
     createUIContainer = () => {
         // Creates the overarching container that houses the UI
-        this.ui = this.add.container(
-            this.cameras.main.width / GRID_SIZE * 2,    // Center in the middle of the screen
-            GRID_SIZE / 2,  // Clamp to top of screen
-        )
+        this.ui = this.add.container()  // For some reason setting the container position first causes it to be anchored on the left side of the screen
+        // this.ui.setScale(4, 4)
+        this.ui.setPosition(this.cameras.main.width / 2, GRID_SIZE * 2)
         this.ui.setDepth(DEPTH.UI)
     
         // Create the background for our UI
         const numButtons = 4
         const numSpacers = 2
-        const width = (numButtons + numSpacers) * GRID_SIZE // Create space for ~6 buttons (4 buttons + 2 spacers)
-        const height = GRID_SIZE
+        const width = (numButtons + numSpacers) * GRID_SIZE * 4 // Create space for ~6 buttons (4 buttons + 2 spacers)
+        const height = GRID_SIZE * 4
         // x, y are set relative to the UI container
         const bg = this.add.rectangle(0, 0, width, height, 0x000000)
 
-        const buttonSize = GRID_SIZE
+        const buttonSize = GRID_SIZE * 3.5
 
         // Modes (e.g. select stuff, move around, attack, take an action)
         // Only one mode can be active at a time, managed by a state machine

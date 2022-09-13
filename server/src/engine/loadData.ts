@@ -130,15 +130,21 @@ export class LoadData {
             for (let j = 0; j < second.length; j++) {
                 const component = second[j]
 
-                // If component exists, overwrite it
-                const index = clone.findIndex((element) => element.type === component.type)
-                // findIndex returns -1 if index isn't found
-                if (index != -1) {
-                    clone[index] = component
+                // Check to make sure our templates are all set
+                if (clone != undefined) {
+                    // If component exists, overwrite it
+                    const index = clone.findIndex((element) => element.type === component.type)
+                    // findIndex returns -1 if index isn't found
+                    if (index != -1) {
+                        clone[index] = component
+                    } else {
+                        // component doesn't exist, push it onto the array
+                        clone.push(component)
+                    }
                 } else {
-                    // component doesn't exist, push it onto the array
-                    clone.push(component)
+                    throw new Error('missing template file')
                 }
+                
             }
         }
 

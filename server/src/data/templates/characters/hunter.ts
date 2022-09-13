@@ -3,10 +3,10 @@
 
 {
     components: [
-        { type: 'transform', x: 20, y: 12 },
+        { type: 'transform', x: 5, y: 5 },
         {
             type: 'sprite',
-            name: 'knight'
+            name: 'hunter'
         },
         {
             type: 'collider'

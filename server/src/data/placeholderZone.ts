@@ -15,6 +15,27 @@
                 }
             ]
         },
+        // Placeholder players
+        {
+            base: 'characters/mage',
+            components: [
+                {
+                    type: 'transform',
+                    x: 35,
+                    y: 25
+                }
+            ]
+        }, 
+        {
+            base: 'characters/hunter',
+            components: [
+                {
+                    type: 'transform',
+                    x: 30,
+                    y: 29
+                }
+            ]
+        }, 
         // Environment
         {
             base: 'environment/_resource',

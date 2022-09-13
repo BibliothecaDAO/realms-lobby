@@ -15,7 +15,7 @@ export class Button extends Phaser.GameObjects.Container {
     private button: Phaser.GameObjects.Container
 
     // Configuration variables
-    private fontSize = 12 // 12pt
+    private fontSize = 48 // 12pt
 
     // Style the buttons
     private styles = {
