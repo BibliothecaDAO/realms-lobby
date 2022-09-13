@@ -58,9 +58,9 @@ export class MapSystem implements ISystem {
 
     generate2DArrayFromTiled = (tileMap): Array<Array<number>> => {
         const map = []
-        for (let y = 0; y < tileMap.width; y++) {
+        for (let y = 0; y < tileMap.height; y++) {
             const row = []
-            for (let x = 0; x < tileMap.height; x++) {
+            for (let x = 0; x < tileMap.width; x++) {
                 // If the tile is not walkable, add it to the pathfinding grid
                 row.push(tileMap.layers[0].data[y * tileMap.width + x] === 0 ? 1 : 0)
             }

@@ -19,6 +19,7 @@ import { CameraSystem } from '../systems/cameraSystem'
 // Components
 import { Player } from '../components/player'
 import { Sprite } from '../components/sprite'
+import { Zone } from '../components/zone'
 
 export class MapScene extends Phaser.Scene {
     public static Name = 'map-scene'
@@ -90,16 +91,27 @@ export class MapScene extends Phaser.Scene {
     }
 
     initCamera = (entity) => {
-        const zone = this.ecs.getComponentsByType('zone')[0]
-        // this.physics.world.setBounds(0, 0, zone.width * GRID_SIZE * 4, zone.height * GRID_SIZE * 4)
-        this.physics.world.setBounds(0, 0, 9000, 9000)
+          const mapEntities = this.ecs.getEntitiesByComponentType('zone')
+        const map = this.ecs.getComponent(mapEntities[0], 'zone') as Zone
 
-        this.input.setPollAlways() // The cursor should poll for new positions while the camera is moving
+        // This allows us to call world coordinates (e.g. via mouse pointer)
+        this.physics.world.setBounds(0, 0, map.width * GRID_SIZE, map.height * GRID_SIZE)
         // Setup camera to follow player around
-        this.cameras.main.setBounds(0, 0, 500, 500, true)
+        this.cameras.main.setBounds(0, 0, map.width * GRID_SIZE, map.height * GRID_SIZE)
+
         const sprite = this.ecs.getComponent(entity, 'sprite') as Sprite
-        this.cameras.main.startFollow(sprite.sprite, true, 0.01, 0.01)
-        this.cameras.main.setDeadzone(100, 100)
+        this.cameras.main.startFollow(sprite.sprite, false, 0.01, 0.01)
+
+        // const zone = this.ecs.getComponentsByType('zone')[0]
+        // // this.physics.world.setBounds(0, 0, zone.width * GRID_SIZE * 4, zone.height * GRID_SIZE * 4)
+        // this.physics.world.setBounds(0, 0, 9000, 9000)
+
+        // this.input.setPollAlways() // The cursor should poll for new positions while the camera is moving
+        // // Setup camera to follow player around
+        // this.cameras.main.setBounds(0, 0, 500, 500, true)
+        // const sprite = this.ecs.getComponent(entity, 'sprite') as Sprite
+        // this.cameras.main.startFollow(sprite.sprite, true, 0.01, 0.01)
+        // this.cameras.main.setDeadzone(100, 100)
        
     }
 }
