@@ -7,6 +7,7 @@ import { js as Finder } from 'easystarjs' // https://github.com/prettymuchbryce/
 // Components
 import { Zone } from '../components/zone'
 import { Transform } from '../components/transform'
+import { GRID_SIZE } from '../config'
 
 export class MapSystem implements ISystem {
     private events: Phaser.Events.EventEmitter
@@ -21,14 +22,6 @@ export class MapSystem implements ISystem {
         this.scene = scene
 
         this.finder = finder
-
-        // HACK - manually create a map entity
-        // const map = new Map(30, 30) // HACK - Reduced map size for perf reasons. Need to figure out how to efficently handle larger maps.
-        const zone = new Zone(100, 50)
-    
-        // Create the entity and add our map to it
-        const entity = this.ecs.createEntity()
-        this.ecs.addComponent(entity, zone)
 
         // Listen for events
         // When anything with a collider spawns, update pathfinding so entities can't move to that spot
@@ -73,18 +66,45 @@ export class MapSystem implements ISystem {
     // Create a tileset/tilemap so we can display the map in Phaser
     setupTileset = (zone: Zone) => {
         // setup tilemap
-        const tileSize = 16
-        const tilemap = this.scene.make.tilemap({
-            data: zone.tiles,
-            tileWidth: tileSize,
-            tileHeight: tileSize
-        })
+        const tileSize = GRID_SIZE
 
-        const tileSet = tilemap.addTilesetImage('tilemap')
+        console.log(zone.tiles)
 
-        // TODO - Look into cheaper ways to create this tilemap
-        tilemap.createLayer(0, tileSet, 0, 0).randomize(0, 0, tilemap.width, tilemap.height, [0, 1, 2, 3, 4, 5])
-        zone.tileMap = tilemap
+        const mapData = Phaser.Tilemaps.Parsers.Tiled.ParseJSONTiled('tiledMap', zone.tiles, false)
+        console.log(mapData)
+        const layers = Phaser.Tilemaps.Parsers.Tiled.ParseTileLayers(zone.tiles, false)
+        console.log(layers)
+
+        // this.scene.make.tilemap({ data: mapData, layers:})
+        const tileMap = this.scene.make.tilemap(mapData)
+        const tileSet = tileMap.addTilesetImage('lobby-tileset', 'lobby-tileset', tileSize, tileSize, 0, 0)
+        
+        tileMap.layers = layers
+        
+
+        // Generates Error:
+        // "Invalid Tilemap Layer ID: layer0"
+        // "Valid tilelayer names: []"
+        tileMap.createLayer('layer0', tileSet, 0, 0)
+
+        // Generates Error:
+        // "Invalid Tilemap Layer ID: Tile Layer 1"
+        // "Valid tilelayer names: []"
+        console.log(tileMap)
+        tileMap.createLayer("Tile Layer 1", tileSet, 0, 0)
+
+        // Generates Error:
+        // "Invalid Tilemap Layer ID: 0"
+        tileMap.createLayer(0, tileSet, 0, 0)
+
+        // Generates Error:
+        // "Invalid Tilemap Layer ID: 1"
+        tileMap.createLayer(1, tileSet, 0, 0)
+
+
+        // const tileset = tileMap.tilesets..addTilesetImage("tuxmon-sample-32px-extruded", "tiles")
+        
+        zone.tileMap = tileMap
     }
 
     // Pathfinding algorithm

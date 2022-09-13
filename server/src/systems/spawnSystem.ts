@@ -75,7 +75,10 @@ export class SpawnSystem implements ISystem {
                 case 'velocity':
                     component = new Velocity(components[i].delay, components[i].dirX, components[i].dirY)
                     break
-                 case 'zone':
+                case 'zone':
+                    // HACK - Convert tiled tile format (1d array) to 2D array
+                    // const tiles = this.convertTiledMap(components[i].width, components[i].height, components[i].tiles)
+                    // component = new Zone(components[i].width, components[i].height, tiles)
                     component = new Zone(components[i].width, components[i].height, components[i].tiles)
                     break
                 default:
@@ -126,5 +129,25 @@ export class SpawnSystem implements ISystem {
     // Deep Copy a object (e.g. if we want to pluck a template)
     clone = (value) => {
         return _.cloneDeep(value, true)
+    }
+
+    // Convert a Tiled json map to a 2D array
+    convertTiledMap = (width: number, height: number, tiles) => {
+        const map = []
+
+        if (width > 0 && height > 0) {
+            for (let y = 0; y < height; y++) {
+                const row = []
+                
+                for (let x = 0; x < width; x++) {
+                    row.push(tiles[y * width + x])
+                }
+                map.push(row)
+            }
+        } else {
+            throw new Error('width or height is not set properly')
+        }
+        
+        return map
     }
 }

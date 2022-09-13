@@ -35,7 +35,7 @@ export class LoadingScene extends Scene {
         this.load.image('_enemy', 'sprites/enemies/_enemy.png')
 
         // Load world tiles
-        this.load.image('tilemap', 'tilemaps/tinydungeon_packed.png')
+        this.load.image('lobby-tileset', 'tilemaps/tinydungeon_packed.png')
     }
 
     create(): void {
