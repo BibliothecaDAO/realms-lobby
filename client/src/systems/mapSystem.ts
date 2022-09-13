@@ -68,42 +68,12 @@ export class MapSystem implements ISystem {
         // setup tilemap
         const tileSize = GRID_SIZE
 
-        console.log(zone.tiles)
-
-        const mapData = Phaser.Tilemaps.Parsers.Tiled.ParseJSONTiled('tiledMap', zone.tiles, false)
-        console.log(mapData)
-        const layers = Phaser.Tilemaps.Parsers.Tiled.ParseTileLayers(zone.tiles, false)
-        console.log(layers)
-
-        // this.scene.make.tilemap({ data: mapData, layers:})
-        const tileMap = this.scene.make.tilemap(mapData)
+        const mapData = Phaser.Tilemaps.Parsers.Tiled.ParseJSONTiled('tiledMap', zone.tileMap, false)
+        const tileMap = new Phaser.Tilemaps.Tilemap(this.scene, mapData)
         const tileSet = tileMap.addTilesetImage('lobby-tileset', 'lobby-tileset', tileSize, tileSize, 0, 0)
         
-        tileMap.layers = layers
-        
-
-        // Generates Error:
-        // "Invalid Tilemap Layer ID: layer0"
-        // "Valid tilelayer names: []"
-        tileMap.createLayer('layer0', tileSet, 0, 0)
-
-        // Generates Error:
-        // "Invalid Tilemap Layer ID: Tile Layer 1"
-        // "Valid tilelayer names: []"
-        console.log(tileMap)
         tileMap.createLayer("Tile Layer 1", tileSet, 0, 0)
 
-        // Generates Error:
-        // "Invalid Tilemap Layer ID: 0"
-        tileMap.createLayer(0, tileSet, 0, 0)
-
-        // Generates Error:
-        // "Invalid Tilemap Layer ID: 1"
-        tileMap.createLayer(1, tileSet, 0, 0)
-
-
-        // const tileset = tileMap.tilesets..addTilesetImage("tuxmon-sample-32px-extruded", "tiles")
-        
         zone.tileMap = tileMap
     }
 
@@ -113,7 +83,22 @@ export class MapSystem implements ISystem {
     // width: width of tilemap
     // height: height of tilemap
     setupPathing = (zone: Zone) => {
-        this.finder.setGrid(zone.tiles) // Submit a 2d grid of tiles with id's to consider
+        const map = this.generate2DArrayFromTiled(zone.tileMap)
+        this.finder.setGrid(map) // Submit a 2d grid of tiles with id's to consider
         this.finder.setAcceptableTiles([0,1]) // The ID's of tiles that can be walked (not walls)
+    }
+
+    generate2DArrayFromTiled = (tileMap): Array<Array<number>> => {
+        const map = []
+        for (let y = 0; y < tileMap.width; y++) {
+            const row = []
+            for (let x = 0; x < tileMap.height; x++) {
+                // If the tile is not walkable, add it to the pathfinding grid
+                row.push(tileMap.layers[0].data[y * tileMap.width + x] === 0 ? 1 : 0)
+            }
+            map.push(row)
+        }
+        
+        return (map)
     }
 }

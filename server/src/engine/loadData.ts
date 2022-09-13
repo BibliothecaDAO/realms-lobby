@@ -72,6 +72,19 @@ export class LoadData {
                 components = this.merge(template, zoneData.entities[i].components)
             } else {
                 components = zoneData.entities[i].components
+
+                // HACK - Load zone data from disk
+                for (let i = 0; i < components.length; i++) {
+                    if (components[i].type === 'zone') {
+                        if (components[i].tileMap) {
+                            const tileMap = await fs.readFile(`${this.dataDirectory}/tilemaps/${components[i].tileMap}`, 'utf8')
+                            components[i].tileMap = JSON.parse(tileMap)
+                            // console.log(components[i].tileMap)
+                        }else {
+                            throw new Error('No tilemap found for zone')
+                        }
+                    } 
+                }
             }
 
             // Spawn the entity

@@ -3,12 +3,23 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "lobby-tilemap.tmx",
     "expandedProjectPaths": [
     ],
     "fileStates": {
         "": {
             "scaleInDock": 1
+        },
+        "lobby-tilemap.tmx": {
+            "scale": 1,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 702.5,
+                "y": 374
+            }
+        },
+        "lobby-tilemap.tmx#lobby-tileset": {
+            "scaleInDock": 2
         },
         "lobby-tilemap.tsx": {
             "scaleInDock": 1,
@@ -24,9 +35,11 @@
     "map.tileWidth": 16,
     "map.width": 70,
     "openFiles": [
+        "lobby-tilemap.tmx"
     ],
     "project": "lobby-tilemap.tiled-project",
     "recentFiles": [
+        "lobby-tilemap.tmx",
         "lobby-tilemap.tsx"
     ],
     "tileset.embedInMap": true,

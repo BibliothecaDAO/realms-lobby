@@ -4,6 +4,9 @@ import { IComponent, ISystem } from '../engine/registry'
 import EventEmitter from 'events'
 import { Registry } from '../engine/registry'
 
+import { promises as fs } from 'fs'
+import { join, resolve } from 'path'
+
 // Deep Cloning objects
 import * as _ from 'lodash'
 
@@ -75,11 +78,8 @@ export class SpawnSystem implements ISystem {
                 case 'velocity':
                     component = new Velocity(components[i].delay, components[i].dirX, components[i].dirY)
                     break
-                case 'zone':
-                    // HACK - Convert tiled tile format (1d array) to 2D array
-                    // const tiles = this.convertTiledMap(components[i].width, components[i].height, components[i].tiles)
-                    // component = new Zone(components[i].width, components[i].height, tiles)
-                    component = new Zone(components[i].width, components[i].height, components[i].tiles)
+                case 'zone':                    
+                    component = new Zone(components[i].width, components[i].height, components[i].tileMap)
                     break
                 default:
                     throw new Error(`component '${components[i].type}' not found`)

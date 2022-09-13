@@ -33,7 +33,7 @@ export class MapSystem implements ISystem {
 
     // Event functions
     // Place a blocker in pathfinding for any static objects (no velocity / cannot move)
-    placeStaticColliders = (entity) => {
+    placeStaticColliders = (entity): void => {
         // Make sure this is a static object (velocity means it can move)
         const transform = this.ecs.getComponent(entity, 'transform') as Transform
         if (transform) {
@@ -42,15 +42,31 @@ export class MapSystem implements ISystem {
     }
 
     // When an entity moves, update its collider position
-    placeDynamicColliders = (entity, prevX, prevY, currentX, currentY) => {
+    placeDynamicColliders = (entity, prevX, prevY, currentX, currentY): void => {
         this.finder.stopAvoidingAdditionalPoint(prevX, prevY)
         this.finder.avoidAdditionalPoint(currentX, currentY)
     }
 
     // Utility functions
-    setupPathfinding = (entity: string, zone: Zone) => {
+    setupPathfinding = (entity: string, zone: Zone): void => {
+        const map = this.generate2DArrayFromTiled(zone.tileMap)
+            
         // Check if this is a map entity so we can load tileset, etc
-        this.finder.setGrid(zone.tiles) // Submit a 2d grid of tiles with id's to consider for pathfinding
+        this.finder.setGrid(map) // Submit a 2d grid of tiles with id's to consider for pathfinding
         this.finder.setAcceptableTiles([0]) // The ID's of tiles that can be walked (not walls)
+    }
+
+    generate2DArrayFromTiled = (tileMap): Array<Array<number>> => {
+        const map = []
+        for (let y = 0; y < tileMap.width; y++) {
+            const row = []
+            for (let x = 0; x < tileMap.height; x++) {
+                // If the tile is not walkable, add it to the pathfinding grid
+                row.push(tileMap.layers[0].data[y * tileMap.width + x] === 0 ? 1 : 0)
+            }
+            map.push(row)
+        }
+        
+        return (map)
     }
 }

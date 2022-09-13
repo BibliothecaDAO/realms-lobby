@@ -1,6 +1,6 @@
-// map - A 2D array representing walls/floor
+// zone - A 2D array representing walls/floor
+// this would have been called 'Map' but that is taken by a native js structure
 
-import { GameObjects } from 'phaser'
 import { IComponent } from '../engine/registry'
 
 export class Zone implements IComponent {
@@ -8,12 +8,11 @@ export class Zone implements IComponent {
 
     public width: number
     public height: number
-    public tiles: Array<Array<number>>
-    public tileMap?: Phaser.Tilemaps.Tilemap
+    public tileMap
 
-    constructor(width: number, height: number, tiles?: Array<Array<number>>) {
+    constructor(width: number, height: number, tileMap?) {
         this.width = width
         this.height = height
-        this.tiles = tiles
+        this.tileMap = tileMap
     }
 }
