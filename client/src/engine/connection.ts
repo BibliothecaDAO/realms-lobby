@@ -12,7 +12,7 @@ export class Connection {
         this.events = events
 
         // Connect to the server
-        this.socket = io('ws://localhost:3000')
+        this.socket = io(`ws://${window.location.hostname}:3000`)
 
         this.socket.on('connect', () => {
             console.log('💻 connected to server')
