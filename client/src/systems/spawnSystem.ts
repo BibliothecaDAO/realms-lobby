@@ -13,6 +13,7 @@ import { Player } from '../components/player'
 import { Sprite } from '../components/sprite'
 import { Transform } from '../components/transform'
 import { Velocity } from '../components/velocity'
+import { DEPTH } from '../config'
 
 export class SpawnSystem implements ISystem {
     private events: EventEmitter
@@ -52,13 +53,14 @@ export class SpawnSystem implements ISystem {
                     component = new Inventory(components[index].items)
                     break
                 case 'zone':
-                    component = new Zone(components[index].width, components[index].height, components[index].tiles)
+                    component = new Zone(components[index].width, components[index].height, components[index].tileMap)
                     break
                 case 'player':
                     component = new Player()
                     break
                 case 'sprite':
-                    const sprite = this.scene.add.sprite(-100, -100, components[index].name).setScale(4) // Add scale component so our 1:1 pixel sprites show at a reasonable size
+                    const sprite = this.scene.add.sprite(-100, -100, components[index].name)
+                        .setDepth(DEPTH.Characters) // Make sure foreground sprites appear on top
                     component = new Sprite(components[index].name, sprite)
                     break
                 case 'transform':
@@ -71,6 +73,12 @@ export class SpawnSystem implements ISystem {
                     throw new Error(`component '${index}' not found`)
             }
             this.ecs.addComponent(entity, component)
+
+            // HACK - special case zone spawn so the client can load pathfinding and tilemaps
+            // Otherwise the zone component has to query every time anything spawns
+            if (component.type == 'zone') {
+                this.events.emit('spawnZone', entity, component)
+            }
         }
         // Let other systems know we've intiialized a new entity
         this.events.emit('spawnSuccess', entity)

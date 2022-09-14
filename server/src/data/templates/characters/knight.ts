@@ -3,16 +3,15 @@
 
 {
     components: [
-        { type: 'transform', x: 5, y: 5 },
+        { type: 'transform', x: 20, y: 12 },
         {
             type: 'sprite',
-            name: '_character'
+            name: 'knight'
         },
         {
             type: 'collider'
         },
         {
-            // TODO Figure out why they aren't renderin c
             type: 'inventory',
             items: [] // Player spawns w/ empty inventory
         },

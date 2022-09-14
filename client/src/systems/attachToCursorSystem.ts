@@ -10,7 +10,7 @@ import { Sprite } from '../components/sprite'
 import { Transform } from '../components/transform'
 import { Enabled } from '../components/enabled'
 
-export class FollowMouseSystem implements ISystem {
+export class AttachToCursorSystem implements ISystem {
     events: Phaser.Events.EventEmitter
     ecs: Registry
     scene: Phaser.Scene
@@ -56,7 +56,6 @@ export class FollowMouseSystem implements ISystem {
         // Setup events
         // HACK - Add our player to the game for firing events
         this.events.on('setupPlayer', (playerId) => {
-            console.log('setup player')
             this.createCursor(playerId)
         })
         this.events.on('startmoving', () => {
@@ -88,7 +87,7 @@ export class FollowMouseSystem implements ISystem {
             const transform = this.ecs.getComponent(this.entity, 'transform') as Transform
             // Mark the point in the world we might move to
             const toXmouse = Phaser.Math.Snap.To(this.scene.game.input.mousePointer.worldX, GRID_SIZE) / GRID_SIZE // Divide by grid size because our transforms are all based on 'world' coordinates (small grid) vs screen coords
-            const toYmouse = Phaser.Math.Snap.To(this.scene.game.input.mousePointer.worldY + 30, GRID_SIZE) / GRID_SIZE
+            const toYmouse = Phaser.Math.Snap.To(this.scene.game.input.mousePointer.worldY, GRID_SIZE) / GRID_SIZE
 
             transform.x = toXmouse
             transform.y = toYmouse
@@ -132,7 +131,7 @@ export class FollowMouseSystem implements ISystem {
 
     // Configures our sprite before adding it to the scene
     configureSprite = (filename) => {
-        const _sprite = this.scene.add.sprite(-100, -100, filename).setScale(4) // spawn our cursor offscreen and snap to cursor when available
+        const _sprite = this.scene.add.sprite(-100, -100, filename) // spawn our cursor offscreen and snap to cursor when available
         _sprite.alpha = 0.5
         _sprite.visible = false // Hide this character until we're ready to move
         _sprite.setDepth(DEPTH.Characters)

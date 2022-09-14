@@ -4,6 +4,9 @@ import { IComponent, ISystem } from '../engine/registry'
 import EventEmitter from 'events'
 import { Registry } from '../engine/registry'
 
+import { promises as fs } from 'fs'
+import { join, resolve } from 'path'
+
 // Deep Cloning objects
 import * as _ from 'lodash'
 
@@ -75,8 +78,8 @@ export class SpawnSystem implements ISystem {
                 case 'velocity':
                     component = new Velocity(components[i].delay, components[i].dirX, components[i].dirY)
                     break
-                 case 'zone':
-                    component = new Zone(components[i].width, components[i].height, components[i].tiles)
+                case 'zone':                    
+                    component = new Zone(components[i].width, components[i].height, components[i].tileMap)
                     break
                 default:
                     throw new Error(`component '${components[i].type}' not found`)
@@ -86,6 +89,12 @@ export class SpawnSystem implements ISystem {
             // Only show components that we should be exposing to the client
             if (!component.hidden) {
                 componentsToSend[components[i].type] = component
+            }
+
+            // HACK - special case zone spawn so the client can load pathfinding and tilemaps
+            // Otherwise the zone component has to query every time anything spawns
+            if (component.type == 'zone') {
+                this.events.emit('spawnZone', entity, component)
             }
         }
 
@@ -120,5 +129,25 @@ export class SpawnSystem implements ISystem {
     // Deep Copy a object (e.g. if we want to pluck a template)
     clone = (value) => {
         return _.cloneDeep(value, true)
+    }
+
+    // Convert a Tiled json map to a 2D array
+    convertTiledMap = (width: number, height: number, tiles) => {
+        const map = []
+
+        if (width > 0 && height > 0) {
+            for (let y = 0; y < height; y++) {
+                const row = []
+                
+                for (let x = 0; x < width; x++) {
+                    row.push(tiles[y * width + x])
+                }
+                map.push(row)
+            }
+        } else {
+            throw new Error('width or height is not set properly')
+        }
+        
+        return map
     }
 }

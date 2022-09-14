@@ -6,13 +6,12 @@
         { type: 'transform', x: 5, y: 5 },
         {
             type: 'sprite',
-            name: '_character'
+            name: 'hunter'
         },
         {
             type: 'collider'
         },
         {
-            // TODO Figure out why they aren't renderin c
             type: 'inventory',
             items: [] // Player spawns w/ empty inventory
         },

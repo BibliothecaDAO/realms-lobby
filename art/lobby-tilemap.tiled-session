@@ -1,0 +1,54 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "lobby-tilemap.tmx",
+    "expandedProjectPaths": [
+    ],
+    "fileStates": {
+        "": {
+            "scaleInDock": 1
+        },
+        "lobby-tilemap.tmx": {
+            "scale": 1,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 702.5,
+                "y": 374
+            }
+        },
+        "lobby-tilemap.tmx#lobby-tileset": {
+            "scaleInDock": 2,
+            "scaleInEditor": 1
+        },
+        "lobby-tilemap.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        }
+    },
+    "last.exportedFilePath": "/Users/threepwave/code/realms-lobby/art",
+    "last.imagePath": "/Users/threepwave/code/realms-lobby/client/public/assets/tilemaps",
+    "lastUsedTilesetExportFilter": "JSON tileset files (*.tsj *.json)",
+    "map.height": 50,
+    "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 70,
+    "openFiles": [
+        "lobby-tilemap.tmx"
+    ],
+    "project": "lobby-tilemap.tiled-project",
+    "property.type": "bool",
+    "recentFiles": [
+        "lobby-tilemap.tmx",
+        "lobby-tilemap.tsx"
+    ],
+    "tileset.embedInMap": true,
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}

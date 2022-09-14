@@ -4,21 +4,21 @@
 // 'move' - sent when a player clicks to move their character
 
 import { GameObjects } from 'phaser'
+import { GRID_SIZE } from '../../config'
 import { Button } from '../button'
-import { FollowMouseSystem } from '../../systems/followMouseSystem'
 
 export class MoveButton extends Button {
     private worldEvents: Phaser.Events.EventEmitter
     private player: string
 
     // Setup components
-    private followMouse: FollowMouseSystem
 
     // Debug cursor
     private debugCursor: GameObjects.Text
 
     constructor(scene, state, size, data, callback) {
-        const xOffset = -78
+        // TODO - Make button offsets a factor of number of buttons
+        const xOffset = -6 * GRID_SIZE
 
         super(scene, state, xOffset, 0, size, size, '✥', null, callback)
 

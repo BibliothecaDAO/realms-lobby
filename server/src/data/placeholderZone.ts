@@ -3,6 +3,39 @@
 
 {
     entities: [
+        // Base Zone
+        {
+            components: [
+                {
+                    type: 'zone',
+                    width: 70,
+                    height: 50,
+                    // paste in tiled file here:
+                    tileMap: 'placeholderZone.json'
+                }
+            ]
+        },
+        // Placeholder players
+        {
+            base: 'characters/mage',
+            components: [
+                {
+                    type: 'transform',
+                    x: 35,
+                    y: 25
+                }
+            ]
+        }, 
+        {
+            base: 'characters/hunter',
+            components: [
+                {
+                    type: 'transform',
+                    x: 30,
+                    y: 29
+                }
+            ]
+        }, 
         // Environment
         {
             base: 'environment/_resource',
@@ -52,16 +85,6 @@
                     type: 'transform',
                     x: 7,
                     y: 4
-                }
-            ]
-        },
-        // Base Zone
-        {
-            components: [
-                {
-                    type: 'zone',
-                    width: 100,
-                    height: 100
                 }
             ]
         }

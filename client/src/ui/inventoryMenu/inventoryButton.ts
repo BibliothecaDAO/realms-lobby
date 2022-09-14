@@ -1,6 +1,7 @@
 // inventoryButton.ts - Display an inventory (backpack) so a player can see what they have
 
-import { Button } from './button'
+import { GRID_SIZE } from '../../config'
+import { Button } from '../button'
 
 export class InventoryButton extends Button {
     private worldEvents: Phaser.Events.EventEmitter
@@ -8,7 +9,7 @@ export class InventoryButton extends Button {
     private showInventory = false // State variable to keep track of whether we're showing the inventory or not
 
     constructor(scene, state, size, data, callback) {
-        const xOffset = 80 // Where should we position this relative to its parent container's
+        const xOffset = 6 * GRID_SIZE // Where should we position this relative to its parent container's
 
         super(scene, state, xOffset, 0, size, size, '👝', null, callback)
 

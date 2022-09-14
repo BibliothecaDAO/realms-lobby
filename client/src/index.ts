@@ -5,48 +5,14 @@
 // 3. Pre-loads scenes
 // 4. Launches initial scene
 
+// Load Phaser config data
+import { gameConfig } from './config'
+
 // Load phaser base classes
-import { Types } from 'phaser'
 import { World } from './engine/world'
 
 // Load our scenes (each scene defines a mode of gameplay)
-import { LoadingScene } from './scenes'
 import { MapScene } from './scenes'
-
-// Configure phaser w/ default settings
-const gameConfig: Types.Core.GameConfig = {
-    // Load up our loading scene then figure out what to do next
-    scene: [LoadingScene],
-    title: 'crushbone ☠️',
-    type: Phaser.WEBGL,
-    parent: 'game',
-    backgroundColor: '#351f1b',
-    scale: {
-        mode: Phaser.Scale.ScaleModes.NONE,
-        width: window.innerWidth,
-        height: window.innerHeight
-    },
-    physics: {
-        default: 'arcade',
-        arcade: {
-            debug: false
-        }
-    },
-    render: {
-        antialiasGL: false,
-        pixelArt: true
-    },
-    callbacks: {
-        postBoot: () => {
-            window.sizeChanged()
-        }
-    },
-    canvasStyle: `display: block; width: 100%; height: 100%;`,
-    autoFocus: true,
-    audio: {
-        disableWebAudio: false
-    }
-}
 
 export default class Game extends Phaser.Game {
     public world: World // The current instance of the game world
