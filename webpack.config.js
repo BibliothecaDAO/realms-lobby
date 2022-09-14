@@ -19,7 +19,7 @@ module.exports = {
         static: {
             directory: path.join(__dirname, 'client/public')
         },
-        server: 'https'
+        server: 'http'
     },
 
     entry: './client/src',
