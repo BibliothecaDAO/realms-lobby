@@ -53,7 +53,7 @@ export class MapSystem implements ISystem {
             
         // Check if this is a map entity so we can load tileset, etc
         this.finder.setGrid(map) // Submit a 2d grid of tiles with id's to consider for pathfinding
-        this.finder.setAcceptableTiles([0]) // The ID's of tiles that can be walked (not walls)
+        this.finder.setAcceptableTiles([0,12, 24, 30, 42, 48, 49, 50, 51, 52, 53, 60, 61, 62]) // The ID's of tiles that can be walked (not walls)
     }
 
     generate2DArrayFromTiled = (tileMap): Array<Array<number>> => {
@@ -62,7 +62,7 @@ export class MapSystem implements ISystem {
             const row = []
             for (let x = 0; x < tileMap.width; x++) {
                 // If the tile is not walkable, add it to the pathfinding grid
-                row.push(tileMap.layers[0].data[y * tileMap.width + x] === 0 ? 1 : 0)
+                row.push(tileMap.layers[0].data[y * tileMap.width + x])
             }
             map.push(row)
         }

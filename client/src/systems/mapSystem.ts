@@ -67,14 +67,14 @@ export class MapSystem implements ISystem {
     setupTileset = (zone: Zone) => {
         // setup tilemap
         const tileSize = GRID_SIZE
-
+console.log(zone)
         const mapData = Phaser.Tilemaps.Parsers.Tiled.ParseJSONTiled('tiledMap', zone.tileMap, false)
         const tileMap = new Phaser.Tilemaps.Tilemap(this.scene, mapData)
         const tileSet = tileMap.addTilesetImage('lobby-tileset', 'lobby-tileset', tileSize, tileSize, 0, 0)
-        
-        tileMap.createLayer("Tile Layer 1", tileSet, 0, 0)
+        tileMap.createLayer(0, tileSet, 0, 0)
 
         zone.tileMap = tileMap
+        
     }
 
     // Pathfinding algorithm
@@ -82,23 +82,24 @@ export class MapSystem implements ISystem {
     // Uses easystar pathing library: https://github.com/prettymuchbryce/easystarjs
     // width: width of tilemap
     // height: height of tilemap
-    setupPathing = (zone: Zone) => {
+    setupPathing = (zone: Zone) => {    
         const map = this.generate2DArrayFromTiled(zone.tileMap)
         this.finder.setGrid(map) // Submit a 2d grid of tiles with id's to consider
-        this.finder.setAcceptableTiles([0,1]) // The ID's of tiles that can be walked (not walls)
+        this.finder.setAcceptableTiles([0,12, 24, 30, 42, 48, 49, 50, 51, 52, 53, 60, 61, 62]) // The ID's of tiles that can be walked (not walls)
     }
 
     generate2DArrayFromTiled = (tileMap): Array<Array<number>> => {
+        console.log(tileMap)
         const map = []
         for (let y = 0; y < tileMap.height; y++) {
             const row = []
             for (let x = 0; x < tileMap.width; x++) {
                 // If the tile is not walkable, add it to the pathfinding grid
-                row.push(tileMap.layers[0].data[y * tileMap.width + x] === 0 ? 1 : 0)
+                row.push(tileMap.layers[0].data[y][x].index)
             }
             map.push(row)
         }
-        
+        // console.log(map)
         return (map)
     }
 }

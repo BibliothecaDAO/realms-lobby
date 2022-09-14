@@ -43,7 +43,8 @@ export const gameConfig: Types.Core.GameConfig = {
     render: {
         // antialiasGL: false,
         // antialias: false,
-        pixelArt: true
+        pixelArt: true,
+        roundPixels:true
     },
     callbacks: {
         postBoot: () => {
