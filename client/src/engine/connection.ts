@@ -14,10 +14,11 @@ export class Connection {
         // Connect to the server
         const hostname = window.location.hostname
 
+        console.log(process.env.VERCEL)
+        console.log(process.env.WS_HOSTNAME)
+        console.log(process.env.WS_PORT)
         this.socket = io(`ws://${process.env.WS_HOSTNAME}:${process.env.WS_PORT}`)
 
-        
-        console.log(process.env.WS_PORT)
         this.socket.on('connect', () => {
             // TODO - Figure out why this isn't firing
             console.log(`💻 connected to server ws://${process.env.WS_HOSTNAME}:${process.env.WS_PORT}`)
