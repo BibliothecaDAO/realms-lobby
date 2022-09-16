@@ -67,7 +67,6 @@ export class MapSystem implements ISystem {
     setupTileset = (zone: Zone) => {
         // setup tilemap
         const tileSize = GRID_SIZE
-console.log(zone)
         const mapData = Phaser.Tilemaps.Parsers.Tiled.ParseJSONTiled('tiledMap', zone.tileMap, false)
         const tileMap = new Phaser.Tilemaps.Tilemap(this.scene, mapData)
         const tileSet = tileMap.addTilesetImage('lobby-tileset', 'lobby-tileset', tileSize, tileSize, 0, 0)
@@ -89,7 +88,6 @@ console.log(zone)
     }
 
     generate2DArrayFromTiled = (tileMap): Array<Array<number>> => {
-        console.log(tileMap)
         const map = []
         for (let y = 0; y < tileMap.height; y++) {
             const row = []
@@ -99,7 +97,7 @@ console.log(zone)
             }
             map.push(row)
         }
-        // console.log(map)
+        
         return (map)
     }
 }

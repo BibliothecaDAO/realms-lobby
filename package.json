@@ -14,6 +14,8 @@
     "all:dev": "npx concurrently --names 'S,C' --prefix-colors 'bgMagenta,bgCyan' 'npm run server:dev' 'npm run client:dev'"
   },
   "dependencies": {
+    "dotenv": "^16.0.2",
+    "dotenv-webpack": "^8.0.1",
     "easystarjs": "^0.4.4",
     "json5": "^2.2.1",
     "lodash": "^4.17.21",

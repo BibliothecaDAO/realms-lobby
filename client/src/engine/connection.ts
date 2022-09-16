@@ -12,10 +12,15 @@ export class Connection {
         this.events = events
 
         // Connect to the server
-        this.socket = io(`ws://${window.location.hostname}:3000`)
+        const hostname = window.location.hostname
 
+        this.socket = io(`ws://${process.env.WS_HOSTNAME}:${process.env.WS_PORT}`)
+
+        
+        console.log(process.env.WS_PORT)
         this.socket.on('connect', () => {
-            console.log('💻 connected to server')
+            // TODO - Figure out why this isn't firing
+            console.log(`💻 connected to server ws://${process.env.WS_HOSTNAME}:${process.env.WS_PORT}`)
             // Any logic to make sure we stay connected goes here
         })
 

@@ -20,8 +20,8 @@ export default class Server {
     private events: EventEmitter
     private ecs: Registry
 
-    constructor(port: number) {
-        // Create event emitter
+    constructor() {
+        // Create event bus to pass messages between systems
         this.events = new EventEmitter()
 
         // Setup ECS registry so we can use components and systems
@@ -44,11 +44,8 @@ export default class Server {
         this.ecs.addSystem(new InventorySystem(this.events, this.ecs))
 
         // Start accepting connections from player
-        this.connections = new Connections(port, this.events, this.world)
-
-        console.log(`💻 Starting Server on port ${port}`)
+        this.connections = new Connections(this.events, this.world)
     }
 }
 
-// const server = new Server(3000)
-new Server(3000)
+new Server()
