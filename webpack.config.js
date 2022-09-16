@@ -22,6 +22,10 @@ module.exports = {
         },
         server: 'http'
     },
+    output: {
+        path: path.join(__dirname, "client/public/js"),
+        filename: '[name].js'
+    },
 
     entry: './client/src',
 
