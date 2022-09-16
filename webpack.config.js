@@ -3,6 +3,7 @@
 // We need this plugin to detect a `--watch` mode. It may be removed later
 // after https://github.com/webpack/webpack/issues/3460 will be resolved.
 const path = require('path')
+const Dotenv = require('dotenv-webpack');
 
 module.exports = {
     // Currently we need to add '.ts' to the resolve.extensions array.
@@ -19,7 +20,11 @@ module.exports = {
         static: {
             directory: path.join(__dirname, 'client/public')
         },
-        server: 'https'
+        server: 'http'
+    },
+    output: {
+        path: path.join(__dirname, "client/public/js"),
+        filename: '[name].js'
     },
 
     entry: './client/src',
@@ -33,5 +38,7 @@ module.exports = {
             }
         ]
     },
-    plugins: []
+    plugins: [
+        new Dotenv()
+    ]
 }

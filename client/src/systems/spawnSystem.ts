@@ -1,7 +1,6 @@
 // SpawnSystem - Listens for spawn commands from server (e.g. when zone loads monster respawns, player connects) and creates a new entity accordingly
 
 import { ISystem } from '../engine/registry'
-import EventEmitter from 'events'
 import { Registry } from '../engine/registry'
 
 // Hardcode components for our lookup table
@@ -16,11 +15,11 @@ import { Velocity } from '../components/velocity'
 import { DEPTH } from '../config'
 
 export class SpawnSystem implements ISystem {
-    private events: EventEmitter
+    private events: Phaser.Events.EventEmitter
     private ecs: Registry
     private scene: Phaser.Scene
 
-    constructor(events: EventEmitter, ecs: Registry, scene: Phaser.Scene) {
+    constructor(events: Phaser.Events.EventEmitter, ecs: Registry, scene: Phaser.Scene) {
         this.events = events
         this.ecs = ecs
         this.scene = scene
