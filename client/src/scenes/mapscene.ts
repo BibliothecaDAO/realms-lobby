@@ -4,22 +4,22 @@ import { Registry } from '../engine/registry'
 import { js as Finder } from 'easystarjs' // https://github.com/prettymuchbryce/easystarjs
 
 import { GameUIScene } from './uiscene'
-import { GRID_SIZE, WORLD_SIZE } from '../config'
+import { GRID_SIZE } from '../config'
 
 // Initialize systems
-import { FollowMouseSystem } from '../systems/followMouseSystem'
+import { AttachToCursorSystem } from '../systems/attachToCursorSystem'
 import { RenderSystem } from '../systems/renderSystem'
 import { MoveSystem } from '../systems/moveSystem'
 import { MoveModeSystem } from '../systems/moveModeSystem'
 import { SpawnSystem } from '../systems/spawnSystem'
 import { MapSystem } from '../systems/mapSystem'
 import { InventorySystem } from '../systems/inventorySystem'
+import { CameraSystem } from '../systems/cameraSystem'
 
 // Components
 import { Player } from '../components/player'
 import { Sprite } from '../components/sprite'
 import { Zone } from '../components/zone'
-
 
 export class MapScene extends Phaser.Scene {
     public static Name = 'map-scene'
@@ -54,10 +54,11 @@ export class MapScene extends Phaser.Scene {
         this.ecs.addSystem(new MoveSystem(this.events, this.ecs))
         this.ecs.addSystem(new MoveModeSystem(this.events, this.ecs, this, finder))
         this.ecs.addSystem(new MapSystem(this.events, this.ecs, this, finder))
-        this.ecs.addSystem(new FollowMouseSystem(this.events, this.ecs, this)) // Create map cursor
+        this.ecs.addSystem(new AttachToCursorSystem(this.events, this.ecs, this)) // Create map cursor
         this.ecs.addSystem(new RenderSystem(this.events, this.ecs)) // Update any transforms that moved this turn
         this.ecs.addSystem(new SpawnSystem(this.events, this.ecs, this))
         this.ecs.addSystem(new InventorySystem(this.events, this.ecs))
+        this.ecs.addSystem(new CameraSystem(this.events, this.ecs, this))
 
         // Running this up front because the camera can scroll before setPollAlways has been called (Resulting in improper values)
         this.input.setPollAlways() // The cursor should poll for new positions while the camera is moving
@@ -90,17 +91,27 @@ export class MapScene extends Phaser.Scene {
     }
 
     initCamera = (entity) => {
-        // Set bounds of world to the same size as our tilemap.
-        const mapEntities = this.ecs.getEntitiesByComponentType('zone')
+          const mapEntities = this.ecs.getEntitiesByComponentType('zone')
         const map = this.ecs.getComponent(mapEntities[0], 'zone') as Zone
 
         // This allows us to call world coordinates (e.g. via mouse pointer)
         this.physics.world.setBounds(0, 0, map.width * GRID_SIZE, map.height * GRID_SIZE)
-
         // Setup camera to follow player around
         this.cameras.main.setBounds(0, 0, map.width * GRID_SIZE, map.height * GRID_SIZE)
 
         const sprite = this.ecs.getComponent(entity, 'sprite') as Sprite
         this.cameras.main.startFollow(sprite.sprite, false, 0.01, 0.01)
+
+        // const zone = this.ecs.getComponentsByType('zone')[0]
+        // // this.physics.world.setBounds(0, 0, zone.width * GRID_SIZE * 4, zone.height * GRID_SIZE * 4)
+        // this.physics.world.setBounds(0, 0, 9000, 9000)
+
+        // this.input.setPollAlways() // The cursor should poll for new positions while the camera is moving
+        // // Setup camera to follow player around
+        // this.cameras.main.setBounds(0, 0, 500, 500, true)
+        // const sprite = this.ecs.getComponent(entity, 'sprite') as Sprite
+        // this.cameras.main.startFollow(sprite.sprite, true, 0.01, 0.01)
+        // this.cameras.main.setDeadzone(100, 100)
+       
     }
 }

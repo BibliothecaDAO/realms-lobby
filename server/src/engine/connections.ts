@@ -1,9 +1,13 @@
 // connections.ts - Handles player connects and disconnects
 
-import { randomUUID } from 'crypto'
-import { Server as Socket } from 'socket.io'
+// Engine
 import EventEmitter from 'events'
 import { World } from './world'
+
+// Libraries
+import { randomUUID } from 'crypto'
+import { Server as Socket } from 'socket.io'
+import * as dotenv from 'dotenv'
 
 export class Connections {
     private users: Record<string, Socket> // Allow socket id lookups by uid
@@ -14,19 +18,24 @@ export class Connections {
     private events: EventEmitter
     private world: World
 
-    constructor(port: number, events: EventEmitter, world: World) {
+    constructor(events: EventEmitter, world: World) {
         this.events = events
         this.world = world // Needed to lookup data from time to time
 
         this.users = {} // Allow player/socket lookups by uid
         this.sockets = {} // Allow uid lookups by socket
 
+        // Load environment variables
+        dotenv.config()
+
         // Start the server
-        this.io = new Socket(port, {
+        this.io = new Socket(parseInt(process.env.WS_PORT), {
             cors: {
-                origin: 'https://localhost:8080'
+                origin: `http://${process.env.WWW_HOSTNAME}:${process.env.WWW_PORT}`
             }
         })
+
+        console.log(`💻 Starting Server on port ${parseInt(process.env.WS_PORT)}`)
 
         this.setupExternalEvents()
 

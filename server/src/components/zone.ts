@@ -3,17 +3,16 @@
 
 import { IComponent } from '../engine/registry'
 
-// Named this class
 export class Zone implements IComponent {
     public type = 'zone'
 
     public width: number
     public height: number
-    public tiles: Array<Array<number>>
+    public tileMap
 
-    constructor(width: number, height: number, tiles?: Array<Array<number>>) {
+    constructor(width: number, height: number, tileMap?) {
         this.width = width
         this.height = height
-        this.tiles = tiles
+        this.tileMap = tileMap
     }
 }

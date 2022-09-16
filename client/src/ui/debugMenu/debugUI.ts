@@ -1,7 +1,7 @@
 // debugUI - A panel that shows the current game state, events firing, and netowrk requests
 
 import { GameObjects } from 'phaser'
-import { IComponent, Registry } from '../engine/registry'
+import { IComponent, Registry } from '../../engine/registry'
 
 export class DebugUI {
     private ecs: Registry

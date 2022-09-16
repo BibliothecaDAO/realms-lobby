@@ -54,7 +54,7 @@ export class World {
     addPlayer = (entity: string) => {
         // Hardcode spawn values for now
         // this.loadData.loadEntity('characters/bard', entity)
-        this.loadData.loadEntity('characters/_character', entity)
+        this.loadData.loadEntity('characters/knight', entity)
     }
 
     // Remove a player that times out

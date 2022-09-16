@@ -1,9 +1,9 @@
 // inventoryUI - Display any items in our inventory
 
 import { GameObjects } from 'phaser'
-import { Inventory } from '../components/inventory'
-import { Sprite } from '../components/sprite'
-import { Registry } from '../engine/registry'
+import { Inventory } from '../../components/inventory'
+import { Sprite } from '../../components/sprite'
+import { Registry } from '../../engine/registry'
 
 export class InventoryUI {
     private ecs: Registry
@@ -119,7 +119,7 @@ export class InventoryUI {
         const y = -startY + this.itemSpacer + sprite.sprite.height * row
 
         // Add the sprite to the scene so we can render it
-        const cloneSprite = this.scene.add.sprite(x, y, sprite.filename).setScale(4)
+        const cloneSprite = this.scene.add.sprite(x, y, sprite.filename)
 
         return cloneSprite
     }

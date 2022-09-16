@@ -8,12 +8,14 @@
   "scripts": {
     "client:debug": "export DEBUG='express:*'; cross-env NODE_ENV=development webpack serve",
     "client:dev": "cross-env NODE_ENV=development webpack serve",
-    "client:build": "cross-env NODE_ENV=production webpack --progress --hide-modules",
+    "client:build": "cross-env NODE_ENV=production webpack --progress",
     "client:test": "npx watch 'mocha -r ts-node/register ./client/tests/**/*.test.ts'",
     "server:dev": "npx nodemon ./server/src/index.ts --watch ./server",
     "all:dev": "npx concurrently --names 'S,C' --prefix-colors 'bgMagenta,bgCyan' 'npm run server:dev' 'npm run client:dev'"
   },
   "dependencies": {
+    "dotenv": "^16.0.2",
+    "dotenv-webpack": "^8.0.1",
     "easystarjs": "^0.4.4",
     "json5": "^2.2.1",
     "lodash": "^4.17.21",

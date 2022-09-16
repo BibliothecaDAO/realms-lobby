@@ -21,16 +21,8 @@ export class MapSystem implements ISystem {
 
         this.finder = finder
 
-        // HACK - manually create a map entity
-        const zone = this.constructMap(100, 50)
-        this.finder.setGrid(zone.tiles) // Submit a 2d grid of tiles with id's to consider
-        this.finder.setAcceptableTiles([0]) // The ID's of tiles that can be walked (not walls)
-
-        // Create the entity and add our map to it
-        const entity = this.ecs.createEntity()
-        this.ecs.addComponent(entity, zone)
-
         // Listen for events
+        this.events.on('spawnZone', this.setupPathfinding)
         this.events.on('spawnSuccess', this.placeStaticColliders)
         this.events.on('validMove', this.placeDynamicColliders)
     }
@@ -41,8 +33,7 @@ export class MapSystem implements ISystem {
 
     // Event functions
     // Place a blocker in pathfinding for any static objects (no velocity / cannot move)
-    // TODO: Figure out how to place dynamic objects without having them block themselves 🙃
-    placeStaticColliders = (entity) => {
+    placeStaticColliders = (entity): void => {
         // Make sure this is a static object (velocity means it can move)
         const transform = this.ecs.getComponent(entity, 'transform') as Transform
         if (transform) {
@@ -51,26 +42,31 @@ export class MapSystem implements ISystem {
     }
 
     // When an entity moves, update its collider position
-    placeDynamicColliders = (entity, prevX, prevY, currentX, currentY) => {
+    placeDynamicColliders = (entity, prevX, prevY, currentX, currentY): void => {
         this.finder.stopAvoidingAdditionalPoint(prevX, prevY)
         this.finder.avoidAdditionalPoint(currentX, currentY)
     }
 
     // Utility functions
-    constructMap = (width, height) => {
-        const zone = new Zone(width, height)
-        const tiles = []
+    setupPathfinding = (entity: string, zone: Zone): void => {
+        const map = this.generate2DArrayFromTiled(zone.tileMap)
+            
+        // Check if this is a map entity so we can load tileset, etc
+        this.finder.setGrid(map) // Submit a 2d grid of tiles with id's to consider for pathfinding
+        this.finder.setAcceptableTiles([0,12, 24, 30, 42, 48, 49, 50, 51, 52, 53, 60, 61, 62]) // The ID's of tiles that can be walked (not walls)
+    }
 
-        for (let y = 0; y < height; y++) {
-            const col = []
-            for (let x = 0; x < width; x++) {
-                col.push(0) // Push a '1' because the tile should be acceptable
+    generate2DArrayFromTiled = (tileMap): Array<Array<number>> => {
+        const map = []
+        for (let y = 0; y < tileMap.height; y++) {
+            const row = []
+            for (let x = 0; x < tileMap.width; x++) {
+                // If the tile is not walkable, add it to the pathfinding grid
+                row.push(tileMap.layers[0].data[y * tileMap.width + x])
             }
-            tiles.push(col)
+            map.push(row)
         }
-
-        zone.tiles = tiles
-
-        return zone
+        
+        return (map)
     }
 }

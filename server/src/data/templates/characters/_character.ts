@@ -12,6 +12,7 @@
             type: 'collider'
         },
         {
+            // TODO Figure out why they aren't renderin c
             type: 'inventory',
             items: [] // Player spawns w/ empty inventory
         },

@@ -1,8 +1,8 @@
 // debugCursor - Places a small label on the user's cursor (for dev purposes)
 
 import { GameObjects } from 'phaser'
-import { Registry } from '../engine/registry'
-import { GRID_SIZE } from '../config'
+import { Registry } from '../../engine/registry'
+import { GRID_SIZE } from '../../config'
 
 export class DebugCursorUI {
     private ecs: Registry
