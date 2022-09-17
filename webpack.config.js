@@ -20,11 +20,13 @@ module.exports = {
         static: {
             directory: path.join(__dirname, 'client/public')
         },
-        server: 'http'
+        server: 'https'
     },
     output: {
-        path: path.join(__dirname, "client/public/js"),
+        path: path.join(__dirname, "client/public/js"), // Where to save the .js bundle
+        publicPath: '/js/',   // Where to serve the main.js from memory
         filename: '[name].js'
+        
     },
 
     entry: './client/src',
