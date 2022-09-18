@@ -21,7 +21,10 @@ WWW_PORT="8080"             # game client will be served on this port
 # Hostname and port of the system running game server and communicating via web sockers
 WS_HOSTNAME="localhost"     # game server will run on this hostname (use `localhost` for local dev)
 WS_PORT="8081"              # game server will run on this port
+WS_URL="ws://localhost:8081"    # client will call this url to access the game server
+WS_CORS="https://localhost:8080"    # server will only accept connections from this (client) url
 ```
+
 
 # Tech used
 * [Phaser 3](https://photonstorm.github.io/phaser3-docs/) - javascript game engine which handles rendering, input, animations, and the game loop
