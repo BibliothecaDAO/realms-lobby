@@ -4,6 +4,7 @@
 // after https://github.com/webpack/webpack/issues/3460 will be resolved.
 const path = require('path')
 const Dotenv = require('dotenv-webpack');
+const fs = require('fs')
 
 module.exports = {
     // Currently we need to add '.ts' to the resolve.extensions array.
@@ -12,19 +13,19 @@ module.exports = {
     },
 
     // Source maps support ('inline-source-map' also works)
-    // devtool: 'source-map',
+    devtool: 'source-map',
 
     target: 'web',
     devServer: {
         host: 'localhost',
-        port: 8080,
-        server: 'http',
+        port: process.env.WWW_PORT,
+        server: 'https',
         static: {
             directory: path.join(__dirname, 'client/public')
         }
     },
     output: {
-        path: path.join(__dirname, "client/public/js"), // Where to save the .js bundle
+        path: path.join(__dirname, 'client/public/js'), // Where to save the .js bundle
         publicPath: '/js/',   // Where to serve the main.js from memory
         filename: '[name].js'
         

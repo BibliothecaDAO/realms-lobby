@@ -5,9 +5,8 @@ Battle other lords in a multiplayer lobby
 1. clone this repository
 2. install dependencies: `yarn`
 3. create environment variables in `.env` (see **Environment Variables** below)
-4. generate an ssl cert (see **local SSL cert** below)
-3. run dev server: `yarn all:dev`
-4. visit http://localhost:8080 in your browser
+4. run dev server: `yarn all:dev`
+5. visit http://localhost:8080 in your browser
 
 ## Environment Variables
 
@@ -23,29 +22,6 @@ WWW_PORT="8080"             # game client will be served on this port
 WS_HOSTNAME="localhost"     # game server will run on this hostname (use `localhost` for local dev)
 WS_PORT="8081"              # game server will run on this port
 ```
-
-## Local SSL Cert
-
-Because we use https for our server and client, we'll need to generate and load a certificate locally.
-
-First, you'll need to generate a key:
-```
-openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
- -keyout localhost.key -out localhost.crt -extensions san -config \
- <(echo "[req]";
-echo distinguished_name=req;
-echo "[san]";
-echo subjectAltName=DNS:localhost,IP:127.0.0.1
-) \
- -subj "/CN=localhost"
-```
-
-1. 
-3. Save them as `localhost.key` and `localhost.crt` in the project's root directory
-
-For more info, see [this guide](https://www.binarycarpenter.com/create-ssl-site-at-your-localhost-with-mamp-nodejs-in-5-minutes/
-).
-
 
 # Tech used
 * [Phaser 3](https://photonstorm.github.io/phaser3-docs/) - javascript game engine which handles rendering, input, animations, and the game loop

@@ -2,8 +2,8 @@
 .DS_Store
 
 # certificates for local testing
-localhost.crt
-localhost.key
+dev.local.crt
+dev.local.key
 
 # build artifacts
 ./client/bin/*
