@@ -1,6 +1,10 @@
 .env
 .DS_Store
 
+# certificates for local testing
+localhost.crt
+localhost.key
+
 # build artifacts
 ./client/bin/*
 ./client/public/js/*

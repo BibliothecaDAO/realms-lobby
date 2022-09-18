@@ -16,11 +16,12 @@ module.exports = {
 
     target: 'web',
     devServer: {
+        host: 'localhost',
         port: 8080,
+        server: 'http',
         static: {
             directory: path.join(__dirname, 'client/public')
-        },
-        server: 'https'
+        }
     },
     output: {
         path: path.join(__dirname, "client/public/js"), // Where to save the .js bundle
