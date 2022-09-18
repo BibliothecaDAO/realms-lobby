@@ -31,7 +31,7 @@ export class Connections {
         // Start the server
         this.io = new Socket(parseInt(process.env.WS_PORT), {
             cors: {
-                origin: `http://${process.env.WWW_HOSTNAME}:${process.env.WWW_PORT}`,
+                origin: `${process.env.WS_CORS}`,
                 credentials: true   // Pass the required CORS Access-Control-Allow-Credentials header so browser doesn't complain
             }
         })

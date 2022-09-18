@@ -4,8 +4,26 @@ Battle other lords in a multiplayer lobby
 ## Installation
 1. clone this repository
 2. install dependencies: `yarn`
-3. run dev server: `yarn all:dev`
-4. visit http://localhost:8080 in your browser
+3. create environment variables in `.env` (see **Environment Variables** below)
+4. run dev server: `yarn all:dev`
+5. visit http://localhost:8080 in your browser
+
+## Environment Variables
+
+To facilitate local development and production deployment, we use environment variables in the file `.env` located in the root of this project. 
+
+Create this file and populate the following variables:
+```
+# Hostname and port of the system hosting/serving html and js iles
+WWW_HOSTNAME="localhost"    # game client will be served via this hostname (use `localhost` for local dev)
+WWW_PORT="8080"             # game client will be served on this port
+
+# Hostname and port of the system running game server and communicating via web sockers
+WS_HOSTNAME="localhost"     # game server will run on this hostname (use `localhost` for local dev)
+WS_PORT="8081"              # game server will run on this port
+WS_URL="ws://localhost:8081"    # client will call this url to access the game server
+WS_CORS="https://localhost:8080"    # server will only accept connections from this (client) url
+```
 
 
 # Tech used
