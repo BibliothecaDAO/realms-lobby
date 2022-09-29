@@ -1,7 +1,6 @@
 /* LoadingScene - Shown between scenes when the game needs to load assets. */
 
 import { GameObjects, Scene } from 'phaser'
-import { MapScene } from './mapscene'
 import { GraphScene } from './graphscene'
 // import logo from ''
 export class LoadingScene extends Scene {
@@ -26,23 +25,13 @@ export class LoadingScene extends Scene {
         this.load.baseURL = 'assets/'
 
         // Load Characters
-        this.load.image('_character', 'sprites/characters/_character.png')
-        this.load.image('knight', 'sprites/characters/knight.png')
-        this.load.image('mage', 'sprites/characters/mage.png')
-        this.load.image('hunter', 'sprites/characters/hunter.png')
 
         // Load environment assets
-        this.load.image('_resource', 'sprites/environment/_resource.png')
-        // this.load.image('_resource-empty', 'sprites/environment/_resource-empty.png')
 
         // Load enemies
-        this.load.image('_enemy', 'sprites/enemies/_enemy.png')
-
-        // Load world tiles
-        this.load.image('lobby-tileset', 'tilemaps/tinydungeon_packed.png')
     }
 
     create(): void {
-        this.cameras.main.setBackgroundColor('#6c3e9c') // Set bg to purple while loading
+        this.cameras.main.setBackgroundColor('#141414') // Set bg to purple while loading
     }
 }

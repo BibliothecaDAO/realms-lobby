@@ -28,7 +28,7 @@ export const gameConfig: Types.Core.GameConfig = {
     title: 'crushbone ☠️',
     type: Phaser.WEBGL,
     parent: 'game',
-    backgroundColor: '#351f1b',
+    backgroundColor: '#141414',
     scale: {
         mode: Phaser.Scale.ScaleModes.NONE,
         width: window.innerWidth,
