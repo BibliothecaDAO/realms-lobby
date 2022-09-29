@@ -2,6 +2,7 @@
 // Returns an object that can be sent to the client and displayed
 
 import EventEmitter from 'events'
+import { GameObjects } from 'phaser'
 import { ISystem, Registry } from '../../engine/registry'
 
 import { Edge } from './edge'
@@ -10,14 +11,21 @@ export class GraphSystem implements ISystem {
     private events: Phaser.Events.EventEmitter
     private ecs: Registry
     private scene: Phaser.Scene
-
     public type = 'graphSystem'
+
+    // Graph data
     public edges: Edge[] = []
     public adjacency: Map<number, number[]> = new Map()
     public reverseAdjacency: Map<number, number[]> = new Map()
     public nodes: Array<number> = []
     
+    // Graph state
+    public currentNode: number = 0
+
+    // Game Objects
+    public container: GameObjects.Container
     public nodeTexts: Array<Phaser.GameObjects.Text> = []
+    public currentNodeSelector: GameObjects.Arc
 
     constructor(events: Phaser.Events.EventEmitter, ecs: Registry, scene: Phaser.Scene) {
         this.events = events
@@ -41,7 +49,17 @@ export class GraphSystem implements ISystem {
 
 
     update = () => {
-    //
+        /*if (this.currentNodeSelector.x != this.nodeTexts[this.currentNode].x || this.currentNodeSelector.y != this.nodeTexts[this.currentNode].y) {
+
+            this.currentNodeSelector.x = this.nodeTexts[this.currentNode].x
+            this.graphics.strokePath()
+        }
+
+        if (this.currentNodeSelector.y != this.nodeTexts[this.currentNode].y) {
+            this.currentNodeSelector.y = this.nodeTexts[this.currentNode].y
+            this.graphics.strokePath()
+        } */
+
     }
 
     // Instantiates edges and prepares to traverse them
@@ -57,15 +75,15 @@ export class GraphSystem implements ISystem {
         // Identify nodes via breath first search
         this.breadthFirst()
 
-        this.drawNodes()
-        this.drawVertices()
-
-        
-
-        // Map all of the nodes
-        // this.traverseGraph()
-
         // Draw Graph
+
+        // create a container which will adjust the position of all child gameobjects inside it
+        this.container = this.scene.add.container(this.scene.cameras.main.centerX, this.scene.cameras.main.centerY)
+
+        this.drawNodes()
+        this.drawSelectedNode()
+        this.drawVertices()
+        
     }
 
     createVertices = (): void => {
@@ -94,7 +112,7 @@ export class GraphSystem implements ISystem {
         }
     }
 
-    drawNodes = () => {
+    drawNodes = (): void => {
         // How far from the edge of the canvas should we draw each node?
         const xOffset = 100
         const yOffset = 100
@@ -105,16 +123,60 @@ export class GraphSystem implements ISystem {
 
         // Start walking through each node
         for (let i = 0; i < this.nodes.length; i++) {
-            const x = xOffset * (this.getDepth(this.nodes[i])+1)
+            const x = xOffset * (this.getDepth(this.nodes[i]))
             
+            // Calculate how many edges each node has - more edges means it gets drawn further down the screen
             let numEdges = this.reverseAdjacency.get(this.nodes[i]) ? this.reverseAdjacency.get(this.nodes[i]).length : 1
-            let y = yOffset * numEdges
+            let y = yOffset * (numEdges-1)  // we subtract 1 so our graph is centered vertically
             
+            // Keep track of what position our node is in (so we can reference it later via array)
             let index = this.nodes[i].toString()
-            // this.nodeTexts.push(this.scene.add.text(x, y, this.nodes[i].toString(), { color: 'white' }).setDepth(2))
-            this.nodeTexts[index] = this.scene.add.text(x, y, this.nodes[i].toString(), { color: 'white' })
-                .setDepth(2)
+
+            // Draw the circular background
+            const circle = this.scene.add.circle(x, y, 30, 0xFF6B00)
+            this.container.add(circle)
+
+            // Draw the node number
+            this.nodeTexts[index] = this.scene.add.text(x, y, index, { color: 'white' })
                 .setOrigin(0.5)
+                .setFontSize(20)
+            this.container.add(this.nodeTexts[index])
+        }
+    }
+
+    drawSelectedNode = (): void => {
+        // Draw the a circle around the currently selected node
+        this.currentNodeSelector = this.scene.add.circle(0, 0, 36, 0x000000, 0)
+            .setStrokeStyle(2, 0xFF6B00, 1) // To draw a circle w/o fill, we set fill alpha to 0 and add a stroke
+        this.container.add(this.currentNodeSelector)
+
+        // Node selector should pulse to indicate it's selected
+        this.scene.tweens.add({
+                targets: this.currentNodeSelector,
+            alpha: { value: 0.3, duration: 600 },
+            ease: 'Sine.easeInOut',
+                // delay: 50,
+                yoyo: true,
+                loop: -1,
+            });
+    }
+
+     drawVertices = (): void => {
+        // Loop through each edge (vertices)
+         for (let i = 0; i < this.edges.length; i++) {
+            // Get the source and destination nodes for this edge
+            const src = this.edges[i].src_identifier
+            const dst = this.edges[i].dst_identifier
+
+            // get the text object so we can determine its location
+            const srcNode = this.nodeTexts[src]
+            const dstNode = this.nodeTexts[dst]
+
+            // Draw our line
+            const graphics = this.scene.add.graphics()
+            graphics.lineStyle(2, 0xFFFFFF)
+            const tmp = graphics.lineBetween(srcNode.x, srcNode.y, dstNode.x, dstNode.y)
+            this.container.add(tmp).sendToBack(tmp) // Containers ignore setDepth so instead we send this object to the back of the queue
         }
     }
 
@@ -209,27 +271,6 @@ export class GraphSystem implements ISystem {
                 })
             }
         } 
-    }
-
-    drawVertices = () => {
-        const graphics = this.scene.add.graphics();
-
-        for (let i = 0; i < this.edges.length; i++) {
-            // console.log(`${this.edges[i].src_identifier} -> ${this.edges[i].dst_identifier}`)
-            const src = this.edges[i].src_identifier
-            const dst = this.edges[i].dst_identifier
-
-            const srcNode = this.nodeTexts[src]
-            const dstNode = this.nodeTexts[dst]
-
-            graphics.lineStyle(2, 0xFFFFFF)
-            graphics.lineBetween(srcNode.x, srcNode.y, dstNode.x, dstNode.y)
-        }
-
-        for (let i = 0; i < this.nodeTexts.length; i++) {
-            this.scene.add.circle(this.nodeTexts[i].x, this.nodeTexts[i].y, 30, 0xFF6B00).setDepth(1)
-            console.log(`${i}: (${this.nodeTexts[i].x}, ${this.nodeTexts[i].y}`)
-        }
     }
 
     debug = () => {
