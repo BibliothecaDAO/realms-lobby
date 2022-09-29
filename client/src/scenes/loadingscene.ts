@@ -2,6 +2,7 @@
 
 import { GameObjects, Scene } from 'phaser'
 import { MapScene } from './mapscene'
+import { GraphScene } from './graphscene'
 // import logo from ''
 export class LoadingScene extends Scene {
     public static Name = 'loading-scene'
@@ -17,7 +18,7 @@ export class LoadingScene extends Scene {
         this.load.on(
             'complete',
             function () {
-                this.scene.start(MapScene.Name)
+                this.scene.start(GraphScene.Name)
             },
             this
         ) // Pass in this as context so we can call the next scene

@@ -12,7 +12,7 @@ import { gameConfig } from './config'
 import { World } from './engine/world'
 
 // Load our scenes (each scene defines a mode of gameplay)
-import { MapScene } from './scenes'
+import { GraphScene } from './scenes/graphscene'
 
 export default class Game extends Phaser.Game {
     public world: World // The current instance of the game world
@@ -24,7 +24,8 @@ export default class Game extends Phaser.Game {
         this.world = new World()
 
         // Start loading scenes in background (but we kick off LoadingScreen)
-        this.scene.add(MapScene.Name, MapScene, false, { ecs: this.world.ecs, world: this.world, events: this.world.events }) // TODO: Race condition where player isn't available yet
+        this.scene.add(GraphScene.Name, GraphScene, false, { ecs: this.world.ecs, world: this.world, events: this.world.events })
+        // this.scene.add(MapScene.Name, MapScene, false, { ecs: this.world.ecs, world: this.world, events: this.world.events }) // TODO: Race condition where player isn't available yet
     }
 }
 
