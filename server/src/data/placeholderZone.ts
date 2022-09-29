@@ -11,7 +11,7 @@
                     width: 70,
                     height: 50,
                     // paste in tiled file here:
-                    tileMap: 'placeholderZone.json'
+                    tileMap: 'arena.json'
                 }
             ]
         },

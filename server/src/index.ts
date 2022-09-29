@@ -13,6 +13,7 @@ import { MoveSystem } from './systems/moveSystem'
 import { SpawnSystem } from './systems/spawnSystem'
 import { RespawnTimerSystem } from './systems/respawnTimerSystem'
 import { InventorySystem } from './systems/inventorySystem'
+import { GraphSystem } from './systems/graphSystem/graphSystem'
 
 export default class Server {
     private world: World
@@ -42,6 +43,7 @@ export default class Server {
         this.ecs.addSystem(new RespawnTimerSystem(this.events, this.ecs))
         this.ecs.addSystem(new DestinationSystem(this.events, this.ecs))
         this.ecs.addSystem(new InventorySystem(this.events, this.ecs))
+        this.ecs.addSystem(new GraphSystem(this.events, this.ecs))
 
         // Start accepting connections from player
         this.connections = new Connections(this.events, this.world)
