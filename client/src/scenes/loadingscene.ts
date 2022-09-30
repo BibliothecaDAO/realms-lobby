@@ -24,9 +24,17 @@ export class LoadingScene extends Scene {
 
         this.load.baseURL = 'assets/'
 
-        // Load Characters
+        // Load character
 
-        // Load environment assets
+        // Load items
+        this.load.image('sword', 'sprites/items/sword.png')
+        this.load.image('chest', 'sprites/items/chest.png')
+        this.load.image('helm', 'sprites/items/helm.png')
+        this.load.image('belt', 'sprites/items/belt.png')
+        this.load.image('boots', 'sprites/items/boots.png')
+        this.load.image('gloves', 'sprites/items/gloves.png')
+        this.load.image('amulet', 'sprites/items/amulet.png')
+        this.load.image('ring', 'sprites/items/ring.png')
 
         // Load enemies
     }

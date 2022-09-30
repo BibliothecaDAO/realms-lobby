@@ -4,7 +4,9 @@
 import EventEmitter from 'events'
 import { GameObjects } from 'phaser'
 import { ISystem, Registry } from '../../engine/registry'
+import { COLORS } from '../../config'
 
+// Graph data structures
 import { Edge } from './edge'
 
 export class GraphSystem implements ISystem {
@@ -49,16 +51,16 @@ export class GraphSystem implements ISystem {
 
 
     update = () => {
-        /*if (this.currentNodeSelector.x != this.nodeTexts[this.currentNode].x || this.currentNodeSelector.y != this.nodeTexts[this.currentNode].y) {
+        // Update current node selector's position whne we change nodes
+        // TODO: Should this be an event?
+        if (this.currentNodeSelector.x != this.nodeTexts[this.currentNode].x || this.currentNodeSelector.y != this.nodeTexts[this.currentNode].y) {
 
             this.currentNodeSelector.x = this.nodeTexts[this.currentNode].x
-            this.graphics.strokePath()
         }
 
         if (this.currentNodeSelector.y != this.nodeTexts[this.currentNode].y) {
             this.currentNodeSelector.y = this.nodeTexts[this.currentNode].y
-            this.graphics.strokePath()
-        } */
+        }
 
     }
 
@@ -133,7 +135,7 @@ export class GraphSystem implements ISystem {
             let index = this.nodes[i].toString()
 
             // Draw the circular background
-            const circle = this.scene.add.circle(x, y, 30, 0xFF6B00)
+            const circle = this.scene.add.circle(x, y, 30, COLORS.primary.hex)
             this.container.add(circle)
 
             // Draw the node number
@@ -147,7 +149,7 @@ export class GraphSystem implements ISystem {
     drawSelectedNode = (): void => {
         // Draw the a circle around the currently selected node
         this.currentNodeSelector = this.scene.add.circle(0, 0, 36, 0x000000, 0)
-            .setStrokeStyle(2, 0xFF6B00, 1) // To draw a circle w/o fill, we set fill alpha to 0 and add a stroke
+            .setStrokeStyle(2, COLORS.primary.hex, 1) // To draw a circle w/o fill, we set fill alpha to 0 and add a stroke
         this.container.add(this.currentNodeSelector)
 
         // Node selector should pulse to indicate it's selected
