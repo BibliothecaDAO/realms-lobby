@@ -2,8 +2,28 @@
 // Add values that need to be accessed by many classes/scenes
 
 import { Types } from 'phaser'
-
 import { LoadingScene } from './scenes'
+
+// Define colors
+const BGCOLOR = 0x141414
+const PRIMARYCOLOR = 0xFF6B00
+
+// some phaser functions need a hex value but others need a hex string so we offer both
+// I chose to add the toString() convention because that feels js-native (even though it adds a bit of text)
+export const COLORS = {
+    bg: {
+        hex: BGCOLOR,
+        toString: () => {
+           return('#' + BGCOLOR.toString(16))
+        }
+    },
+    primary: {
+        hex: PRIMARYCOLOR,
+        toString: () => {
+            return ('#' + PRIMARYCOLOR.toString(16))
+        }
+    },
+}
 
 export const DEBUG = false // Used to flip on/off debug values globally
 // export const DEBUG = true
@@ -28,7 +48,7 @@ export const gameConfig: Types.Core.GameConfig = {
     title: 'crushbone ☠️',
     type: Phaser.WEBGL,
     parent: 'game',
-    backgroundColor: '#141414',
+    backgroundColor: BGCOLOR,
     scale: {
         mode: Phaser.Scale.ScaleModes.NONE,
         width: window.innerWidth,

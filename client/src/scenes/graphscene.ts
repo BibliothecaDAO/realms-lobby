@@ -3,7 +3,6 @@
 import { Registry } from '../engine/registry'
 
 import { GameUIScene } from './uiscene'
-import { GRID_SIZE } from '../config'
 
 // Initialize systems
 import { GraphSystem } from '../systems/graphSystem/graphSystem'
@@ -33,7 +32,7 @@ export class GraphScene extends Phaser.Scene {
         this.events = data.events
 
         // Initialize subscenes
-        // this.scene.add(GameUIScene.Name, GameUIScene, false, { events: this.events, ecs: this.ecs })
+        this.scene.add(GameUIScene.Name, GameUIScene, false, { events: this.events, ecs: this.ecs })
 
         // Initialize systems
         this.ecs.addSystem(new GraphSystem(this.events, this.ecs, this))
@@ -44,7 +43,7 @@ export class GraphScene extends Phaser.Scene {
         // Monitor for events
 
         // Enable UI Scene
-        // this.scene.launch(GameUIScene.Name)
+        this.scene.launch(GameUIScene.Name)
     }
 
     update(): void {
