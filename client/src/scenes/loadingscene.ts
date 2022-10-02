@@ -37,6 +37,7 @@ export class LoadingScene extends Scene {
         this.load.image('ring', 'sprites/items/ring.png')
 
         // Load enemies
+        this.load.image('skeleton', 'sprites/enemies/skeleton.png')
     }
 
     create(): void {

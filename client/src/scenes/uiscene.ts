@@ -7,6 +7,7 @@ import { Registry } from '../engine/registry'
 
 // Floating text (e.g. damage numbers)
 import { FloatingTextUI } from '../ui/floatingTextUI'
+import { Button } from '../ui/button'
 
 
 export class GameUIScene extends Phaser.Scene {
@@ -28,6 +29,8 @@ export class GameUIScene extends Phaser.Scene {
         'amulet',
         'ring'
     ]
+
+    // private actionButtons: Array<GameObjects> = []
 
     private floatingTextUI: FloatingTextUI
 
@@ -166,18 +169,30 @@ export class GameUIScene extends Phaser.Scene {
         this.roomPanel.add(roomHeadline)
 
 
-        // Room Text (gen from GPT3)
-         // Draw Room text (TBD)
+        // Draw Room Text (gen from GPT3)
         const roomContent = `You find yourself wading through mud. It's dark, musty....\n\nThen you come across a chest!`
         const roomText = this.add.text(0, 0, roomContent, {
             align: 'left',
             fontSize: '14px',
             color: COLORS.primary.toString()
         }).setOrigin(0.5).setPadding(8, 0, 0, 0)
+
         // Wrap text so that it fits within our container nicely
         roomText.setStyle({ wordWrap: { width: roomBg.width } })
         this.roomPanel.add(roomText)
 
-        // Room Buttons (Actions)
+        // Room Buttons (Actions)]
+        // TODO - Dynamically populate action buttons based on adjacent graph nodes
+
+        const buttonWidth = this.cameras.main.width * 0.1
+        const buttonHeight = this.cameras.main.height * 0.03
+        
+        const buttonPadding = this.cameras.main.height * 0.03
+        const actionButton1 = new Button(this, 'action1', -this.cameras.main.width*0.03, this.cameras.main.height*0.1, buttonWidth, buttonHeight, 'Q - Open It')
+        const actionButton2 = new Button(this, 'action2', -this.cameras.main.width*0.03, actionButton1.y + (actionButton1.height / 2) + buttonPadding, buttonWidth, buttonHeight, 'W - Move to room 1')
+        const actionButton3 = new Button(this, 'action3', -this.cameras.main.width*0.03, actionButton2.y + (actionButton2.height / 2) + buttonPadding, buttonWidth, buttonHeight, 'Z - Use escape rope')
+        this.roomPanel.add([actionButton1, actionButton2, actionButton3])
+        
+        
     }
 }

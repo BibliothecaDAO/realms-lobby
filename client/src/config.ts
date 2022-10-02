@@ -62,7 +62,7 @@ export const gameConfig: Types.Core.GameConfig = {
     },
     render: {
         // antialiasGL: false,
-        // antialias: false,
+        antialias: true,
         pixelArt: true,
         roundPixels:true
     },
