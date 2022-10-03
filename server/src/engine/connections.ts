@@ -2,7 +2,6 @@
 
 // Engine
 import EventEmitter from 'events'
-import { World } from './world'
 
 // Libraries
 import { randomUUID } from 'crypto'
@@ -16,11 +15,9 @@ export class Connections {
     // Keep track of connection info
     public io: Socket
     private events: EventEmitter
-    private world: World
 
-    constructor(events: EventEmitter, world: World) {
+    constructor(events: EventEmitter) {
         this.events = events
-        this.world = world // Needed to lookup data from time to time
 
         this.users = {} // Allow player/socket lookups by uid
         this.sockets = {} // Allow uid lookups by socket
@@ -57,30 +54,6 @@ export class Connections {
             // Handle client requesting a snapshot of state
             socket.on('requestSnapshot', () => {
                 this.events.emit('requestSnapshot', playerId)
-            })
-
-            // Player set a new destination
-            socket.on('setDestination', (x, y) => {
-                // Make sure inputs are not undefined
-                if (x && y) {
-                    this.events.emit('setDestination', playerId, x, y)
-                }
-            })
-
-            // Handle entity attempting to chop down a tree
-            socket.on('harvestAttempt', (resource, harvester) => {
-                // Make sure input is valid
-                if (resource && harvester) {
-                    this.events.emit('harvestAttempt', resource, harvester)
-                }
-            })
-
-            // Handle entities trading an item
-            socket.on('transferItemAttempt', (sender: string, recipient: string, item: string) => {
-                // Make sure input is valid
-                if (sender && recipient && item) {
-                    this.events.emit('transferItemAttempt', sender, recipient, item)
-                }
             })
 
             // Clear the character array when our player disconnects
@@ -124,15 +97,6 @@ export class Connections {
             // Send a snapshot of state to the client so they load initial entities
             // TODO: use broadcast, not emit (otherwise everyone gets it)
             socket.emit('snapshot', playerId, state)
-        })
-
-        this.events.on('harvestSuccess', (resource, character) => {
-            const socket = this.getSocketByUid(character)
-            socket.emit('harvestSuccess', resource, character)
-        })
-
-        this.events.on('transferItemSuccess', (sender: string, recipient: string, item: string) => {
-            this.io.emit('transferItem', sender, recipient, item)
         })
     }
 

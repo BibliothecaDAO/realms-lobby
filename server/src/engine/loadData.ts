@@ -54,10 +54,13 @@ export class LoadData {
     }
 
     // Load zone files from disk and spawn templates (with any modifications)
+    // TODO Figure out how to load a graph from disk
     loadZone = async (zone: string) => {
         const zoneFilename = `${this.dataDirectory}/${zone}.ts`
         const zoneFile = await fs.readFile(zoneFilename, 'utf8')
         const zoneData = JSON5.parse(zoneFile)
+
+        let hasGraph = false
 
         // Run through each enitity, grab its template, and override any custom variables
         for (let i = 0; i < zoneData.entities.length; i++) {
@@ -73,17 +76,17 @@ export class LoadData {
             } else {
                 components = zoneData.entities[i].components
 
-                // HACK - Load zone data from disk
-                for (let i = 0; i < components.length; i++) {
-                    if (components[i].type === 'zone') {
-                        if (components[i].tileMap) {
-                            const tileMap = await fs.readFile(`${this.dataDirectory}/tilemaps/${components[i].tileMap}`, 'utf8')
-                            components[i].tileMap = JSON.parse(tileMap)
-                        }else {
-                            throw new Error('No tilemap found for zone')
-                        }
-                    } 
+                // Make sure we have a graph defined (otherwise zone will fail)
+                if (components[i].type === 'zone') {
+                    if (components[i].graph) {
+                        hasGraph = true                        
+                    }
+
                 }
+            }
+
+            if (!hasGraph) {
+                throw new Error(`No graph found for zone: ${zone}`)
             }
 
             // Spawn the entity

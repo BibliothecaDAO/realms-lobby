@@ -17,12 +17,6 @@ declare global {
         // Entity updates
         move: (uid: string, x: number, y: number) => void
 
-        // Verify that a player successfully hit a tree to chop it down
-        harvestSuccess: (resource: string, harvester: string) => void
-
-        // An item is transferred between two entities
-        transferItem: (sender: string, recipient: string, item: string) => void
-
         // noArg: () => void
         // basicEmit: (a: number, b: string, c: Buffer) => void
         // withAck: (d: string, callback: (e: number) => void) => void
@@ -34,9 +28,6 @@ declare global {
 
         // Handle player input
         setDestination: (x: number, y: number) => void
-
-        // Player wants to chop down a tree / rock / etc
-        harvestAttempt: (resource: string, harvester: string) => void
     }
 
     interface InterServerEvents {

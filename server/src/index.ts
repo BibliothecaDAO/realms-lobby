@@ -4,15 +4,10 @@ import EventEmitter from 'events'
 import { Registry } from './engine/registry'
 
 import { LoadData } from './engine/loadData'
-import { js as Finder } from 'easystarjs' // https://github.com/prettymuchbryce/easystarjs
 
 // Systems
-import { DestinationSystem } from './systems/destinationSystem'
-import { MapSystem } from './systems/mapSystem'
 import { MoveSystem } from './systems/moveSystem'
 import { SpawnSystem } from './systems/spawnSystem'
-import { RespawnTimerSystem } from './systems/respawnTimerSystem'
-import { InventorySystem } from './systems/inventorySystem'
 import { GraphSystem } from './systems/graphSystem/graphSystem'
 
 export default class Server {
@@ -33,20 +28,14 @@ export default class Server {
         // Setup world and initial entities
         this.world = new World(this.ecs, this.events, loadData)
 
-        // HACK - initialize pathfinding library so we can share it between map/move systems
-        const finder = new Finder()
-
         // Setup systems
-        this.ecs.addSystem(new MapSystem(this.events, this.ecs, finder))
-        this.ecs.addSystem(new MoveSystem(this.events, this.ecs, finder))
+        this.ecs.addSystem(new MoveSystem(this.events, this.ecs))
         this.ecs.addSystem(new SpawnSystem(this.events, this.ecs))
-        this.ecs.addSystem(new RespawnTimerSystem(this.events, this.ecs))
-        this.ecs.addSystem(new DestinationSystem(this.events, this.ecs))
-        this.ecs.addSystem(new InventorySystem(this.events, this.ecs))
         this.ecs.addSystem(new GraphSystem(this.events, this.ecs))
 
         // Start accepting connections from player
-        this.connections = new Connections(this.events, this.world)
+        // TODO - Consider splitting this out into its own server (proxy connections between client/game server)
+        this.connections = new Connections(this.events)
     }
 }
 

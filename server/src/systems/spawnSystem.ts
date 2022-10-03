@@ -4,9 +4,6 @@ import { IComponent, ISystem } from '../engine/registry'
 import EventEmitter from 'events'
 import { Registry } from '../engine/registry'
 
-import { promises as fs } from 'fs'
-import { join, resolve } from 'path'
-
 // Deep Cloning objects
 import * as _ from 'lodash'
 
@@ -16,9 +13,7 @@ import { Inventory } from '../components/inventory'
 import { Sprite } from '../components/sprite'
 import { Transform } from '../components/transform'
 import { Velocity } from '../components/velocity'
-import { Destination } from '../components/destination'
 import { Zone } from '../components/zone'
-import { Respawn } from '../components/respawn'
 
 interface gameObject {
     [key: string]: IComponent
@@ -60,14 +55,8 @@ export class SpawnSystem implements ISystem {
                 case 'collider':
                     component = new Collider()
                     break
-                case 'destination':
-                    component = new Destination(components[i].x, components[i].y)
-                    break
                  case 'inventory':
                     component = new Inventory(components[i].items)
-                    break
-                case 'respawn':
-                    component = new Respawn(components[i].template, components[i].spawnTime)
                     break
                 case 'sprite':
                     component = new Sprite(components[i].name)
@@ -79,7 +68,7 @@ export class SpawnSystem implements ISystem {
                     component = new Velocity(components[i].delay, components[i].dirX, components[i].dirY)
                     break
                 case 'zone':                    
-                    component = new Zone(components[i].width, components[i].height, components[i].tileMap)
+                    component = new Zone(components[i].width, components[i].height, components[i].graph)
                     break
                 default:
                     throw new Error(`component '${components[i].type}' not found`)
@@ -105,6 +94,7 @@ export class SpawnSystem implements ISystem {
         // TODO - Reeconcile this function with our 'getState' which dumps the state to clients
         const componentString = JSON.stringify(componentsToSend)
         this.events.emit('spawnSuccess', entity, componentString)
+        console.log(this.ecs.getState())
     }
 
     // // respawn happens after a respawnTimer counts down. Entity should be 'restarted' with its original state
@@ -129,25 +119,5 @@ export class SpawnSystem implements ISystem {
     // Deep Copy a object (e.g. if we want to pluck a template)
     clone = (value) => {
         return _.cloneDeep(value, true)
-    }
-
-    // Convert a Tiled json map to a 2D array
-    convertTiledMap = (width: number, height: number, tiles) => {
-        const map = []
-
-        if (width > 0 && height > 0) {
-            for (let y = 0; y < height; y++) {
-                const row = []
-                
-                for (let x = 0; x < width; x++) {
-                    row.push(tiles[y * width + x])
-                }
-                map.push(row)
-            }
-        } else {
-            throw new Error('width or height is not set properly')
-        }
-        
-        return map
     }
 }

@@ -52,7 +52,7 @@ export class SpawnSystem implements ISystem {
                     component = new Inventory(components[index].items)
                     break
                 case 'zone':
-                    component = new Zone(components[index].width, components[index].height, components[index].tileMap)
+                    component = new Zone(components[index].width, components[index].height, components[index].graph)
                     break
                 case 'player':
                     component = new Player()
