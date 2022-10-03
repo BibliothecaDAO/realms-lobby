@@ -8,6 +8,8 @@ import { COLORS } from '../../config'
 
 // Graph data structures
 import { Edge } from './edge'
+import { stringify } from 'querystring'
+import { Zone } from '../../components/zone'
 
 export class GraphSystem implements ISystem {
     private events: Phaser.Events.EventEmitter
@@ -34,41 +36,32 @@ export class GraphSystem implements ISystem {
         this.ecs = ecs
         this.scene = scene
 
-         // Stub out initial graph
-        const edges = [
-            [0, 1, 1],
-            [ 1, 2, 1 ],
-            [ 2, 3, 1 ],
-            [ 3, 4, 1 ],
-            [1, 4, 1]
-            // [4, 0, 1]    // Finish the graph (loop to exit)
-        ]
-
-        // HACK - parse graph data
-        this.setupGraph(edges)
-       
+        // Event Handlers
+        // We received a graph from the server, parse it and calculate ndoes
+        this.events.on('spawnZone', this.setupGraph)
     }
 
-
     update = () => {
-        // Update current node selector's position whne we change nodes
-        // TODO: Should this be an event?
-        if (this.currentNodeSelector.x != this.nodeTexts[this.currentNode].x || this.currentNodeSelector.y != this.nodeTexts[this.currentNode].y) {
+        
+        // // Update current node selector's position whne we change nodes
+        // // TODO: Should this be an event?
+        // if (this.currentNodeSelector.x != this.nodeTexts[this.currentNode].x || this.currentNodeSelector.y != this.nodeTexts[this.currentNode].y) {
 
-            this.currentNodeSelector.x = this.nodeTexts[this.currentNode].x
-        }
+        //     this.currentNodeSelector.x = this.nodeTexts[this.currentNode].x
+        // }
 
-        if (this.currentNodeSelector.y != this.nodeTexts[this.currentNode].y) {
-            this.currentNodeSelector.y = this.nodeTexts[this.currentNode].y
-        }
+        // if (this.currentNodeSelector.y != this.nodeTexts[this.currentNode].y) {
+        //     this.currentNodeSelector.y = this.nodeTexts[this.currentNode].y
+        // }
 
     }
 
     // Instantiates edges and prepares to traverse them
-    setupGraph = (edges): void => {
-        for (let i = 0; i < edges.length; i++) {
+    setupGraph = (entity: string, component: Zone): void => {
+        console.log(component.graph)
+        for (let i = 0; i < component.graph.length; i++) {
             // Add edge to graph
-            this.edges.push(new Edge(edges[i][0], edges[i][1], edges[i][2]))
+            this.edges.push(new Edge(component.graph[i][0], component.graph[i][1], component.graph[i][2]))
         }
 
         // Create adjacency list that we can traverse

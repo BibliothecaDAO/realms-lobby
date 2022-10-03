@@ -6,6 +6,8 @@ import { GameUIScene } from './uiscene'
 
 // Initialize systems
 import { GraphSystem } from '../systems/graphSystem/graphSystem'
+import { SpawnSystem } from '../systems/spawnSystem'
+import { World } from '../engine/world'
 
 // Components
 
@@ -17,6 +19,9 @@ export class GraphScene extends Phaser.Scene {
 
     // ECS system to initialize entities and systems
     public ecs: Registry
+
+    // World to store our connection (so it persists between scenes)
+    public world: World
 
     constructor() {
         super(GraphScene.Name)
@@ -30,12 +35,16 @@ export class GraphScene extends Phaser.Scene {
         // initialize engine
         this.ecs = data.ecs
         this.events = data.events
+        this.world = data.world
+
+        // Setup 
 
         // Initialize subscenes
         this.scene.add(GameUIScene.Name, GameUIScene, false, { events: this.events, ecs: this.ecs })
 
         // Initialize systems
         this.ecs.addSystem(new GraphSystem(this.events, this.ecs, this))
+        this.ecs.addSystem(new SpawnSystem(this.events, this.ecs, this))
 
         // Running this up front because the camera can scroll before setPollAlways has been called (Resulting in improper values)
         this.input.setPollAlways() // The cursor should poll for new positions while the camera is moving
@@ -44,6 +53,10 @@ export class GraphScene extends Phaser.Scene {
 
         // Enable UI Scene
         this.scene.launch(GameUIScene.Name)
+
+        // We've loaded all our systems and event handlers so request data from server
+        this.events.emit('requestSnapshot')
+        
     }
 
     update(): void {

@@ -21,8 +21,10 @@ export class World {
         // Setup initial state
         // TODO - Migrate to SpawnSystem so we can dynamically load all objects
         this.events.on('snapshot', (playerId: string, state) => {
+            console.log(state)
             // Populate each entity
             for (const entity of Object.keys(state)) {
+                console.log(state[entity])
                 this.events.emit('spawn', entity, state[entity])
             }
 

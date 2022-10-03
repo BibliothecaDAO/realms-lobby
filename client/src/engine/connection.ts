@@ -18,7 +18,6 @@ export class Connection {
             // TODO - Figure out why this isn't firing
             console.log(`💻 connected to server ${process.env.WS_URL}`)
             // Any logic to make sure we stay connected goes here
-            this.socket.emit('requestSnapshot')
         })
 
         // DEBUG - Enable this flag in config.ts to see all events in console.log
@@ -31,8 +30,7 @@ export class Connection {
         // Server -> Client Events
         // Load initial game state onto client (so we can only update deltas afterwards)
         this.socket.on('snapshot', (playerId, state) => {
-            // TODO - Make sure graph is propogating, shove it into ECS, Render it, fire events if it changes
-            console.log(state)
+            console.log('receiving snapshot')
             this.events.emit('snapshot', playerId, JSON.parse(state))
         })
 

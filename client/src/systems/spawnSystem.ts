@@ -25,6 +25,7 @@ export class SpawnSystem implements ISystem {
         this.scene = scene
 
         this.events.on('spawn', this.handleSpawn)
+        console.log('spawn event initialized')
         this.events.on('despawn', this.handleDespawn)
     }
 
@@ -34,6 +35,7 @@ export class SpawnSystem implements ISystem {
 
     // Event Handlers
     handleSpawn = (entity: string, components) => {
+        console.log('wat')
         // If no entity is passed in (null), ecs registry will generate a new one
         entity = this.ecs.createEntity(entity)
 
@@ -76,6 +78,7 @@ export class SpawnSystem implements ISystem {
             // HACK - special case zone spawn so the client can load pathfinding and tilemaps
             // Otherwise the zone component has to query every time anything spawns
             if (component.type == 'zone') {
+                console.log('got here')
                 this.events.emit('spawnZone', entity, component)
             }
         }
