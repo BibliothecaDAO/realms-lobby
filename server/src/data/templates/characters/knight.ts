@@ -3,7 +3,7 @@
 
 {
     components: [
-        { type: 'transform', x: 20, y: 12 },
+        { type: 'transform', node: 0 }, // Players always spawn at start of dungeon
         {
             type: 'sprite',
             name: 'knight'

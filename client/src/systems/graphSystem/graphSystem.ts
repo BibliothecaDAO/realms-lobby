@@ -8,8 +8,8 @@ import { COLORS } from '../../config'
 
 // Graph data structures
 import { Edge } from './edge'
-import { stringify } from 'querystring'
 import { Zone } from '../../components/zone'
+import { Graph } from '../../components/graph'
 
 export class GraphSystem implements ISystem {
     private events: Phaser.Events.EventEmitter
@@ -18,9 +18,6 @@ export class GraphSystem implements ISystem {
     public type = 'graphSystem'
 
     // Graph data
-    public edges: Edge[] = []
-    public adjacency: Map<number, number[]> = new Map()
-    public reverseAdjacency: Map<number, number[]> = new Map()
     public nodes: Array<number> = []
     
     // Graph state
@@ -58,56 +55,68 @@ export class GraphSystem implements ISystem {
 
     // Instantiates edges and prepares to traverse them
     setupGraph = (entity: string, component: Zone): void => {
-        console.log(component.graph)
+        const graph = new Graph()
+
+        const edges: Edge[] = []
+
         for (let i = 0; i < component.graph.length; i++) {
             // Add edge to graph
-            this.edges.push(new Edge(component.graph[i][0], component.graph[i][1], component.graph[i][2]))
+            edges.push(new Edge(component.graph[i][0], component.graph[i][1], component.graph[i][2]))
         }
 
+        graph.edges = edges
+        this.ecs.addComponent(entity, graph)
+
         // Create adjacency list that we can traverse
-        this.createVertices()
+        this.createVertices(graph)
+
 
         // Identify nodes via breath first search
-        this.breadthFirst()
+        this.breadthFirst(graph)
 
         // Draw Graph
 
         // create a container which will adjust the position of all child gameobjects inside it
         this.container = this.scene.add.container(this.scene.cameras.main.centerX, this.scene.cameras.main.centerY)
 
-        this.drawNodes()
+        this.drawNodes(graph)
         this.drawSelectedNode()
-        this.drawVertices()
+        this.drawVertices(graph)
         
+        console.log(graph)
     }
 
-    createVertices = (): void => {
+    createVertices = (graph: Graph): void => {
         // Walk through each node of the 'dungeon' and define connections between edges
         // Create an adjacency list (e.g. node 0 -> 1, 2)
         // Example: { 0 => [ 1 ], 1 => [ 2, 4 ], 2 => [ 3 ], 3 => [ 4 ] }
         // This data structure is easier to traverse than just a list of edges
 
-        for (let i = 0; i < this.edges.length; i++) {
+        console.log(graph.edges.length)
+        for (let i = 0; i < graph.edges.length; i++) {
+            console.log('wat')
+            // todo - figure out why this is only firing 1x (instead of 5x)
             // Assign to local variables so it's easier to read
-            const src = this.edges[i].src_identifier
-            const dst = this.edges[i].dst_identifier
+            const src = graph[i].src_identifier
+            const dst = graph[i].dst_identifier
 
             // Check if node is already in adjacency list
-            if(!this.adjacency.get(src)) {
-                this.adjacency.set(src, [])
+            if(!graph.adjacency.get(src)) {
+                graph.adjacency.set(src, [])
             }
             // Add destination to adjacency list
-            this.adjacency.get(src).push(dst)
+            graph.adjacency.get(src).push(dst)
 
-            if (!this.reverseAdjacency.get(dst)) {
-                this.reverseAdjacency.set(dst, [])
+            if (!graph.reverseAdjacency.get(dst)) {
+                graph.reverseAdjacency.set(dst, [])
             }
             // Add source to reverse adjacency list
-            this.reverseAdjacency.get(dst).push(src)
+            graph.reverseAdjacency.get(dst).push(src)
         }
+        
     }
 
-    drawNodes = (): void => {
+    drawNodes = (graph: Graph): void => {
         // How far from the edge of the canvas should we draw each node?
         const xOffset = 100
         const yOffset = 100
@@ -118,10 +127,10 @@ export class GraphSystem implements ISystem {
 
         // Start walking through each node
         for (let i = 0; i < this.nodes.length; i++) {
-            const x = xOffset * (this.getDepth(this.nodes[i]))
+            const x = xOffset * (this.getDepth(this.nodes[i], graph))
             
             // Calculate how many edges each node has - more edges means it gets drawn further down the screen
-            let numEdges = this.reverseAdjacency.get(this.nodes[i]) ? this.reverseAdjacency.get(this.nodes[i]).length : 1
+            let numEdges = graph.reverseAdjacency.get(this.nodes[i]) ? graph.reverseAdjacency.get(this.nodes[i]).length : 1
             let y = yOffset * (numEdges-1)  // we subtract 1 so our graph is centered vertically
             
             // Keep track of what position our node is in (so we can reference it later via array)
@@ -156,12 +165,12 @@ export class GraphSystem implements ISystem {
             });
     }
 
-     drawVertices = (): void => {
+     drawVertices = (graph: Graph): void => {
         // Loop through each edge (vertices)
-         for (let i = 0; i < this.edges.length; i++) {
+         for (let i = 0; i < graph.edges.length; i++) {
             // Get the source and destination nodes for this edge
-            const src = this.edges[i].src_identifier
-            const dst = this.edges[i].dst_identifier
+            const src = graph.edges[i].src_identifier
+            const dst = graph.edges[i].dst_identifier
 
             // get the text object so we can determine its location
             const srcNode = this.nodeTexts[src]
@@ -178,7 +187,7 @@ export class GraphSystem implements ISystem {
 
     // Utility functions
     // Returns the depth of a given node (via BFS)
-    getDepth = (node) => {
+    getDepth = (node, graph) => {
         const start = 0 // We always start at position zero
         let count = 0   // Keep track of the depth we've traversed
 
@@ -191,7 +200,7 @@ export class GraphSystem implements ISystem {
                 break;
             }
 
-            const neighbors = this.adjacency.get(_node)
+            const neighbors = graph.adjacency.get(_node)
             if (neighbors) {
                 for (let i = 0; i < neighbors.length; i++) {
                     if (!visited.has(neighbors[i])) {
@@ -210,7 +219,7 @@ export class GraphSystem implements ISystem {
         return(count)
     }
 
-    breadthFirst = () => {
+    breadthFirst = (graph: Graph) => {
         // Use BFS (depth-first) search
         const start = 0 // We always start at position zero
 
@@ -228,8 +237,8 @@ export class GraphSystem implements ISystem {
             this.nodes.push(currentVertex)
 
             // Make sure node has a next step
-            if (this.adjacency.get(currentVertex)) {
-                this.adjacency.get(currentVertex).forEach(neighbor => {
+            if (graph.adjacency.get(currentVertex)) {
+                graph.adjacency.get(currentVertex).forEach(neighbor => {
                     if (!visited[neighbor]) {
                         visited[neighbor] = true
                         queue.push(neighbor)
@@ -239,7 +248,7 @@ export class GraphSystem implements ISystem {
         } 
     }
 
-     depthFirst = () => {
+     depthFirst = (graph: Graph) => {
         // Use DFS (depth-first) search so we can add a spacer after we hit a dead end
          const start = 0 // We always start at position zero
          
@@ -257,8 +266,8 @@ export class GraphSystem implements ISystem {
             this.nodes.push(currentVertex)
 
             // Make sure node has a next step
-            if (this.adjacency.get(currentVertex)) {
-                this.adjacency.get(currentVertex).forEach(neighbor => {
+            if (graph.adjacency.get(currentVertex)) {
+                graph.adjacency.get(currentVertex).forEach(neighbor => {
                     if (!visited[neighbor]) {
                         visited[neighbor] = true
                         stack.push(neighbor)
@@ -268,8 +277,8 @@ export class GraphSystem implements ISystem {
         } 
     }
 
-    debug = () => {
-        console.log(this.edges)
+    debug = (graph: Graph) => {
+        console.log(graph.edges)
     }
 }
 

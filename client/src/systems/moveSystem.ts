@@ -2,9 +2,11 @@
 // Authoritative moves come down from the server via events (handled by the 'connection' class)
 // Client can send moveRequests to the server which will then send back a validMove event.
 
-import { Sprite } from '../components/sprite'
-import { Transform } from '../components/transform'
 import { ISystem, Registry } from '../engine/registry'
+
+// Components
+import { Transform } from '../components/transform'
+import { Zone } from '../components/zone'
 
 export class MoveSystem implements ISystem {
     private events: Phaser.Events.EventEmitter
@@ -27,12 +29,22 @@ export class MoveSystem implements ISystem {
     // Receive a valid move from the server
     validMove = (entity, x, y) => {
         const transform = this.ecs.getComponent(entity, 'transform') as Transform
-        transform.x = x
-        transform.y = y
 
-        const sprite = this.ecs.getComponent(entity, 'sprite') as Sprite
-        sprite.sprite.x = x
-        sprite.sprite.y = y
+        const zone = this.ecs.getComponent(entity, 'zone') as Zone
+        const graph = zone.graph
+
+        // TODO - Implement move code (server -> client)
+        // 1. Figure out current position
+        // 2. breadth-first search to calcluate potential moves
+        // 3. Calculate if this is a valid move (is it within breadth first bounds of 1 step?)
+        // 4. Move to that node
+        
+        // transform.x = x
+        // transform.y = y
+
+        // const sprite = this.ecs.getComponent(entity, 'sprite') as Sprite
+        // sprite.sprite.x = x
+        // sprite.sprite.y = y
     }
 
     // Utility functions

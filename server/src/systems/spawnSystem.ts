@@ -62,7 +62,7 @@ export class SpawnSystem implements ISystem {
                     component = new Sprite(components[i].name)
                     break
                 case 'transform':
-                    component = new Transform(components[i].x, components[i].y)
+                    component = new Transform(components[i].node)
                     break
                 case 'velocity':
                     component = new Velocity(components[i].delay, components[i].dirX, components[i].dirY)
@@ -94,7 +94,6 @@ export class SpawnSystem implements ISystem {
         // TODO - Reeconcile this function with our 'getState' which dumps the state to clients
         const componentString = JSON.stringify(componentsToSend)
         this.events.emit('spawnSuccess', entity, componentString)
-        console.log(this.ecs.getState())
     }
 
     // // respawn happens after a respawnTimer counts down. Entity should be 'restarted' with its original state

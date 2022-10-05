@@ -7,7 +7,6 @@ import { ISystem, Registry } from '../engine/registry'
 
 // Components
 import { Transform } from '../components/transform'
-import { Velocity } from '../components/velocity'
 
 export class MoveSystem implements ISystem {
     private events: EventEmitter
@@ -24,24 +23,22 @@ export class MoveSystem implements ISystem {
     }
 
     // Utility functions
-    // Process a move for a player after pathfinding toward the destination
-    moveEntity = (entity: string, transform: Transform, path) => {
-        // TODO - Make sure we don't move off the map
-        const prevX = transform.x
-        const prevY = transform.y
+    // Process a move for a player to an adjacent node
+    moveEntity = (entity: string, transform: Transform) => {
+        // Keep track of current location to calculate if this is a valid move
+        const prevTransform = this.ecs.getComponent(entity, 'transform') as Transform    
+        const prevNode = prevTransform.node
 
-        if (path) {
-            // Move to the first step of the path
-            transform.x = path[1].x
-            transform.y = path[1].y
-
-            // Let the pathfinding system know where we're moving from and where we're moving to
-            this.events.emit('validMove', entity, transform.x, transform.y)
-            this.events.emit('updateColliders', entity, prevX, prevY, transform.x, transform.y)
+        if (prevNode) {
+            // Calculate valid move
+        } else {
+            throw new Error(`cannot find curent node for entity ${entity}`)
         }
 
-        // We moved so reset our move timer (ticksRemaining)
-        const velocity = this.ecs.getComponent(entity, 'velocity') as Velocity
-        velocity.ticksRemaining = velocity.delay
+        // Make sure this is a valid move
+        
+            // Let the pathfinding system know where we're moving from and where we're moving to
+            // this.events.emit('validMove', entity, transform.x, transform.y)
+            // this.events.emit('updateColliders', entity, prevX, prevY, transform.x, transform.y)
     }
 }

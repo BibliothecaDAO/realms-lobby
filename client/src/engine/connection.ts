@@ -30,7 +30,6 @@ export class Connection {
         // Server -> Client Events
         // Load initial game state onto client (so we can only update deltas afterwards)
         this.socket.on('snapshot', (playerId, state) => {
-            console.log('receiving snapshot')
             this.events.emit('snapshot', playerId, JSON.parse(state))
         })
 
