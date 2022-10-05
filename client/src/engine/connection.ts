@@ -15,7 +15,6 @@ export class Connection {
         this.socket = io(process.env.WS_URL)
 
         this.socket.on('connect', () => {
-            // TODO - Figure out why this isn't firing
             console.log(`💻 connected to server ${process.env.WS_URL}`)
             // Any logic to make sure we stay connected goes here
         })

@@ -1,13 +1,15 @@
 // graphscene.ts - Displays a graph that adventurers can explore
 
 import { Registry } from '../engine/registry'
+import { World } from '../engine/world'
 
+// Initialize sub-scenes
 import { GameUIScene } from './uiscene'
 
 // Initialize systems
 import { GraphSystem } from '../systems/graphSystem/graphSystem'
 import { SpawnSystem } from '../systems/spawnSystem'
-import { World } from '../engine/world'
+import { RenderNodeSystem } from '../systems/graphSystem/renderNode'
 
 // Components
 
@@ -42,9 +44,13 @@ export class GraphScene extends Phaser.Scene {
         // Initialize subscenes
         this.scene.add(GameUIScene.Name, GameUIScene, false, { events: this.events, ecs: this.ecs })
 
-        // Initialize systems
+        // Initialize Game Logic systems
         this.ecs.addSystem(new GraphSystem(this.events, this.ecs, this))
         this.ecs.addSystem(new SpawnSystem(this.events, this.ecs, this))
+
+        // Initialize Game Rendering systems
+        this.ecs.addSystem(new RenderNodeSystem(this.events, this.ecs, this))
+        // this.ecs.addSystem(new RenderNodeSystem(this.events, this.ecs, this))
 
         // Running this up front because the camera can scroll before setPollAlways has been called (Resulting in improper values)
         this.input.setPollAlways() // The cursor should poll for new positions while the camera is moving
