@@ -5,6 +5,8 @@
         "path": "./server/"
     }],
     "compilerOptions": {
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "strict": true,
+        "strictNullChecks": true
     }
 }

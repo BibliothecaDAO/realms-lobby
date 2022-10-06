@@ -10,6 +10,7 @@ import { GameUIScene } from './uiscene'
 import { GraphSystem } from '../systems/graphSystem/graphSystem'
 import { SpawnSystem } from '../systems/spawnSystem'
 import { RenderNodeSystem } from '../systems/graphSystem/renderNode'
+import { RenderEdgeSystem } from '../systems/graphSystem/renderEdge'
 
 // Components
 
@@ -47,9 +48,12 @@ export class GraphScene extends Phaser.Scene {
         // Initialize Game Logic systems
         this.ecs.addSystem(new GraphSystem(this.events, this.ecs, this))
         this.ecs.addSystem(new SpawnSystem(this.events, this.ecs, this))
-
+   
         // Initialize Game Rendering systems
         this.ecs.addSystem(new RenderNodeSystem(this.events, this.ecs, this))
+        this.ecs.addSystem(new RenderEdgeSystem(this.events, this.ecs, this))
+
+
         // this.ecs.addSystem(new RenderNodeSystem(this.events, this.ecs, this))
 
         // Running this up front because the camera can scroll before setPollAlways has been called (Resulting in improper values)
@@ -62,7 +66,6 @@ export class GraphScene extends Phaser.Scene {
 
         // We've loaded all our systems and event handlers so request data from server
         this.events.emit('requestSnapshot')
-        
     }
 
     update(): void {

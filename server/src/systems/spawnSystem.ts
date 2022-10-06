@@ -84,6 +84,7 @@ export class SpawnSystem implements ISystem {
             // Otherwise the zone component has to query every time anything spawns
             if (component.type == 'zone') {
                 this.events.emit('spawnZone', entity, component)
+                
             }
         }
 

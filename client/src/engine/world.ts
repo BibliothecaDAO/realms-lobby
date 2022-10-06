@@ -18,6 +18,8 @@ export class World {
         // We should only have one world map instance (this might change as we introduce multiple zones)
         this.connection = new Connection(this.events)
 
+        
+
         // Setup initial state
         // TODO - Migrate to SpawnSystem so we can dynamically load all objects
         this.events.on('snapshot', (playerId: string, state) => {

@@ -12,7 +12,8 @@ export class Connection {
         this.events = events
 
         // Connect to the server
-        this.socket = io(process.env.WS_URL)
+        // HACK - server was reconnecting repeatedly so we pass in reconnection: false
+        this.socket = io(process.env.WS_URL, { reconnection: false })
 
         this.socket.on('connect', () => {
             console.log(`💻 connected to server ${process.env.WS_URL}`)

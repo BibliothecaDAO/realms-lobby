@@ -1,56 +1,52 @@
-/*// Node - a single node in the graph (which is connected by edges)
+// renderEdge - Render the edges that connect nodes in the graph.
 // Nodes have a unique identifier and can be clicked on to move to the next node
 
 import { GameObjects } from 'phaser'
 import { ISystem, Registry } from '../../engine/registry'
-import { COLORS } from '../../config'
-import { Edge} from './edge'
+
+import { Node } from './node'
+
+// Components
 
 export class RenderEdgeSystem implements ISystem{
-    private ecs: Registry
-    private events: Phaser.Events.EventEmitter
-    private scene: Phaser.Scene
+	private ecs: Registry
+	private events: Phaser.Events.EventEmitter
+	private scene: Phaser.Scene
 
-    private src: number
-    private dst: number
+	private nodeCircles: Map<number, GameObjects.Arc> = new Map()
+	private selectedNode: number
+	private selectedCircle: GameObjects.Arc
 
-    private text: GameObjects.Text
+	// 'global' values from graph system
+	private graphEntity: string
+	private container: GameObjects.Container
 
-    constructor(events: Phaser.Events.EventEmitter, ecs: Registry, scene: Phaser.Scene) {
-        this.events = events
-        this.ecs = ecs
-        this.scene = scene
+	constructor(events: Phaser.Events.EventEmitter, ecs: Registry, scene: Phaser.Scene) {
+		this.events = events
+		this.ecs = ecs
+		this.scene = scene
 
-        // Event Handlers
-        // We received a graph from the server, parse it and calculate ndoes
-        this.events.on('createEdge', this.drawEdge)
-    }
+		// Event Handlers
+		// Save graph entity info so we can reference it later
+		this.events.on('spawnZone', this.setupGraph)
+		// We received a graph from the server, parse it and calculate ndoes
+		this.events.on('createEdge', this.drawEdge)
+	}
     
-    update = () => {
-    }
+	update = () => {
+		// 
+	}
 
-    drawEdge = (srcId: number, dstId: number, container: Phaser.GameObjects.Container) => {
-        const srcEdge = this.ecs.getComponent(srcId, 'edge') as Edge
-        // Get the source and destination nodes for this edge
-        // const src = this.ecs.getComponent(srcId, 'node') as Node
-            // const src = graph.edges[i].src_identifier
-            // const dst = graph.edges[i].dst_identifier
+	// Store the entity for our graph so we can pull it down when needed
+	setupGraph = (entity: string) => {
+		this.graphEntity = entity
+	}
 
-            // TODO separate logic (node #'s) from x,y, etc
-             
-            // get the text object so we can determine its location
-            const srcNode = this.nodeTexts[src]
-            const dstNode = this.nodeTexts[dst]
-
-            // Draw our line
-            const graphics = this.scene.add.graphics()
-            graphics.lineStyle(2, 0xFFFFFF)
-            const tmp = graphics.lineBetween(srcNode.x, srcNode.y, dstNode.x, dstNode.y)
-            this.container.add(tmp).sendToBack(tmp) // Containers ignore setDepth so instead we send this object to the back of the queue
-    }
-
-    selectNode = (index: number) => {
-        // TODO - implement logic to draw selected node graphics (or deselect if another node is selected)
-        // if index = us,
-    }
-}*/
+	drawEdge = (src: Node, dst: Node, container: Phaser.GameObjects.Container) => {
+		// Draw our line
+		const graphics = this.scene.add.graphics()
+		graphics.lineStyle(2, 0xFFFFFF)
+		const tmp = graphics.lineBetween(src.x, src.y, dst.x, dst.y)
+		container.add(tmp).sendToBack(tmp) // Containers ignore setDepth so instead we send this object to the back of the queue
+	}
+}
