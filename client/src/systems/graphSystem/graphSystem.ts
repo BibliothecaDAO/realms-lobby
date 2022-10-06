@@ -70,9 +70,6 @@ export class GraphSystem implements ISystem {
         
 		this.calculateNodes(graph)
 		this.calculateVertices(graph)
-
-		// Let rendering modules know that we'll start with the default node (zero)
-		this.events.emit('selectNode', graph.nodes[0].index)
 	}
 
 	createVertices = (graph: Graph): void => {

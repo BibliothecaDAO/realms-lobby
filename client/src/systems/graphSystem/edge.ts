@@ -3,13 +3,13 @@
 // Once connecetd, edges form a graphand can be traversed
 
 export class Edge {
-    src_identifier: number
-    dst_identifier: number
-    weight: number
+	src_identifier: number
+	dst_identifier: number
+	weight: number
     
-    constructor(src: number, dst: number, weight: number) {
-        this.src_identifier = src
-        this.dst_identifier = dst
-        this.weight = weight
-    }
+	constructor(src: number, dst: number, weight: number) {
+		this.src_identifier = src
+		this.dst_identifier = dst
+		this.weight = weight
+	}
 }

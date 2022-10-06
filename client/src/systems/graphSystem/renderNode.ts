@@ -4,6 +4,7 @@
 import { GameObjects } from 'phaser'
 import { ISystem, Registry } from '../../engine/registry'
 import { COLORS } from '../../config'
+import { Graph } from '../../components/graph'
 
 // Components
 
@@ -30,6 +31,7 @@ export class RenderNodeSystem implements ISystem{
 		this.events.on('spawnZone', this.setupGraph)
 		this.events.on('createNode', this.drawNode)
 		this.events.on('selectNode', this.selectNode)
+    
 	}
     
 	update = () => {
@@ -39,6 +41,11 @@ export class RenderNodeSystem implements ISystem{
 	// Store the entity for our graph so we can pull it down when needed
 	setupGraph = (entity: string) => {
 		this.graphEntity = entity
+        
+		// HACK - set node to zero by default
+		// this.selectedNode = 0
+		this.selectNode(0)
+		this.selectedNode = 0
 	}
 
 	drawNode = (index: number, x: number, y: number, container: Phaser.GameObjects.Container) => {
@@ -64,27 +71,39 @@ export class RenderNodeSystem implements ISystem{
 	}
 
 	selectNode = (index: number) => {
-		// Remove old selection
-		if (this.selectedCircle) {
-			this.selectedCircle.destroy()    
+		const graph = this.ecs.getComponent(this.graphEntity, 'graph') as Graph
+		if (graph != undefined) {
+			
+			// Make sure target node is in our adjacency list for the current node
+			// Otherwise this is an invalid move
+			if (this.selectedNode == undefined || graph.adjacency.get(this.selectedNode).includes(index)) {
+				// this is a valid move
+				// Remove old selection
+				if (this.selectedCircle) {
+					this.selectedCircle.destroy()
+				}
+                
+				// Determine where we should draw our selection
+				const circle = this.nodeCircles.get(index)
+
+				// Draw the a circle around the currently selected node
+				this.selectedCircle = this.scene.add.circle(circle.x, circle.y, 36, 0x000000, 0)
+					.setStrokeStyle(2, COLORS.primary.hex, 1) // To draw a circle w/o fill, we set fill alpha to 0 and add a stroke
+				this.container.add(this.selectedCircle)
+
+				// Node selector should pulse to indicate it's selected
+				this.scene.tweens.add({
+					targets: this.selectedCircle,
+					alpha: { value: 0.3, duration: 600 },
+					ease: 'Sine.easeInOut',
+					yoyo: true,
+					loop: -1,
+				})    
+                
+				// Actually set the new selected node
+				this.selectedNode = index
+			}
 		}
-        
-		// Determine where we should draw our selection
-		const circle = this.nodeCircles.get(index)
-
-		// Draw the a circle around the currently selected node
-		this.selectedCircle = this.scene.add.circle(circle.x, circle.y, 36, 0x000000, 0)
-			.setStrokeStyle(2, COLORS.primary.hex, 1) // To draw a circle w/o fill, we set fill alpha to 0 and add a stroke
-		this.container.add(this.selectedCircle)
-
-		// Node selector should pulse to indicate it's selected
-		this.scene.tweens.add({
-			targets: this.selectedCircle,
-			alpha: { value: 0.3, duration: 600 },
-			ease: 'Sine.easeInOut',
-			yoyo: true,
-			loop: -1,
-		})        
 	}   
     
 	enableClick = (index: number, circle: GameObjects.Arc) => {
