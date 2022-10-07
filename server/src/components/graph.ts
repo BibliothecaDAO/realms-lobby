@@ -6,6 +6,7 @@ import { Node } from '../systems/graphSystem/node'
 
 export class Graph implements IComponent {
 	public type = 'graph'
+	public hidden = true // Hide this component so the client can assemble its own graph (which it will have to do from starknet)
 
 	public edges: Edge[] = []
 	public nodes: Map<number, Node> = new Map()

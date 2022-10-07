@@ -4,12 +4,12 @@
 import { IComponent } from '../engine/registry'
 
 export class Transform implements IComponent {
-    public type = 'transform'
+	public type = 'transform'
 
-    // Which graph node are we currently occupying
-    public node: number
+	// Which graph node are we currently occupying
+	public node: number
 
-    constructor(node: number) {
-        this.node = node
-    }
+	constructor(node: number) {
+		this.node = node
+	}
 }

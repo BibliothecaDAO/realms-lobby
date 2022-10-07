@@ -44,14 +44,14 @@ export class Connection {
 		})
 
 		// Move a character around the map
-		this.socket.on('move', (uid, x, y) => {
-			this.events.emit('move', uid, x, y)
+		this.socket.on('moveSuccess', (uid: string, index: number) => {
+			this.events.emit('moveSuccess', uid, index)
 		})
 
 		// Client -> Server events
 		// Send move to the server
-		this.events.on('input:move', (x, y) => {
-			this.socket.emit('setDestination', x, y)
+		this.events.on('moveAttempt', (index: number) => {
+			this.socket.emit('moveAttempt', index)
 		})
 
 		// Request state so we can load the map

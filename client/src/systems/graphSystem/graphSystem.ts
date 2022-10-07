@@ -20,16 +20,15 @@ export class GraphSystem implements ISystem {
 
 	// Graph data
 	public graphEntity: string
-    
-	// Graph state
-	public currentNode = 0
 
 	// Game Objects
 	public container: GameObjects.Container
-	public nodeTexts: Array<Phaser.GameObjects.Text> = []
-	public currentNodeSelector: GameObjects.Arc
 
-	constructor(events: Phaser.Events.EventEmitter, ecs: Registry, scene: Phaser.Scene) {
+	constructor(
+		events: Phaser.Events.EventEmitter,
+		ecs: Registry,
+		scene: Phaser.Scene
+	) {
 		this.events = events
 		this.ecs = ecs
 		this.scene = scene
@@ -37,11 +36,10 @@ export class GraphSystem implements ISystem {
 		// Event Handlers
 		// We received a graph from the server, parse it and calculate ndoes
 		this.events.on('spawnZone', this.setupGraph)
-		this.events.on('selectNode', this.selectNode)
 	}
 
 	update = () => {
-		// 
+		//
 	}
 
 	// Instantiates edges and prepares to traverse them
@@ -49,7 +47,11 @@ export class GraphSystem implements ISystem {
 		const edges: Edge[] = []
 
 		for (let i = 0; i < component.graph.length; i++) {
-			const edge = new Edge(component.graph[i][0], component.graph[i][1], component.graph[i][2])
+			const edge = new Edge(
+				component.graph[i][0],
+				component.graph[i][1],
+				component.graph[i][2]
+			)
 			// Add edge to graph
 			edges.push(edge)
 		}
@@ -65,9 +67,11 @@ export class GraphSystem implements ISystem {
 		this.breadthFirst(graph)
 
 		// create a container which will adjust the position of all child gameobjects inside it
-		this.container = this.scene.add.container(this.scene.cameras.main.centerX, this.scene.cameras.main.centerY)
+		this.container = this.scene.add.container(
+			this.scene.cameras.main.centerX,
+			this.scene.cameras.main.centerY
+		)
 
-        
 		this.calculateNodes(graph)
 		this.calculateVertices(graph)
 	}
@@ -79,15 +83,13 @@ export class GraphSystem implements ISystem {
 		// This data structure is easier to traverse than just a list of edges
 
 		for (let i = 0; i < graph.edges.length; i++) {
-            
 			// todo - figure out why this is only firing 1x (instead of 5x)
 			// Assign to local variables so it's easier to read
 			const src = graph.edges[i].src_identifier
 			const dst = graph.edges[i].dst_identifier
 
-
 			// Check if node is already in adjacency list
-			if(!graph.adjacency.get(src)) {
+			if (!graph.adjacency.get(src)) {
 				graph.adjacency.set(src, [])
 			}
 			// Add destination to adjacency list
@@ -96,7 +98,7 @@ export class GraphSystem implements ISystem {
 			if (!graph.reverseAdjacency.get(dst)) {
 				graph.reverseAdjacency.set(dst, [])
 			}
-            
+
 			// Add source to reverse adjacency list
 			graph.reverseAdjacency.get(dst).push(src)
 		}
@@ -108,27 +110,26 @@ export class GraphSystem implements ISystem {
 		const yOffset = 100
 
 		// Start walking through each node
-		for (let i = 0; i < graph.nodes.length; i++) {
-			graph.nodes[i].x = xOffset * (this.getDepth(graph.nodes[i], graph))
-            
+		for (let i = 0; i < graph.nodes.size; i++) {
+			graph.nodes.get(i).x = xOffset * this.getDepth(graph.nodes.get(i), graph)
+
 			// Calculate how many edges each node has - more edges means it gets drawn further down the screen
-			const numEdges = graph.reverseAdjacency.get(graph.nodes[i].index) ? graph.reverseAdjacency.get(graph.nodes[i].index).length : 1
-			graph.nodes[i].y = yOffset * (numEdges-1)  // we subtract 1 so our graph is centered vertically
-            
+			const numEdges = graph.reverseAdjacency.get(graph.nodes.get(i).index)
+				? graph.reverseAdjacency.get(graph.nodes.get(i).index).length
+				: 1
+			graph.nodes.get(i).y = yOffset * (numEdges - 1) // we subtract 1 so our graph is centered vertically
+
 			// Keep track of what position our node is in (so we can reference it later via array)
-			const index = graph.nodes[i].index
+			const index = graph.nodes.get(i).index
 
 			// let the rendering system know to draw this node
-			this.events.emit('createNode', index, graph.nodes[i].x, graph.nodes[i].y, this.container)
-		}
-	}
-
-	selectNode = (index: number): void => {
-		if (index != undefined) {
-			this.currentNode = index
-		} else {
-			// Make sure we have a node set..
-			throw new Error(`Invalid node selected: ${index}`)
+			this.events.emit(
+				'createNode',
+				index,
+				graph.nodes.get(i).x,
+				graph.nodes.get(i).y,
+				this.container
+			)
 		}
 	}
 
@@ -138,17 +139,21 @@ export class GraphSystem implements ISystem {
 			const src = graph.edges[i].src_identifier
 			const dst = graph.edges[i].dst_identifier
 
-			this.events.emit('createEdge', graph.nodes[src], graph.nodes[dst], this.container)
+			this.events.emit(
+				'createEdge',
+				graph.nodes.get(src),
+				graph.nodes.get(dst),
+				this.container
+			)
 			// this.events.emit('testevent', src, dst, this.container)
 		}
 	}
-
 
 	// Utility functions
 	// Returns the depth of a given node (via BFS)
 	getDepth = (node: Node, graph) => {
 		const start = 0 // We always start at position zero
-		let count = 0   // Keep track of the depth we've traversed
+		let count = 0 // Keep track of the depth we've traversed
 
 		const visited = new Set()
 		const queue = [start]
@@ -167,15 +172,15 @@ export class GraphSystem implements ISystem {
 						count++
 						visited.add(neighbors[i])
 						queue.push(neighbors[i])
-					}   
+					}
 				}
-			} else { 
+			} else {
 				// We didn't encounter a subgraph so we should backtrack
 				count--
 			}
 		}
-         
-		return(count)
+
+		return count
 	}
 
 	breadthFirst = (graph: Graph) => {
@@ -194,24 +199,24 @@ export class GraphSystem implements ISystem {
 			// Grab the first node
 			currentVertex = queue.shift()
 			const node = new Node(currentVertex)
-			graph.nodes.push(node)
+			graph.nodes.set(currentVertex, node)
 
 			// Make sure node has a next step
 			if (graph.adjacency.get(currentVertex)) {
-				graph.adjacency.get(currentVertex).forEach(neighbor => {
+				graph.adjacency.get(currentVertex).forEach((neighbor) => {
 					if (!visited[neighbor]) {
 						visited[neighbor] = true
 						queue.push(neighbor)
 					}
 				})
 			}
-		} 
+		}
 	}
 
 	depthFirst = (graph: Graph) => {
 		// Use DFS (depth-first) search so we can add a spacer after we hit a dead end
 		const start = 0 // We always start at position zero
-         
+
 		// Walk through each node of the 'dungeon' and output the path
 		const stack = [start]
 		const visited = {}
@@ -223,22 +228,22 @@ export class GraphSystem implements ISystem {
 		while (stack.length) {
 			// Grab the first node
 			currentVertex = stack.pop()
-			graph.nodes.push(currentVertex)
+			const node = new Node(currentVertex)
+			graph.nodes.set(currentVertex, node)
 
 			// Make sure node has a next step
 			if (graph.adjacency.get(currentVertex)) {
-				graph.adjacency.get(currentVertex).forEach(neighbor => {
+				graph.adjacency.get(currentVertex).forEach((neighbor) => {
 					if (!visited[neighbor]) {
 						visited[neighbor] = true
 						stack.push(neighbor)
 					}
 				})
 			}
-		} 
+		}
 	}
 
 	debug = (graph: Graph) => {
 		console.log(graph.edges)
 	}
 }
-

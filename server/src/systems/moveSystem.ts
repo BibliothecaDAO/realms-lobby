@@ -7,38 +7,46 @@ import { ISystem, Registry } from '../engine/registry'
 
 // Components
 import { Transform } from '../components/transform'
+import { Graph } from '../components/graph'
 
 export class MoveSystem implements ISystem {
-    private events: EventEmitter
-    private ecs: Registry
+	private events: EventEmitter
+	private ecs: Registry
 
-    constructor(events: EventEmitter, ecs: Registry) {
-        this.events = events
-        this.ecs = ecs
+	constructor(events: EventEmitter, ecs: Registry) {
+		this.events = events
+		this.ecs = ecs
 
-        // Event responders
-    }
+		// Event responders
+		this.events.on('moveAttempt', this.moveEntity)
+	}
 
-    update = () => {
-    }
+	update = () => {
+		//
+	}
 
-    // Utility functions
-    // Process a move for a player to an adjacent node
-    moveEntity = (entity: string, transform: Transform) => {
-        // Keep track of current location to calculate if this is a valid move
-        const prevTransform = this.ecs.getComponent(entity, 'transform') as Transform    
-        const prevNode = prevTransform.node
+	// Utility functions
+	// Process a move for a player to an adjacent node
+	moveEntity = (entity: string, node: number) => {
+		// Keep track of current location to calculate if this is a valid move
+		const transform = this.ecs.getComponent(entity, 'transform') as Transform
 
-        if (prevNode) {
-            // Calculate valid move
-        } else {
-            throw new Error(`cannot find curent node for entity ${entity}`)
-        }
+		if (transform.node != undefined) {
+			// Calculate valid move
+			const graph = this.ecs.getComponentsByType('graph')[0] as Graph
 
-        // Make sure this is a valid move
-        
-            // Let the pathfinding system know where we're moving from and where we're moving to
-            // this.events.emit('validMove', entity, transform.x, transform.y)
-            // this.events.emit('updateColliders', entity, prevX, prevY, transform.x, transform.y)
-    }
+			if (graph != undefined) {
+				const currentNode = graph.adjacency.get(transform.node)
+				// Make sure the node is adjacent to the current node
+				if (currentNode && currentNode.includes(node)) {
+					transform.node = node
+					this.events.emit('moveSuccess', entity, node)
+				}
+			} else {
+				throw new Error('cannot load graph during move')
+			}
+		} else {
+			throw new Error(`cannot find curent node for entity ${entity}`)
+		}
+	}
 }
