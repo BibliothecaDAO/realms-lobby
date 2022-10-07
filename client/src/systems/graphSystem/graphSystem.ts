@@ -1,282 +1,249 @@
 // graphSystem - Loads a graph, parses it, and traverses it
 // Returns an object that can be sent to the client and displayed
 
-import EventEmitter from 'events'
 import { GameObjects } from 'phaser'
 import { ISystem, Registry } from '../../engine/registry'
-import { COLORS } from '../../config'
+
+// Components
+import { Zone } from '../../components/zone'
+import { Graph } from '../../components/graph'
 
 // Graph data structures
 import { Edge } from './edge'
+import { Node } from './node'
 
 export class GraphSystem implements ISystem {
-    private events: Phaser.Events.EventEmitter
-    private ecs: Registry
-    private scene: Phaser.Scene
-    public type = 'graphSystem'
+	private events: Phaser.Events.EventEmitter
+	private ecs: Registry
+	private scene: Phaser.Scene
+	public type = 'graphSystem'
 
-    // Graph data
-    public edges: Edge[] = []
-    public adjacency: Map<number, number[]> = new Map()
-    public reverseAdjacency: Map<number, number[]> = new Map()
-    public nodes: Array<number> = []
-    
-    // Graph state
-    public currentNode: number = 0
+	// Graph data
+	public graphEntity: string
 
-    // Game Objects
-    public container: GameObjects.Container
-    public nodeTexts: Array<Phaser.GameObjects.Text> = []
-    public currentNodeSelector: GameObjects.Arc
+	// Game Objects
+	public container: GameObjects.Container
 
-    constructor(events: Phaser.Events.EventEmitter, ecs: Registry, scene: Phaser.Scene) {
-        this.events = events
-        this.ecs = ecs
-        this.scene = scene
+	constructor(
+		events: Phaser.Events.EventEmitter,
+		ecs: Registry,
+		scene: Phaser.Scene
+	) {
+		this.events = events
+		this.ecs = ecs
+		this.scene = scene
 
-         // Stub out initial graph
-        const edges = [
-            [0, 1, 1],
-            [ 1, 2, 1 ],
-            [ 2, 3, 1 ],
-            [ 3, 4, 1 ],
-            [1, 4, 1]
-            // [4, 0, 1]    // Finish the graph (loop to exit)
-        ]
+		// Event Handlers
+		// We received a graph from the server, parse it and calculate ndoes
+		this.events.on('spawnZone', this.setupGraph)
+	}
 
-        // HACK - parse graph data
-        this.setupGraph(edges)
-       
-    }
+	update = () => {
+		//
+	}
 
+	// Instantiates edges and prepares to traverse them
+	setupGraph = (entity: string, component: Zone): void => {
+		const edges: Edge[] = []
 
-    update = () => {
-        // Update current node selector's position whne we change nodes
-        // TODO: Should this be an event?
-        if (this.currentNodeSelector.x != this.nodeTexts[this.currentNode].x || this.currentNodeSelector.y != this.nodeTexts[this.currentNode].y) {
+		for (let i = 0; i < component.graph.length; i++) {
+			const edge = new Edge(
+				component.graph[i][0],
+				component.graph[i][1],
+				component.graph[i][2]
+			)
+			// Add edge to graph
+			edges.push(edge)
+		}
 
-            this.currentNodeSelector.x = this.nodeTexts[this.currentNode].x
-        }
+		const graph = new Graph(edges)
+		this.graphEntity = entity
+		this.ecs.addComponent(entity, graph)
 
-        if (this.currentNodeSelector.y != this.nodeTexts[this.currentNode].y) {
-            this.currentNodeSelector.y = this.nodeTexts[this.currentNode].y
-        }
+		// Create adjacency list that we can traverse
+		this.createVertices(graph)
 
-    }
+		// Identify nodes via breath first search
+		this.breadthFirst(graph)
 
-    // Instantiates edges and prepares to traverse them
-    setupGraph = (edges): void => {
-        for (let i = 0; i < edges.length; i++) {
-            // Add edge to graph
-            this.edges.push(new Edge(edges[i][0], edges[i][1], edges[i][2]))
-        }
+		// create a container which will adjust the position of all child gameobjects inside it
+		this.container = this.scene.add.container(
+			this.scene.cameras.main.centerX,
+			this.scene.cameras.main.centerY
+		)
 
-        // Create adjacency list that we can traverse
-        this.createVertices()
+		this.calculateNodes(graph)
+		this.calculateVertices(graph)
+	}
 
-        // Identify nodes via breath first search
-        this.breadthFirst()
+	createVertices = (graph: Graph): void => {
+		// Walk through each node of the 'dungeon' and define connections between edges
+		// Create an adjacency list (e.g. node 0 -> 1, 2)
+		// Example: { 0 => [ 1 ], 1 => [ 2, 4 ], 2 => [ 3 ], 3 => [ 4 ] }
+		// This data structure is easier to traverse than just a list of edges
 
-        // Draw Graph
+		for (let i = 0; i < graph.edges.length; i++) {
+			// todo - figure out why this is only firing 1x (instead of 5x)
+			// Assign to local variables so it's easier to read
+			const src = graph.edges[i].src_identifier
+			const dst = graph.edges[i].dst_identifier
 
-        // create a container which will adjust the position of all child gameobjects inside it
-        this.container = this.scene.add.container(this.scene.cameras.main.centerX, this.scene.cameras.main.centerY)
+			// Check if node is already in adjacency list
+			if (!graph.adjacency.get(src)) {
+				graph.adjacency.set(src, [])
+			}
+			// Add destination to adjacency list
+			graph.adjacency.get(src).push(dst)
 
-        this.drawNodes()
-        this.drawSelectedNode()
-        this.drawVertices()
-        
-    }
+			if (!graph.reverseAdjacency.get(dst)) {
+				graph.reverseAdjacency.set(dst, [])
+			}
 
-    createVertices = (): void => {
-        // Walk through each node of the 'dungeon' and define connections between edges
-        // Create an adjacency list (e.g. node 0 -> 1, 2)
-        // Example: { 0 => [ 1 ], 1 => [ 2, 4 ], 2 => [ 3 ], 3 => [ 4 ] }
-        // This data structure is easier to traverse than just a list of edges
+			// Add source to reverse adjacency list
+			graph.reverseAdjacency.get(dst).push(src)
+		}
+	}
 
-        for (let i = 0; i < this.edges.length; i++) {
-            // Assign to local variables so it's easier to read
-            const src = this.edges[i].src_identifier
-            const dst = this.edges[i].dst_identifier
+	calculateNodes = (graph: Graph): void => {
+		// How far from the edge of the canvas should we draw each node?
+		const xOffset = 100
+		const yOffset = 100
 
-            // Check if node is already in adjacency list
-            if(!this.adjacency.get(src)) {
-                this.adjacency.set(src, [])
-            }
-            // Add destination to adjacency list
-            this.adjacency.get(src).push(dst)
+		// Start walking through each node
+		for (let i = 0; i < graph.nodes.size; i++) {
+			graph.nodes.get(i).x = xOffset * this.getDepth(graph.nodes.get(i), graph)
 
-            if (!this.reverseAdjacency.get(dst)) {
-                this.reverseAdjacency.set(dst, [])
-            }
-            // Add source to reverse adjacency list
-            this.reverseAdjacency.get(dst).push(src)
-        }
-    }
+			// Calculate how many edges each node has - more edges means it gets drawn further down the screen
+			const numEdges = graph.reverseAdjacency.get(graph.nodes.get(i).index)
+				? graph.reverseAdjacency.get(graph.nodes.get(i).index).length
+				: 1
+			graph.nodes.get(i).y = yOffset * (numEdges - 1) // we subtract 1 so our graph is centered vertically
 
-    drawNodes = (): void => {
-        // How far from the edge of the canvas should we draw each node?
-        const xOffset = 100
-        const yOffset = 100
-        
-        // How much space should we add between two nodes?
-        const xSpacer = 100
-        const ySpacer = 100
+			// Keep track of what position our node is in (so we can reference it later via array)
+			const index = graph.nodes.get(i).index
 
-        // Start walking through each node
-        for (let i = 0; i < this.nodes.length; i++) {
-            const x = xOffset * (this.getDepth(this.nodes[i]))
-            
-            // Calculate how many edges each node has - more edges means it gets drawn further down the screen
-            let numEdges = this.reverseAdjacency.get(this.nodes[i]) ? this.reverseAdjacency.get(this.nodes[i]).length : 1
-            let y = yOffset * (numEdges-1)  // we subtract 1 so our graph is centered vertically
-            
-            // Keep track of what position our node is in (so we can reference it later via array)
-            let index = this.nodes[i].toString()
+			// let the rendering system know to draw this node
+			this.events.emit(
+				'createNode',
+				index,
+				graph.nodes.get(i).x,
+				graph.nodes.get(i).y,
+				this.container
+			)
+		}
+	}
 
-            // Draw the circular background
-            const circle = this.scene.add.circle(x, y, 30, COLORS.primary.hex)
-            this.container.add(circle)
+	calculateVertices = (graph: Graph): void => {
+		// Loop through each edge (vertices)
+		for (let i = 0; i < graph.edges.length; i++) {
+			const src = graph.edges[i].src_identifier
+			const dst = graph.edges[i].dst_identifier
 
-            // Draw the node number
-            this.nodeTexts[index] = this.scene.add.text(x, y, index, { color: 'white' })
-                .setOrigin(0.5)
-                .setFontSize(20)
-            this.container.add(this.nodeTexts[index])
-        }
-    }
+			this.events.emit(
+				'createEdge',
+				graph.nodes.get(src),
+				graph.nodes.get(dst),
+				this.container
+			)
+			// this.events.emit('testevent', src, dst, this.container)
+		}
+	}
 
-    drawSelectedNode = (): void => {
-        // Draw the a circle around the currently selected node
-        this.currentNodeSelector = this.scene.add.circle(0, 0, 36, 0x000000, 0)
-            .setStrokeStyle(2, COLORS.primary.hex, 1) // To draw a circle w/o fill, we set fill alpha to 0 and add a stroke
-        this.container.add(this.currentNodeSelector)
+	// Utility functions
+	// Returns the depth of a given node (via BFS)
+	getDepth = (node: Node, graph) => {
+		const start = 0 // We always start at position zero
+		let count = 0 // Keep track of the depth we've traversed
 
-        // Node selector should pulse to indicate it's selected
-        this.scene.tweens.add({
-                targets: this.currentNodeSelector,
-            alpha: { value: 0.3, duration: 600 },
-            ease: 'Sine.easeInOut',
-                // delay: 50,
-                yoyo: true,
-                loop: -1,
-            });
-    }
+		const visited = new Set()
+		const queue = [start]
 
-     drawVertices = (): void => {
-        // Loop through each edge (vertices)
-         for (let i = 0; i < this.edges.length; i++) {
-            // Get the source and destination nodes for this edge
-            const src = this.edges[i].src_identifier
-            const dst = this.edges[i].dst_identifier
+		while (queue.length > 0) {
+			const _node = queue.pop()
+			if (_node === node.index) {
+				break
+			}
 
-            // get the text object so we can determine its location
-            const srcNode = this.nodeTexts[src]
-            const dstNode = this.nodeTexts[dst]
+			const neighbors = graph.adjacency.get(_node)
+			if (neighbors) {
+				for (let i = 0; i < neighbors.length; i++) {
+					if (!visited.has(neighbors[i])) {
+						// We found a new node, add it to the queue
+						count++
+						visited.add(neighbors[i])
+						queue.push(neighbors[i])
+					}
+				}
+			} else {
+				// We didn't encounter a subgraph so we should backtrack
+				count--
+			}
+		}
 
-            // Draw our line
-            const graphics = this.scene.add.graphics()
-            graphics.lineStyle(2, 0xFFFFFF)
-            const tmp = graphics.lineBetween(srcNode.x, srcNode.y, dstNode.x, dstNode.y)
-            this.container.add(tmp).sendToBack(tmp) // Containers ignore setDepth so instead we send this object to the back of the queue
-        }
-    }
+		return count
+	}
 
+	breadthFirst = (graph: Graph) => {
+		// Use BFS (depth-first) search
+		const start = 0 // We always start at position zero
 
-    // Utility functions
-    // Returns the depth of a given node (via BFS)
-    getDepth = (node) => {
-        const start = 0 // We always start at position zero
-        let count = 0   // Keep track of the depth we've traversed
+		// Walk through each node of the 'dungeon' and output the path
+		const queue = [start]
+		const visited = {}
+		visited[start] = true
 
-        const visited = new Set()
-        const queue = [start]
+		let currentVertex
 
-        while (queue.length > 0) {
-            const _node = queue.pop()
-            if (_node === node) {
-                break;
-            }
+		// Iterate until there are no edges left to visit
+		while (queue.length) {
+			// Grab the first node
+			currentVertex = queue.shift()
+			const node = new Node(currentVertex)
+			graph.nodes.set(currentVertex, node)
 
-            const neighbors = this.adjacency.get(_node)
-            if (neighbors) {
-                for (let i = 0; i < neighbors.length; i++) {
-                    if (!visited.has(neighbors[i])) {
-                        // We found a new node, add it to the queue
-                        count++
-                        visited.add(neighbors[i])
-                        queue.push(neighbors[i])
-                    }   
-                }
-            } else { 
-                // We didn't encounter a subgraph so we should backtrack
-                count--
-            }
-        }
-         
-        return(count)
-    }
+			// Make sure node has a next step
+			if (graph.adjacency.get(currentVertex)) {
+				graph.adjacency.get(currentVertex).forEach((neighbor) => {
+					if (!visited[neighbor]) {
+						visited[neighbor] = true
+						queue.push(neighbor)
+					}
+				})
+			}
+		}
+	}
 
-    breadthFirst = () => {
-        // Use BFS (depth-first) search
-        const start = 0 // We always start at position zero
+	depthFirst = (graph: Graph) => {
+		// Use DFS (depth-first) search so we can add a spacer after we hit a dead end
+		const start = 0 // We always start at position zero
 
-        // Walk through each node of the 'dungeon' and output the path
-        const queue = [start]
-        const visited = {}
-        visited[start] = true
+		// Walk through each node of the 'dungeon' and output the path
+		const stack = [start]
+		const visited = {}
+		visited[start] = true
 
-        let currentVertex
+		let currentVertex
 
-        // Iterate until there are no edges left to visit
-        while (queue.length) {
-            // Grab the first node
-            currentVertex = queue.shift()
-            this.nodes.push(currentVertex)
+		// Iterate until there are no edges left to visit
+		while (stack.length) {
+			// Grab the first node
+			currentVertex = stack.pop()
+			const node = new Node(currentVertex)
+			graph.nodes.set(currentVertex, node)
 
-            // Make sure node has a next step
-            if (this.adjacency.get(currentVertex)) {
-                this.adjacency.get(currentVertex).forEach(neighbor => {
-                    if (!visited[neighbor]) {
-                        visited[neighbor] = true
-                        queue.push(neighbor)
-                    }
-                })
-            }
-        } 
-    }
+			// Make sure node has a next step
+			if (graph.adjacency.get(currentVertex)) {
+				graph.adjacency.get(currentVertex).forEach((neighbor) => {
+					if (!visited[neighbor]) {
+						visited[neighbor] = true
+						stack.push(neighbor)
+					}
+				})
+			}
+		}
+	}
 
-     depthFirst = () => {
-        // Use DFS (depth-first) search so we can add a spacer after we hit a dead end
-         const start = 0 // We always start at position zero
-         
-        // Walk through each node of the 'dungeon' and output the path
-        const stack = [start]
-        const visited = {}
-        visited[start] = true
-
-        let currentVertex
-
-        // Iterate until there are no edges left to visit
-        while (stack.length) {
-            // Grab the first node
-            currentVertex = stack.pop()
-            this.nodes.push(currentVertex)
-
-            // Make sure node has a next step
-            if (this.adjacency.get(currentVertex)) {
-                this.adjacency.get(currentVertex).forEach(neighbor => {
-                    if (!visited[neighbor]) {
-                        visited[neighbor] = true
-                        stack.push(neighbor)
-                    }
-                })
-            }
-        } 
-    }
-
-    debug = () => {
-        console.log(this.edges)
-    }
+	debug = (graph: Graph) => {
+		console.log(graph.edges)
+	}
 }
-

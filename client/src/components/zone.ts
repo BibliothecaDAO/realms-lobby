@@ -8,11 +8,12 @@ export class Zone implements IComponent {
 
     public width: number
     public height: number
-    public tileMap
+    // TODO - Write interface for graph so we can validate them
+    public graph
 
-    constructor(width: number, height: number, tileMap?) {
+    constructor(width: number, height: number, graph) {
         this.width = width
         this.height = height
-        this.tileMap = tileMap
+        this.graph = graph
     }
 }

@@ -25,7 +25,6 @@ export default class Game extends Phaser.Game {
 
         // Start loading scenes in background (but we kick off LoadingScreen)
         this.scene.add(GraphScene.Name, GraphScene, false, { ecs: this.world.ecs, world: this.world, events: this.world.events })
-        // this.scene.add(MapScene.Name, MapScene, false, { ecs: this.world.ecs, world: this.world, events: this.world.events }) // TODO: Race condition where player isn't available yet
     }
 }
 

@@ -15,7 +15,7 @@ export class Button extends Phaser.GameObjects.Container {
     private button: Phaser.GameObjects.Container
 
     // Configuration variables
-    private fontSize = 48 // 12pt
+    private fontSize = 14 // 12pt
 
     // Style the buttons
     private styles = {
@@ -34,15 +34,13 @@ export class Button extends Phaser.GameObjects.Container {
 
     constructor(
         scene: Phaser.Scene,
-        name: symbol,
+        name: string,
         x: integer,
         y: integer,
         width: integer,
         height: integer,
         text: string,
-        options, // unique: true/false - Set to true if this button is part of a statemachine and you don't want it to trigger other buttons
-        //  rotation: int in radians - How much should we rotate the text when displaying it
-        callback
+        callback?
     ) {
         super(scene, x, y)
 
@@ -72,16 +70,6 @@ export class Button extends Phaser.GameObjects.Container {
         // Make the button interactive
         this.button.setSize(width, height) // Required to set interactive - otherwise it won't emit events: https://snowbillr.github.io/blog/2018-07-03-buttons-in-phaser-3/
         this.button.setInteractive({ useHandCursor: true }) // Let the button respond to clicks
-
-        // Handle options (if they exist)
-        if (options) {
-            if (options.rotation) {
-                this.buttonText.rotation = options.rotation
-            }
-            if (options.unique) {
-                this.unique = options.unique
-            }
-        }
 
         // Add Listeners
         // Handle hover states

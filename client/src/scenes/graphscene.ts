@@ -1,54 +1,79 @@
 // graphscene.ts - Displays a graph that adventurers can explore
 
 import { Registry } from '../engine/registry'
+import { World } from '../engine/world'
 
+// Initialize sub-scenes
 import { GameUIScene } from './uiscene'
 
 // Initialize systems
 import { GraphSystem } from '../systems/graphSystem/graphSystem'
+import { SpawnSystem } from '../systems/spawnSystem'
+import { PlayerSystem } from '../systems/playerSystem'
+
+import { RenderNodeSystem } from '../systems/graphSystem/renderNodeSystem'
+import { RenderEdgeSystem } from '../systems/graphSystem/renderEdgeSystem'
 
 // Components
 
 export class GraphScene extends Phaser.Scene {
-    public static Name = 'graph-scene'
+	public static Name = 'graph-scene'
 
-    // Event bus
-    public events: Phaser.Events.EventEmitter
+	// Event bus
+	public events: Phaser.Events.EventEmitter
 
-    // ECS system to initialize entities and systems
-    public ecs: Registry
+	// ECS system to initialize entities and systems
+	public ecs: Registry
 
-    constructor() {
-        super(GraphScene.Name)
-    }
+	// World to store our connection (so it persists between scenes)
+	public world: World
 
-    preload(): void {
-        // Load necessary files for this map
-    }
+	constructor() {
+		super(GraphScene.Name)
+	}
 
-    create(data): void {
-        // initialize engine
-        this.ecs = data.ecs
-        this.events = data.events
+	preload(): void {
+		// Load necessary files for this map
+	}
 
-        // Initialize subscenes
-        this.scene.add(GameUIScene.Name, GameUIScene, false, { events: this.events, ecs: this.ecs })
+	create(data): void {
+		// initialize engine
+		this.ecs = data.ecs
+		this.events = data.events
+		this.world = data.world
 
-        // Initialize systems
-        this.ecs.addSystem(new GraphSystem(this.events, this.ecs, this))
+		// Setup
 
-        // Running this up front because the camera can scroll before setPollAlways has been called (Resulting in improper values)
-        this.input.setPollAlways() // The cursor should poll for new positions while the camera is moving
+		// Initialize subscenes
+		this.scene.add(GameUIScene.Name, GameUIScene, false, {
+			events: this.events,
+			ecs: this.ecs,
+		})
 
-        // Monitor for events
+		// Initialize Game Rendering systems
+		// Race conditions happen when we put these after the logic systems
+		this.ecs.addSystem(new RenderNodeSystem(this.events, this.ecs, this))
+		this.ecs.addSystem(new RenderEdgeSystem(this.events, this.ecs, this))
 
-        // Enable UI Scene
-        this.scene.launch(GameUIScene.Name)
-    }
+		// Initialize Game Logic systems
+		this.ecs.addSystem(new GraphSystem(this.events, this.ecs, this))
+		this.ecs.addSystem(new SpawnSystem(this.events, this.ecs, this))
+		this.ecs.addSystem(new PlayerSystem(this.events, this.ecs))
 
-    update(): void {
-        // Run through our systems and run each update function
-        this.ecs.update()
-    }
+		// Running this up front because the camera can scroll before setPollAlways has been called (Resulting in improper values)
+		this.input.setPollAlways() // The cursor should poll for new positions while the camera is moving
 
+		// Monitor for events
+
+		// Enable UI Scene
+		this.scene.launch(GameUIScene.Name)
+
+		// We've loaded all our systems and event handlers so request data from server
+		this.events.emit('requestSnapshot')
+	}
+
+	update(): void {
+		// Run through our systems and run each update function
+		this.ecs.update()
+	}
 }

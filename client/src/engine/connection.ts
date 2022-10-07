@@ -5,58 +5,58 @@ import { io, Socket } from 'socket.io-client'
 import { DEBUG } from '../config'
 
 export class Connection {
-    socket: Socket<ServerToClientEvents, ClientToServerEvents>
-    events: Phaser.Events.EventEmitter
+	socket: Socket<ServerToClientEvents, ClientToServerEvents>
+	events: Phaser.Events.EventEmitter
 
-    constructor(events: Phaser.Events.EventEmitter) {
-        this.events = events
+	constructor(events: Phaser.Events.EventEmitter) {
+		this.events = events
 
-        // Connect to the server
-        this.socket = io(process.env.WS_URL)
+		// Connect to the server
+		// HACK - server was reconnecting repeatedly so we pass in reconnection: false
+		this.socket = io(process.env.WS_URL, { reconnection: false })
 
-        this.socket.on('connect', () => {
-            // TODO - Figure out why this isn't firing
-            console.log(`💻 connected to server ${process.env.WS_URL}`)
-            // Any logic to make sure we stay connected goes here
-        })
+		this.socket.on('connect', () => {
+			console.log(`💻 connected to server ${process.env.WS_URL}`)
+			// Any logic to make sure we stay connected goes here
+		})
 
-        // DEBUG - Enable this flag in config.ts to see all events in console.log
-        if (DEBUG) {
-            this.socket.onAny(function (eventName, ...args) {
-                console.log(`⬅️ left-a[${eventName}] fired: ${args}`)
-            })
-        }
+		// DEBUG - Enable this flag in config.ts to see all events in console.log
+		if (DEBUG) {
+			this.socket.onAny(function (eventName, ...args) {
+				console.log(`⬅️ left-a[${eventName}] fired: ${args}`)
+			})
+		}
 
-        // Server -> Client Events
-        // Load initial game state onto client (so we can only update deltas afterwards)
-        this.socket.on('snapshot', (playerId, state) => {
-            this.events.emit('snapshot', playerId, JSON.parse(state))
-        })
+		// Server -> Client Events
+		// Load initial game state onto client (so we can only update deltas afterwards)
+		this.socket.on('snapshot', (playerId, state) => {
+			this.events.emit('snapshot', playerId, JSON.parse(state))
+		})
 
-        // Tell clients about new entities that connect or spawn
-        this.socket.on('spawnSuccess', (entity, components) => {
-            this.events.emit('spawn', entity, JSON.parse(components))
-        })
+		// Tell clients about new entities that connect or spawn
+		this.socket.on('spawnSuccess', (entity, components) => {
+			this.events.emit('spawn', entity, JSON.parse(components))
+		})
 
-        // Tell clients about new entities that connect or spawn
-        this.socket.on('despawnSuccess', (entity) => {
-            this.events.emit('despawn', entity)
-        })
+		// Tell clients about new entities that connect or spawn
+		this.socket.on('despawnSuccess', (entity) => {
+			this.events.emit('despawn', entity)
+		})
 
-        // Move a character around the map
-        this.socket.on('move', (uid, x, y) => {
-            this.events.emit('move', uid, x, y)
-        })
+		// Move a character around the map
+		this.socket.on('moveSuccess', (uid: string, index: number) => {
+			this.events.emit('moveSuccess', uid, index)
+		})
 
-        // Client -> Server events
-        // Send move to the server
-        this.events.on('input:move', (x, y) => {
-            this.socket.emit('setDestination', x, y)
-        })
+		// Client -> Server events
+		// Send move to the server
+		this.events.on('moveAttempt', (index: number) => {
+			this.socket.emit('moveAttempt', index)
+		})
 
-        // Request state so we can load the map
-        this.events.on('requestSnapshot', () => {
-            this.socket.emit('requestSnapshot')
-        })
-    }
+		// Request state so we can load the map
+		this.events.on('requestSnapshot', () => {
+			this.socket.emit('requestSnapshot')
+		})
+	}
 }

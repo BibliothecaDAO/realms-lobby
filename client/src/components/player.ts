@@ -3,5 +3,5 @@
 import { IComponent } from '../engine/registry'
 
 export class Player implements IComponent {
-    public type = 'player'
+	public type = 'player'
 }

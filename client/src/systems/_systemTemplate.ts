@@ -4,21 +4,21 @@ import Phaser from 'phaser'
 import { ISystem, Registry } from '../engine/registry'
 
 export class TemplateSystem implements ISystem {
-    private events: Phaser.Events.EventEmitter
-    private ecs: Registry
+	private events: Phaser.Events.EventEmitter
+	private ecs: Registry
 
-    constructor(events: Phaser.Events.EventEmitter, ecs: Registry) {
-        this.events = events
-        this.ecs = ecs
+	constructor(events: Phaser.Events.EventEmitter, ecs: Registry) {
+		this.events = events
+		this.ecs = ecs
 
-        // Listen for events
-    }
+		// Listen for events
+	}
 
-    update = () => {
-        //
-    }
+	update = () => {
+		//
+	}
 
-    // Event responders
+	// Event responders
 
-    // Utility functions
+	// Utility functions
 }

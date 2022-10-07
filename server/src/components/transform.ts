@@ -1,15 +1,15 @@
-// template - Fake component template for making new components
+// transform - Which node of the graph does this entity occupy?
+// e.g. node: 1 means the entity currently sits at that node number and can move from there to other nodes
 
 import { IComponent } from '../engine/registry'
 
 export class Transform implements IComponent {
-    public type = 'transform'
+	public type = 'transform'
 
-    public x: number
-    public y: number
+	// Which graph node are we currently occupying
+	public node: number
 
-    constructor(x: number, y: number) {
-        this.x = x
-        this.y = y
-    }
+	constructor(node: number) {
+		this.node = node
+	}
 }

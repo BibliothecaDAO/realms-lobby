@@ -1,162 +1,186 @@
 // graphSystem - Loads a graph, parses it, and traverses it
 // Returns an object that can be sent to the client and displayed
 
-import EventEmitter from 'events'
 import { ISystem, Registry } from '../../engine/registry'
+import EventEmitter from 'events'
 
+// Components
+import { Zone } from '../../components/zone'
+import { Graph } from '../../components/graph'
+
+// Graph data structures
 import { Edge } from './edge'
+import { Node } from './node'
 
 export class GraphSystem implements ISystem {
-    private events: EventEmitter
-    private ecs: Registry
+	private events: EventEmitter
+	private ecs: Registry
+	public type = 'graphSystem'
 
-    public type = 'graphSystem'
-    public graph: Edge[] = []
-    public adjacencyList: Map<number, number[]> = new Map()
+	// Graph data
+	public graphEntity: string
 
-    constructor(events: EventEmitter, ecs: Registry) {
-        this.events = events
-        this.ecs = ecs
+	constructor(events: EventEmitter, ecs: Registry) {
+		this.events = events
+		this.ecs = ecs
 
-         // Stub out initial graph
-        const edges = [
-            [0, 1, 1],
-            [ 1, 2, 1 ],
-            [ 2, 3, 1 ],
-            [ 3, 4, 1 ],
-            [1, 4, 1]
-            // [4, 0, 1]    // Finish the graph (loop to exit)
-        ]
+		// Event Handlers
+		// We received a graph from the server, parse it and calculate ndoes
+		this.events.on('spawnZone', this.setupGraph)
+	}
 
-        // Listen for events
-        // this.events.on('spawnZone', this.setupGraph)
+	update = () => {
+		//
+	}
 
-        // HACK - parse graph data
-        this.setupGraph(edges)
-       
-    }
+	// Instantiates edges and prepares to traverse them
+	setupGraph = (entity: string, component: Zone): void => {
+		const edges: Edge[] = []
 
+		for (let i = 0; i < component.graph.length; i++) {
+			const edge = new Edge(
+				component.graph[i][0],
+				component.graph[i][1],
+				component.graph[i][2]
+			)
+			// Add edge to graph
+			edges.push(edge)
+		}
 
-    update = () => {
-    //
-    }
+		const graph = new Graph(edges)
+		this.graphEntity = entity
+		this.ecs.addComponent(entity, graph)
 
-    // Instantiates edges and prepares to traverse them
-    setupGraph = (edges): void => {
-        for (let i = 0; i < edges.length; i++) {
-            // Add edge to graph
-            this.graph.push(new Edge(edges[i][0], edges[i][1], edges[i][2]))
-        }
-        console.log(this.graph)
+		// Create adjacency list that we can traverse
+		this.createVertices(graph)
 
-        // Parse edges
-        this.createVertices()
+		// Identify nodes via breath first search
+		this.breadthFirst(graph)
+	}
 
-        this.printGraph()
-        // Map all of the nodes
-        // this.traverseGraph()
+	createVertices = (graph: Graph): void => {
+		// Walk through each node of the 'dungeon' and define connections between edges
+		// Create an adjacency list (e.g. node 0 -> 1, 2)
+		// Example: { 0 => [ 1 ], 1 => [ 2, 4 ], 2 => [ 3 ], 3 => [ 4 ] }
+		// This data structure is easier to traverse than just a list of edges
 
-        // Draw Graph
-    }
+		for (let i = 0; i < graph.edges.length; i++) {
+			// todo - figure out why this is only firing 1x (instead of 5x)
+			// Assign to local variables so it's easier to read
+			const src = graph.edges[i].src_identifier
+			const dst = graph.edges[i].dst_identifier
 
-    createVertices = (): void => {
-        // Walk through each node of the 'dungeon' and define connections between edges
-        // Create an adjacency list (e.g. node 0 -> 1, 2)
-        // Example: { 0 => [ 1 ], 1 => [ 2, 4 ], 2 => [ 3 ], 3 => [ 4 ] }
-        // This data structure is easier to traverse than just a list of edges
+			// Check if node is already in adjacency list
+			if (!graph.adjacency.get(src)) {
+				graph.adjacency.set(src, [])
+			}
+			// Add destination to adjacency list
+			graph.adjacency.get(src).push(dst)
 
-        for (let i = 0; i < this.graph.length; i++) {
-            // Assign to local variables so it's easier to read
-            const src = this.graph[i].src_identifier
-            const dst = this.graph[i].dst_identifier
-            if(!this.adjacencyList.get(src)) {
-                this.adjacencyList.set(src, [])
-            }
-            
-            // Add destination to adjacency list
-            this.adjacencyList.get(src).push(dst)
-        }
+			if (!graph.reverseAdjacency.get(dst)) {
+				graph.reverseAdjacency.set(dst, [])
+			}
 
-        console.log(this.adjacencyList)
-    }
+			// Add source to reverse adjacency list
+			graph.reverseAdjacency.get(dst).push(src)
+		}
+	}
 
-    traverseGraph = () => {
-        const start = 0 // We always start at position zero
+	// Utility functions
+	// Returns the depth of a given node (via BFS)
+	getDepth = (node: Node, graph) => {
+		const start = 0 // We always start at position zero
+		let count = 0 // Keep track of the depth we've traversed
 
-        let index = start // Keep numbers for each node so we can refer to them
-        console.log(index)
+		const visited = new Set()
+		const queue = [start]
 
-        // Walk through each node of the 'dungeon' and output the path
-        const result = []
-        const stack = [start]
-        const visited = {}
-        visited[start] = true
+		while (queue.length > 0) {
+			const _node = queue.pop()
+			if (_node === node.index) {
+				break
+			}
 
-        let currentVertex
+			const neighbors = graph.adjacency.get(_node)
+			if (neighbors) {
+				for (let i = 0; i < neighbors.length; i++) {
+					if (!visited.has(neighbors[i])) {
+						// We found a new node, add it to the queue
+						count++
+						visited.add(neighbors[i])
+						queue.push(neighbors[i])
+					}
+				}
+			} else {
+				// We didn't encounter a subgraph so we should backtrack
+				count--
+			}
+		}
 
-        // Iterate until there are no edges left to visit
-        while (stack.length) {
-            // Grab the first node
-            currentVertex = stack.pop() 
-            result.push(currentVertex)
+		return count
+	}
 
-            // Make sure node has a next step
-            if (this.adjacencyList.get(currentVertex)) {
-                this.adjacencyList.get(currentVertex).forEach(neighbor => {
-                    if (!visited[neighbor]) {
-                        visited[neighbor] = true
-                        stack.push(neighbor)
+	breadthFirst = (graph: Graph) => {
+		// Use BFS (depth-first) search
+		const start = 0 // We always start at position zero
 
-                        // We've hit a new node
-                        index++
-                        console.log(index)
-                    }
-                })
-            }
-        }   
+		// Walk through each node of the 'dungeon' and output the path
+		const queue = [start]
+		const visited = {}
+		visited[start] = true
 
-        console.log(result)
-        return(result)
-    }
+		let currentVertex
 
-    printGraph = () => {
-        const start = 0 // We always start at position zero
+		// Iterate until there are no edges left to visit
+		while (queue.length) {
+			// Grab the first node
+			currentVertex = queue.shift()
+			const node = new Node(currentVertex)
+			graph.nodes.set(currentVertex, node)
 
-        // Walk through each node of the 'dungeon' and output the path
-        const result = []
-        const stack = [start]
-        const visited = {}
-        visited[start] = true
+			// Make sure node has a next step
+			if (graph.adjacency.get(currentVertex)) {
+				graph.adjacency.get(currentVertex).forEach((neighbor) => {
+					if (!visited[neighbor]) {
+						visited[neighbor] = true
+						queue.push(neighbor)
+					}
+				})
+			}
+		}
+	}
 
-        let currentVertex
+	depthFirst = (graph: Graph) => {
+		// Use DFS (depth-first) search so we can add a spacer after we hit a dead end
+		const start = 0 // We always start at position zero
 
-        // Iterate until there are no edges left to visit
-        while (stack.length) {
-            // Grab the first node
-            currentVertex = stack.shift() 
-            result.push(currentVertex)
+		// Walk through each node of the 'dungeon' and output the path
+		const stack = [start]
+		const visited = {}
+		visited[start] = true
 
-            // Make sure node has a next step
-            if (this.adjacencyList.get(currentVertex)) {
-                this.adjacencyList.get(currentVertex).forEach(neighbor => {
-                    if (!visited[neighbor]) {
-                        visited[neighbor] = true
-                        stack.push(neighbor)
-                    }
-                })
-            }
-        }   
+		let currentVertex
 
-        for (let i = 0; i < this.graph.length; i++) {
-            console.log(`${this.graph[i].src_identifier} -> ${this.graph[i].dst_identifier}`)
-        }
+		// Iterate until there are no edges left to visit
+		while (stack.length) {
+			// Grab the first node
+			currentVertex = stack.pop()
+			const node = new Node(currentVertex)
+			graph.nodes.set(currentVertex, node)
 
-        console.log(result)
-        return(result)
-    }
+			// Make sure node has a next step
+			if (graph.adjacency.get(currentVertex)) {
+				graph.adjacency.get(currentVertex).forEach((neighbor) => {
+					if (!visited[neighbor]) {
+						visited[neighbor] = true
+						stack.push(neighbor)
+					}
+				})
+			}
+		}
+	}
 
-    debug = () => {
-        console.log(this.graph)
-    }
+	debug = (graph: Graph) => {
+		console.log(graph.edges)
+	}
 }
-

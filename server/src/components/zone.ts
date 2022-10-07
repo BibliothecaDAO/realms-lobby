@@ -1,5 +1,5 @@
-// zone - A 2D array representing walls/floor
-// this would have been called 'Map' but that is taken by a native js structure
+// zone - A dungeon a player can explore
+// Each dungeon is procedurally generated via a seed and outputs a graph
 
 import { IComponent } from '../engine/registry'
 
@@ -8,11 +8,15 @@ export class Zone implements IComponent {
 
     public width: number
     public height: number
-    public tileMap
+    // TODO - Write interface for graph so we can validate them
+    public graph
 
-    constructor(width: number, height: number, tileMap?) {
+    constructor(width: number, height: number, graph) {
+        if (!graph) {
+            throw new Error(`graph is required for this ${this.type} component`)
+        }
         this.width = width
         this.height = height
-        this.tileMap = tileMap
+        this.graph = graph
     }
 }

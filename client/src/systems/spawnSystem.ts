@@ -4,14 +4,11 @@ import { ISystem } from '../engine/registry'
 import { Registry } from '../engine/registry'
 
 // Hardcode components for our lookup table
-import { Collider } from '../components/collider'
-import { Destination } from '../components/destination'
 import { Inventory } from '../components/inventory'
 import { Zone } from '../components/zone'
 import { Player } from '../components/player'
 import { Sprite } from '../components/sprite'
 import { Transform } from '../components/transform'
-import { Velocity } from '../components/velocity'
 import { DEPTH } from '../config'
 
 export class SpawnSystem implements ISystem {
@@ -42,17 +39,11 @@ export class SpawnSystem implements ISystem {
             // Determine which type of component to create
             // Hacky lookup table for our components
             switch (index) {
-                case 'collider':
-                    component = new Collider()
-                    break
-                case 'destination':
-                    component = new Destination(components[index].x, components[index].y)
-                    break
                 case 'inventory':
                     component = new Inventory(components[index].items)
                     break
                 case 'zone':
-                    component = new Zone(components[index].width, components[index].height, components[index].tileMap)
+                    component = new Zone(components[index].width, components[index].height, components[index].graph)
                     break
                 case 'player':
                     component = new Player()
@@ -63,10 +54,7 @@ export class SpawnSystem implements ISystem {
                     component = new Sprite(components[index].name, sprite)
                     break
                 case 'transform':
-                    component = new Transform(components[index].x, components[index].y)
-                    break
-                case 'velocity':
-                    component = new Velocity(components[index].speed, components[index].dirX, components[index].dirY)
+                    component = new Transform(components[index].node)
                     break
                 default:
                     throw new Error(`component '${index}' not found`)
