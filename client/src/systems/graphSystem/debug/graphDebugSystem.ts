@@ -27,6 +27,10 @@ export class GraphDebugSystem implements ISystem {
 	private currentStep = 0
 	private maxSteps
 
+	// UI State
+	private allowPrev = false
+	private allowNext = false
+
 	// UI Elements
 	private leftArrow: Phaser.GameObjects.Text
 	private currentStepText: Phaser.GameObjects.Text
@@ -52,8 +56,6 @@ export class GraphDebugSystem implements ISystem {
 
 		this.drawPanel()
 		this.setupControls()
-		this.activateNextUI()
-		this.activatePrevUI()
 	}
 
 	update = () => {
@@ -65,6 +67,31 @@ export class GraphDebugSystem implements ISystem {
 				// Store the action queue so we don't call this over and over again
 				this.lastQueue = this.actionQueue
 			}
+		}
+
+		// Check if we should de-activate buttons
+		if (this.allowPrev && this.currentStep == 0) {
+			console.log(`deactivating prev: ${this.currentStep}`)
+
+			this.deactivatePrevUI()
+		}
+
+		if (this.allowNext && this.currentStep == this.actionQueue.length - 1) {
+			console.log(`deactivating next: ${this.currentStep}`)
+
+			this.deactivateNextUI()
+		}
+
+		// Check if we should re-activate buttons
+		if (!this.allowNext && this.currentStep < this.actionQueue.length - 1) {
+			console.log(`activating next: ${this.currentStep}`)
+			this.activateNextUI()
+		}
+
+		if (!this.allowPrev && this.currentStep > 0) {
+			console.log(`activating prev: ${this.currentStep}`)
+
+			this.activatePrevUI()
 		}
 	}
 
@@ -123,7 +150,7 @@ export class GraphDebugSystem implements ISystem {
 
 		this.rightArrow = this.scene.add.text(350, 100, '↣', {
 			fontSize: '100px',
-			color: DEBUGCOLORS.secondary.toString(),
+			color: DEBUGCOLORS.inactive.toString(),
 		})
 	}
 	// Utility functions
@@ -151,9 +178,6 @@ export class GraphDebugSystem implements ISystem {
 				this.graphText.setText(JSON.stringify(indexes))
 			}
 		}
-		// } else {
-		// this.deactivateUI()
-		// }
 	}
 
 	drawPanel = () => {
@@ -167,7 +191,10 @@ export class GraphDebugSystem implements ISystem {
 	}
 
 	activateNextUI = () => {
+		this.allowNext = true
+
 		this.rightArrow
+			.setFill(DEBUGCOLORS.secondary.toString())
 			.setInteractive()
 			.on('pointerover', () => {
 				this.rightArrow.setAlpha(0.8)
@@ -184,8 +211,12 @@ export class GraphDebugSystem implements ISystem {
 	}
 
 	activatePrevUI = () => {
+		this.allowPrev = true
+
 		this.leftArrow
+			.setFill(DEBUGCOLORS.secondary.toString())
 			.setInteractive()
+			.removeAllListeners()
 			.on('pointerover', () => {
 				this.leftArrow.setAlpha(0.8)
 				this.scene.input.setDefaultCursor('pointer')
@@ -200,9 +231,16 @@ export class GraphDebugSystem implements ISystem {
 			})
 	}
 
-	deactivateUI = () => {
+	deactivateNextUI = () => {
+		this.allowNext = false
 		this.rightArrow
+			.removeAllListeners()
 			.disableInteractive()
 			.setFill(DEBUGCOLORS.inactive.toString())
+	}
+
+	deactivatePrevUI = () => {
+		this.allowPrev = false
+		this.leftArrow.disableInteractive().setFill(DEBUGCOLORS.inactive.toString())
 	}
 }
