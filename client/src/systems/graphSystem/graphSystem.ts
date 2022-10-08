@@ -46,6 +46,11 @@ export class GraphSystem implements ISystem {
 	setupGraph = (entity: string, component: Zone): void => {
 		const edges: Edge[] = []
 
+		// Sort graph by src (first) then destination
+		// component.graph.sort((a, b) => {
+		// 	return a[0] - b[0] || a[1] - b[1]
+		// })
+
 		for (let i = 0; i < component.graph.length; i++) {
 			const edge = new Edge(
 				component.graph[i][0],
@@ -105,31 +110,18 @@ export class GraphSystem implements ISystem {
 	}
 
 	calculateNodes = (graph: Graph): void => {
-		// How far from the edge of the canvas should we draw each node?
-		const xOffset = 100
-		const yOffset = 100
-
 		// Start walking through each node
 		for (let i = 0; i < graph.nodes.size; i++) {
-			graph.nodes.get(i).x = xOffset * this.getDepth(graph.nodes.get(i), graph)
+			this.events.emit('createNode', graph.nodes.get(i).index, this.container)
 
-			// Calculate how many edges each node has - more edges means it gets drawn further down the screen
-			const numEdges = graph.reverseAdjacency.get(graph.nodes.get(i).index)
-				? graph.reverseAdjacency.get(graph.nodes.get(i).index).length
-				: 1
-			graph.nodes.get(i).y = yOffset * (numEdges - 1) // we subtract 1 so our graph is centered vertically
-
-			// Keep track of what position our node is in (so we can reference it later via array)
-			const index = graph.nodes.get(i).index
-
-			// let the rendering system know to draw this node
-			this.events.emit(
-				'createNode',
-				index,
-				graph.nodes.get(i).x,
-				graph.nodes.get(i).y,
-				this.container
-			)
+			// // let the rendering system know to draw this node
+			// this.events.emit(
+			// 	'createNode',
+			// 	index,
+			// 	graph.nodes.get(i).x,
+			// 	graph.nodes.get(i).y,
+			// 	this.container
+			// )
 		}
 	}
 
@@ -150,39 +142,6 @@ export class GraphSystem implements ISystem {
 	}
 
 	// Utility functions
-	// Returns the depth of a given node (via BFS)
-	getDepth = (node: Node, graph) => {
-		const start = 0 // We always start at position zero
-		let count = 0 // Keep track of the depth we've traversed
-
-		const visited = new Set()
-		const queue = [start]
-
-		while (queue.length > 0) {
-			const _node = queue.pop()
-			if (_node === node.index) {
-				break
-			}
-
-			const neighbors = graph.adjacency.get(_node)
-			if (neighbors) {
-				for (let i = 0; i < neighbors.length; i++) {
-					if (!visited.has(neighbors[i])) {
-						// We found a new node, add it to the queue
-						count++
-						visited.add(neighbors[i])
-						queue.push(neighbors[i])
-					}
-				}
-			} else {
-				// We didn't encounter a subgraph so we should backtrack
-				count--
-			}
-		}
-
-		return count
-	}
-
 	breadthFirst = (graph: Graph) => {
 		// Use BFS (depth-first) search
 		const start = 0 // We always start at position zero

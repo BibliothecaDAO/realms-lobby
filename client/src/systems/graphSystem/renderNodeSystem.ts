@@ -5,6 +5,7 @@ import { GameObjects } from 'phaser'
 import { ISystem, Registry } from '../../engine/registry'
 import { COLORS } from '../../config'
 import { Graph } from '../../components/graph'
+import { Node } from './node'
 
 // Components
 import { Transform } from '../../components/transform'
@@ -42,7 +43,7 @@ export class RenderNodeSystem implements ISystem {
 		// We received a graph from the server, parse it and calculate ndoes
 		this.events.on('spawnZone', this.setupGraph)
 		this.events.on('setupPlayer', this.setupPlayer)
-		this.events.on('createNode', this.drawNode)
+		this.events.on('executeCreateNode', this.drawNode)
 		this.events.on('moveSuccess', this.selectNode)
 	}
 
@@ -62,12 +63,28 @@ export class RenderNodeSystem implements ISystem {
 		this.selectNode(entity, transform.node)
 	}
 
-	drawNode = (
-		index: number,
-		x: number,
-		y: number,
-		container: Phaser.GameObjects.Container
-	) => {
+	drawNode = (index: number, container: Phaser.GameObjects.Container) => {
+		const graph = this.ecs.getComponent(this.graphEntity, 'graph') as Graph
+
+		// How far from the edge of the canvas should we draw each node?
+		const xOffset = 100
+		const yOffset = 100
+
+		// Create a circle for the node
+		// Calculate the depth of the node
+		const depth = this.getDepth(graph.nodes.get(index), graph)
+
+		const x = xOffset * depth
+		graph.nodes.get(index).x = x
+
+		// Calculate how many edges each node has - more edges means it gets drawn further down the screen
+		const numEdges = graph.reverseAdjacency.get(graph.nodes.get(index).index)
+			? graph.reverseAdjacency.get(graph.nodes.get(index).index).length
+			: 2
+
+		const y = yOffset * (numEdges - 1) // we subtract 1 so our graph is centered vertically
+		graph.nodes.get(index).y = y
+
 		// Save our container for future use
 		if (!this.container) {
 			this.container = container
@@ -164,5 +181,68 @@ export class RenderNodeSystem implements ISystem {
 				this.validNodeCircles.push(circle)
 			}
 		}
+	}
+
+	// Utility functions
+	bfs = (index: number, graph) => {
+		// TODO debug this
+
+		const root = 0
+		const adj = graph.adjacency[index]
+
+		const queue = []
+		queue.push(root)
+
+		const discovered = []
+		discovered[root] = true
+
+		while (queue.length) {
+			const v = queue.shift()
+
+			if (v === index) {
+				return true
+			}
+
+			for (let i = 0; i < adj[v].length; i++) {
+				if (!discovered[adj[v][i]]) {
+					discovered[adj[v][i]] = true
+					queue.push(adj[v][i])
+				}
+			}
+		}
+
+		return false
+	}
+	// Returns the depth of a given node (via BFS)
+	getDepth = (node: Node, graph) => {
+		const start = 0 // We always start at position zero
+		let depth = 0 // Keep track of the depth we've traversed
+
+		const visited = new Set()
+		const queue = [start]
+
+		while (queue.length > 0) {
+			const _node = queue.shift()
+			if (_node === node.index) {
+				return depth
+			}
+
+			const neighbors = graph.adjacency.get(_node)
+			if (neighbors) {
+				for (let i = 0; i < neighbors.length; i++) {
+					if (!visited.has(neighbors[i])) {
+						// We found a new node, add it to the queue
+						depth++
+						visited.add(neighbors[i])
+						queue.unshift(neighbors[i])
+					}
+				}
+			} else {
+				// We didn't encounter a subgraph so we should backtrack
+				depth--
+			}
+		}
+
+		return depth
 	}
 }

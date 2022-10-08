@@ -36,7 +36,7 @@ export class RenderEdgeSystem implements ISystem {
 		// Save graph entity info so we can reference it later
 		this.events.on('spawnZone', this.setupGraph)
 		// We received a graph from the server, parse it and calculate ndoes
-		this.events.on('createEdge', this.drawEdge)
+		this.events.on('executeCreateEdge', this.drawEdge)
 	}
 
 	update = () => {
