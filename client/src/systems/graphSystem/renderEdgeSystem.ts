@@ -15,7 +15,8 @@ export class RenderEdgeSystem implements ISystem {
 	private events: Phaser.Events.EventEmitter
 	private scene: Phaser.Scene
 
-	private nodeCircles: Map<number, GameObjects.Arc> = new Map()
+	private graphics: GameObjects.Graphics
+	private edges: Map<number, GameObjects.Arc> = new Map()
 	private selectedNode: number
 	private selectedCircle: GameObjects.Arc
 
@@ -37,6 +38,7 @@ export class RenderEdgeSystem implements ISystem {
 		this.events.on('spawnZone', this.setupGraph)
 		// We received a graph from the server, parse it and calculate ndoes
 		this.events.on('executeCreateEdge', this.drawEdge)
+		this.events.on('clearCanvas', this.clearEdges)
 	}
 
 	update = () => {
@@ -46,6 +48,7 @@ export class RenderEdgeSystem implements ISystem {
 	// Store the entity for our graph so we can pull it down when needed
 	setupGraph = (entity: string) => {
 		this.graphEntity = entity
+		this.graphics = this.scene.add.graphics()
 	}
 
 	drawEdge = (
@@ -60,9 +63,15 @@ export class RenderEdgeSystem implements ISystem {
 		const edgeColor = COLORS.primary.hex
 
 		// Draw our line
-		const graphics = this.scene.add.graphics()
-		graphics.lineStyle(2, 0xffffff)
-		const tmp = graphics.lineBetween(src.x, src.y, dst.x, dst.y)
+
+		this.graphics.lineStyle(2, 0xffffff)
+		const tmp = this.graphics.lineBetween(src.x, src.y, dst.x, dst.y)
 		container.add(tmp).sendToBack(tmp) // Containers ignore setDepth so instead we send this object to the back of the queue
+	}
+
+	clearEdges = () => {
+		// because we're just drawing lines, we can clear the drawbuffer
+		// vs. removing every individual line
+		this.graphics.clear()
 	}
 }

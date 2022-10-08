@@ -17,6 +17,7 @@ export class RenderNodeSystem implements ISystem {
 
 	// GameObjects for all the nodes (indexed by their graph index)
 	private nodeCircles: Map<number, GameObjects.Arc> = new Map()
+	private nodeTexts: Map<number, GameObjects.Text> = new Map()
 
 	// Current node the player is occupying
 	private selectedNode: number
@@ -44,6 +45,8 @@ export class RenderNodeSystem implements ISystem {
 		this.events.on('spawnZone', this.setupGraph)
 		this.events.on('setupPlayer', this.setupPlayer)
 		this.events.on('executeCreateNode', this.drawNode)
+		this.events.on('clearCanvas', this.clearNodes)
+
 		this.events.on('moveSuccess', this.selectNode)
 	}
 
@@ -103,9 +106,20 @@ export class RenderNodeSystem implements ISystem {
 			.text(x, y, index.toString(), { color: 'white' })
 			.setOrigin(0.5)
 			.setFontSize(20)
+		this.nodeTexts.set(index, text)
 		container.add(text)
 
 		// TODO - Make sure this renders correctly
+	}
+
+	clearNodes = () => {
+		for (const [key, value] of this.nodeCircles) {
+			this.nodeCircles.get(key).destroy()
+		}
+
+		for (const [key, value] of this.nodeTexts) {
+			this.nodeTexts.get(key).destroy()
+		}
 	}
 
 	selectNode = (uid: string, index: number) => {

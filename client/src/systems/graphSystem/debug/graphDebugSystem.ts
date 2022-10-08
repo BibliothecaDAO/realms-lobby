@@ -22,6 +22,8 @@ export class GraphDebugSystem implements ISystem {
 	private graphEntity: string
 
 	private actionQueue: Array<ICommand> = []
+	private lastQueue: Array<ICommand> = []
+
 	private currentStep = 0
 	private maxSteps
 
@@ -55,7 +57,15 @@ export class GraphDebugSystem implements ISystem {
 	}
 
 	update = () => {
-		//
+		// Step through the queue whenver there are actions
+		// Primarily used at the start before the graph is loaded into our actionQueue to avoid race conditions
+		if (this.lastQueue != this.actionQueue) {
+			if (this.actionQueue.length > 0 && this.currentStep >= 0) {
+				this.stepThroughQueue()
+				// Store the action queue so we don't call this over and over again
+				this.lastQueue = this.actionQueue
+			}
+		}
 	}
 
 	// Event responders
@@ -73,8 +83,6 @@ export class GraphDebugSystem implements ISystem {
 				color: DEBUGCOLORS.primary.toString(),
 			}
 		)
-		// Start with node zero
-		this.stepThroughQueue(0)
 	}
 
 	enqueueCreateNode = (
@@ -119,23 +127,19 @@ export class GraphDebugSystem implements ISystem {
 		})
 	}
 	// Utility functions
-
-	stepThroughQueue = (step: number) => {
-		// Iterate through queue
-		// TODO - Wire up arrow UI to progress the queue (vs automagically paging through it)
-		// Process any items in the queue
-
-		// Make sure we're not at the last step
-		// if (step < this.maxSteps) {
-		// clear screen, take in a number, step to that number in the queue
+	// Process any items in the queue sequentially
+	stepThroughQueue = () => {
+		// Clear the queue and re-draw from scratch
 		const indexes = []
 
-		console.log('got here')
-		console.log(step)
+		// Destroy all our game objects and redraw them (vs an undo step)
+		this.events.emit('clearCanvas')
 
-		console.log(this.actionQueue)
+		// Update current step text
+		this.currentStepText.setText(this.currentStep.toString())
+
 		// Process items in the queue
-		for (let i = 0; i < step; i++) {
+		for (let i = 0; i <= this.currentStep; i++) {
 			this.actionQueue[i].execute()
 
 			// TODO - Test edge rendering
@@ -175,8 +179,7 @@ export class GraphDebugSystem implements ISystem {
 			})
 			.on('pointerup', () => {
 				this.currentStep++
-				this.stepThroughQueue(this.currentStep)
-				this.currentStepText.setText(this.currentStep.toString())
+				this.stepThroughQueue()
 			})
 	}
 
@@ -193,8 +196,7 @@ export class GraphDebugSystem implements ISystem {
 			})
 			.on('pointerup', () => {
 				this.currentStep--
-				this.currentStepText.setText(this.currentStep.toString())
-				this.stepThroughQueue(this.currentStep)
+				this.stepThroughQueue()
 			})
 	}
 

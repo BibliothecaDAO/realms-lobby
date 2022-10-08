@@ -37,7 +37,6 @@ export class DebugScene extends Phaser.Scene {
 	}
 
 	create(data): void {
-		console.log(data)
 		// initialize engine
 		this.ecs = data.ecs
 		this.events = data.events
