@@ -9,6 +9,7 @@ import { DEBUGCOLORS } from '../../../config'
 // Components
 import { Graph } from '../../../components/graph'
 import { Node } from '../node'
+import { ActionQueue } from '../../../components/actionQueue'
 
 // Define Commands
 import { CreateNodeCommand } from './commands/createNodeCommand'
@@ -21,7 +22,9 @@ export class GraphDebugSystem implements ISystem {
 
 	private graphEntity: string
 
-	private actionQueue: Array<ICommand> = []
+	private actionQueueEntity: string
+	private actionQueue: ActionQueue
+
 	private lastQueue: Array<ICommand> = []
 
 	private currentStep = 0
@@ -54,6 +57,8 @@ export class GraphDebugSystem implements ISystem {
 
 		this.scene.cameras.main.setBackgroundColor(DEBUGCOLORS.bg.toString())
 
+		// Setup action queue
+		this.createActionQueue()
 		this.drawPanel()
 		this.setupControls()
 	}
@@ -61,41 +66,47 @@ export class GraphDebugSystem implements ISystem {
 	update = () => {
 		// Step through the queue whenver there are actions
 		// Primarily used at the start before the graph is loaded into our actionQueue to avoid race conditions
-		if (this.lastQueue != this.actionQueue) {
-			if (this.actionQueue.length > 0 && this.currentStep >= 0) {
+		if (this.lastQueue != this.actionQueue.actions) {
+			if (this.actionQueue.actions.length > 0 && this.currentStep >= 0) {
 				this.stepThroughQueue()
 				// Store the action queue so we don't call this over and over again
-				this.lastQueue = this.actionQueue
+				this.lastQueue = this.actionQueue.actions
 			}
 		}
 
 		// Check if we should de-activate buttons
 		if (this.allowPrev && this.currentStep == 0) {
-			console.log(`deactivating prev: ${this.currentStep}`)
-
 			this.deactivatePrevUI()
 		}
 
-		if (this.allowNext && this.currentStep == this.actionQueue.length - 1) {
-			console.log(`deactivating next: ${this.currentStep}`)
-
+		if (
+			this.allowNext &&
+			this.currentStep == this.actionQueue.actions.length - 1
+		) {
 			this.deactivateNextUI()
 		}
 
 		// Check if we should re-activate buttons
-		if (!this.allowNext && this.currentStep < this.actionQueue.length - 1) {
-			console.log(`activating next: ${this.currentStep}`)
+		if (
+			!this.allowNext &&
+			this.currentStep < this.actionQueue.actions.length - 1
+		) {
 			this.activateNextUI()
 		}
 
 		if (!this.allowPrev && this.currentStep > 0) {
-			console.log(`activating prev: ${this.currentStep}`)
-
 			this.activatePrevUI()
 		}
 	}
 
 	// Event responders
+	// Create action queue so we can pull it down when needed
+	createActionQueue = () => {
+		this.actionQueue = new ActionQueue()
+		this.actionQueueEntity = this.ecs.createEntity()
+		this.ecs.addComponent(this.actionQueueEntity, this.actionQueue)
+	}
+
 	// Store the entity for our graph so we can pull it down when needed
 	setupGraph = (entity: string) => {
 		this.graphEntity = entity
@@ -117,7 +128,9 @@ export class GraphDebugSystem implements ISystem {
 		container: Phaser.GameObjects.Container
 	) => {
 		// Add our node to the queue
-		this.actionQueue.push(new CreateNodeCommand(this.events, index, container))
+		this.actionQueue.actions.push(
+			new CreateNodeCommand(this.events, index, container)
+		)
 	}
 
 	enqueueCreateEdge = (
@@ -126,7 +139,7 @@ export class GraphDebugSystem implements ISystem {
 		container: Phaser.GameObjects.Container
 	) => {
 		// Add our node to the queue
-		this.actionQueue.push(
+		this.actionQueue.actions.push(
 			new CreateEdgeCommand(this.events, src, dst, container)
 		)
 	}
@@ -167,13 +180,13 @@ export class GraphDebugSystem implements ISystem {
 
 		// Process items in the queue
 		for (let i = 0; i <= this.currentStep; i++) {
-			this.actionQueue[i].execute()
+			this.actionQueue.actions[i].execute()
 
 			// TODO - Test edge rendering
 
 			// Only update text for nodes (not edges)
-			if (this.actionQueue[i].type === 'createNode') {
-				const node = this.actionQueue[i] as CreateNodeCommand
+			if (this.actionQueue.actions[i].type === 'createNode') {
+				const node = this.actionQueue.actions[i] as CreateNodeCommand
 				indexes.push(node.index)
 				this.graphText.setText(JSON.stringify(indexes))
 			}
