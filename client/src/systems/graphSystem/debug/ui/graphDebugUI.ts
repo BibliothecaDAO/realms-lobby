@@ -31,7 +31,12 @@ export class GraphDebugUI implements ISystem {
 	private currentStepText: Phaser.GameObjects.Text
 	private rightArrow: Phaser.GameObjects.Text
 
+	// Display current graph state
 	private graphText: Phaser.GameObjects.Text
+
+	// Define keys
+	private rightArrowKey: Phaser.Input.Keyboard.Key
+	private leftArrowKey: Phaser.Input.Keyboard.Key
 
 	constructor(
 		events: Phaser.Events.EventEmitter,
@@ -42,6 +47,10 @@ export class GraphDebugUI implements ISystem {
 		this.ecs = ecs
 		this.scene = scene
 
+		// TODO - Break out graph (GetDepth) functions so we can walk through them.
+		// Display depth (and maybe some other visuals) to help?
+		// ultimately.. figure out why 5 comes last 🧐
+
 		// Listen for events
 		this.events.on('setupActionQueue', this.setupActionQueue)
 		this.events.on('spawnZone', this.setupGraph)
@@ -50,6 +59,15 @@ export class GraphDebugUI implements ISystem {
 
 		// Set background color
 		this.scene.cameras.main.setBackgroundColor(DEBUGCOLORS.bg.toString())
+
+		// Define keys
+		this.rightArrowKey = this.scene.input.keyboard.addKey(
+			Phaser.Input.Keyboard.KeyCodes.RIGHT
+		)
+		this.leftArrowKey = this.scene.input.keyboard.addKey(
+			Phaser.Input.Keyboard.KeyCodes.LEFT
+		)
+
 		// Draw 'panel' that sits behind buttons
 		this.drawPanel()
 		this.setupControls()
@@ -175,16 +193,16 @@ export class GraphDebugUI implements ISystem {
 				this.rightArrow.setAlpha(1)
 				this.scene.input.setDefaultCursor('default')
 			})
-			.on('pointerup', () => {
-				this.actionQueue.currentStep++
-				this.currentStepText.setText(this.actionQueue.currentStep.toString())
-				this.events.emit('stepQueue', this.actionQueue.currentStep)
-			})
+			.on('pointerup', this.nextStep)
+
+		// Enable keyboard input
+		this.rightArrowKey.on('down', this.nextStep)
 	}
 
 	activatePrevUI = () => {
 		this.allowPrev = true
 
+		// Add mouse input
 		this.leftArrow
 			.setFill(DEBUGCOLORS.secondary.toString())
 			.setInteractive()
@@ -197,23 +215,40 @@ export class GraphDebugUI implements ISystem {
 				this.leftArrow.setAlpha(1)
 				this.scene.input.setDefaultCursor('default')
 			})
-			.on('pointerup', () => {
-				this.actionQueue.currentStep--
-				this.currentStepText.setText(this.actionQueue.currentStep.toString())
-				this.events.emit('stepQueue', this.actionQueue.currentStep)
-			})
+			.on('pointerup', this.prevStep)
+
+		// Handle keyboard input
+		this.leftArrowKey.on('down', this.prevStep)
 	}
 
 	deactivateNextUI = () => {
 		this.allowNext = false
+		// Add mouse input
 		this.rightArrow
 			.removeAllListeners()
 			.disableInteractive()
 			.setFill(DEBUGCOLORS.inactive.toString())
+
+		// Add keyboard input
+		this.rightArrowKey.removeAllListeners()
 	}
 
 	deactivatePrevUI = () => {
 		this.allowPrev = false
 		this.leftArrow.disableInteractive().setFill(DEBUGCOLORS.inactive.toString())
+		this.leftArrowKey.removeAllListeners()
+	}
+
+	nextStep = () => {
+		console.log('got here')
+		this.actionQueue.currentStep++
+		this.currentStepText.setText(this.actionQueue.currentStep.toString())
+		this.events.emit('stepQueue', this.actionQueue.currentStep)
+	}
+
+	prevStep = () => {
+		this.actionQueue.currentStep--
+		this.currentStepText.setText(this.actionQueue.currentStep.toString())
+		this.events.emit('stepQueue', this.actionQueue.currentStep)
 	}
 }
