@@ -24,8 +24,6 @@ export class GraphDebugSystem implements ISystem {
 
 	private lastQueue: Array<IAction> = []
 
-	private currentStep = 0
-
 	constructor(events: Phaser.Events.EventEmitter, ecs: Registry) {
 		this.events = events
 		this.ecs = ecs
@@ -43,8 +41,11 @@ export class GraphDebugSystem implements ISystem {
 		// Primarily used at the start before the graph is loaded into our actionQueue to avoid race conditions
 		if (this.actionQueue) {
 			if (this.lastQueue != this.actionQueue.actions) {
-				if (this.actionQueue.actions.length > 0 && this.currentStep >= 0) {
-					this.stepThroughQueue(this.currentStep)
+				if (
+					this.actionQueue.actions.length > 0 &&
+					this.actionQueue.currentStep >= 0
+				) {
+					this.stepThroughQueue(this.actionQueue.currentStep)
 					// Store the action queue so we don't call this over and over again
 					this.lastQueue = this.actionQueue.actions
 				}

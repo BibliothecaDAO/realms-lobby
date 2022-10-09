@@ -8,6 +8,7 @@ export class ActionQueue implements IComponent {
 	public type = 'actionQueue'
 
 	public actions: Array<IAction>
+	public currentStep = 0
 
 	// By default action queue will be empty
 	constructor(actions: Array<IAction> = []) {

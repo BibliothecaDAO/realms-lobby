@@ -19,7 +19,6 @@ export class GraphDebugUI implements ISystem {
 	// Entity and reference to our action queue
 	private actionQueue: ActionQueue
 
-	private currentStep = 0
 	private indexes: Array<number> = []
 	// TODO - Migrate this to the actionQueue component
 
@@ -61,13 +60,13 @@ export class GraphDebugUI implements ISystem {
 		// console.log(this.actionQueue)
 		if (this.actionQueue) {
 			// Check if we should de-activate buttons
-			if (this.allowPrev && this.currentStep == 0) {
+			if (this.allowPrev && this.actionQueue.currentStep == 0) {
 				this.deactivatePrevUI()
 			}
 
 			if (
 				this.allowNext &&
-				this.currentStep == this.actionQueue.actions.length - 1
+				this.actionQueue.currentStep == this.actionQueue.actions.length - 1
 			) {
 				this.deactivateNextUI()
 			}
@@ -75,18 +74,20 @@ export class GraphDebugUI implements ISystem {
 			// Check if we should re-activate buttons
 			if (
 				!this.allowNext &&
-				this.currentStep < this.actionQueue.actions.length - 1
+				this.actionQueue.currentStep < this.actionQueue.actions.length - 1
 			) {
 				this.activateNextUI()
 			}
 
-			if (!this.allowPrev && this.currentStep > 0) {
+			if (!this.allowPrev && this.actionQueue.currentStep > 0) {
 				this.activatePrevUI()
 			}
 
 			// We've bumped a step
-			if (this.currentStepText.text != this.currentStep.toString()) {
-				this.currentStepText.setText(this.currentStep.toString())
+			if (
+				this.currentStepText.text != this.actionQueue.currentStep.toString()
+			) {
+				this.currentStepText.setText(this.actionQueue.currentStep.toString())
 			}
 		}
 	}
@@ -175,9 +176,9 @@ export class GraphDebugUI implements ISystem {
 				this.scene.input.setDefaultCursor('default')
 			})
 			.on('pointerup', () => {
-				this.currentStep++
-				this.currentStepText.setText(this.currentStep.toString())
-				this.events.emit('stepQueue', this.currentStep)
+				this.actionQueue.currentStep++
+				this.currentStepText.setText(this.actionQueue.currentStep.toString())
+				this.events.emit('stepQueue', this.actionQueue.currentStep)
 			})
 	}
 
@@ -197,9 +198,9 @@ export class GraphDebugUI implements ISystem {
 				this.scene.input.setDefaultCursor('default')
 			})
 			.on('pointerup', () => {
-				this.currentStep--
-				this.currentStepText.setText(this.currentStep.toString())
-				this.events.emit('stepQueue', this.currentStep)
+				this.actionQueue.currentStep--
+				this.currentStepText.setText(this.actionQueue.currentStep.toString())
+				this.events.emit('stepQueue', this.actionQueue.currentStep)
 			})
 	}
 
