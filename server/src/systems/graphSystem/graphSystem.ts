@@ -179,8 +179,4 @@ export class GraphSystem implements ISystem {
 			}
 		}
 	}
-
-	debug = (graph: Graph) => {
-		console.log(graph.edges)
-	}
 }

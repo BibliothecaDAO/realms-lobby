@@ -14,6 +14,9 @@ import { GraphDebugSystem } from '../systems/graphSystem/debug/graphDebugSystem'
 import { RenderNodeSystem } from '../systems/graphSystem/renderNodeSystem'
 import { RenderEdgeSystem } from '../systems/graphSystem/renderEdgeSystem'
 
+// UI Systems
+import { GraphDebugUI } from '../systems/graphSystem/debug/ui/graphDebugUI'
+
 // Components
 
 export class DebugScene extends Phaser.Scene {
@@ -47,7 +50,7 @@ export class DebugScene extends Phaser.Scene {
 		// Initialize subscenes
 
 		// Initialize Game Rendering systems
-		this.ecs.addSystem(new GraphDebugSystem(this.events, this.ecs, this))
+		this.ecs.addSystem(new GraphDebugSystem(this.events, this.ecs))
 		this.ecs.addSystem(new RenderNodeSystem(this.events, this.ecs, this))
 		this.ecs.addSystem(new RenderEdgeSystem(this.events, this.ecs, this))
 
@@ -55,12 +58,11 @@ export class DebugScene extends Phaser.Scene {
 		this.ecs.addSystem(new GraphSystem(this.events, this.ecs, this))
 		this.ecs.addSystem(new SpawnSystem(this.events, this.ecs, this))
 
+		// Initialize UI systems (HACK - Consider migrating this to its own component)
+		this.ecs.addSystem(new GraphDebugUI(this.events, this.ecs, this))
+
 		// Running this up front because the camera can scroll before setPollAlways has been called (Resulting in improper values)
 		this.input.setPollAlways() // The cursor should poll for new positions while the camera is moving
-
-		// Monitor for events
-
-		// Enable UI Scene
 
 		// We've loaded all our systems and event handlers so request data from server
 		this.events.emit('requestSnapshot')
