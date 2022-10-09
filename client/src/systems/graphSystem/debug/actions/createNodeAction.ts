@@ -1,9 +1,8 @@
-// createNodeCommand.ts - Proxies event: 'createNode' to Create a node in a graph
+// createNodeAction.ts - Proxies event: 'createNode' to Create a node in a graph
 
-import { ICommand } from './ICommand'
-import { Node } from '../../node'
+import { IAction } from './IAction'
 
-export class CreateNodeCommand implements ICommand {
+export class CreateNodeAction implements IAction {
 	public type = 'createNode'
 
 	private events: Phaser.Events.EventEmitter

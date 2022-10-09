@@ -1,8 +1,8 @@
-// _templateCommand.ts - Template to make it easier to create new commands
+// _templateAction.ts - Template to make it easier to create new actions
 
-import { ICommand } from './ICommand'
+import { IAction } from './IAction'
 
-export class TemplateCommand implements ICommand {
+export class TemplateAction implements IAction {
 	public type = 'template'
 
 	// Define any properties here (e.g. node)

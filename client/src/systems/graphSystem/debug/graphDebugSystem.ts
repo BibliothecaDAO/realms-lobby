@@ -1,19 +1,19 @@
-// template.ts - Copy/paste this to create a new system
+// graphDebugSystem.ts - Every graph calcuation goes into a queue that can be played back
+// Should help us debug the graph and eventually be re-used for player actions (e.g. instant replay)
 
 import Phaser from 'phaser'
 import { ISystem, Registry } from '../../../engine/registry'
-import { ICommand } from './commands/ICommand'
+import { IAction } from './actions/IAction'
 
 import { DEBUGCOLORS } from '../../../config'
 
 // Components
-import { Graph } from '../../../components/graph'
 import { Node } from '../node'
 import { ActionQueue } from '../../../components/actionQueue'
 
-// Define Commands
-import { CreateNodeCommand } from './commands/createNodeCommand'
-import { CreateEdgeCommand } from './commands/createEdgeCommand'
+// Define Actions
+import { CreateNodeAction } from './actions/createNodeAction'
+import { CreateEdgeAction } from './actions/createEdgeAction'
 
 export class GraphDebugSystem implements ISystem {
 	private events: Phaser.Events.EventEmitter
@@ -25,7 +25,7 @@ export class GraphDebugSystem implements ISystem {
 	private actionQueueEntity: string
 	private actionQueue: ActionQueue
 
-	private lastQueue: Array<ICommand> = []
+	private lastQueue: Array<IAction> = []
 
 	private currentStep = 0
 	private maxSteps
@@ -52,8 +52,8 @@ export class GraphDebugSystem implements ISystem {
 
 		// Listen for events
 		this.events.on('spawnZone', this.setupGraph)
-		this.events.on('createNode', this.enqueueCreateNode)
-		this.events.on('createEdge', this.enqueueCreateEdge)
+		// this.events.on('createNode', this.enqueueCreateNode)
+		// this.events.on('createEdge', this.enqueueCreateEdge)
 
 		this.scene.cameras.main.setBackgroundColor(DEBUGCOLORS.bg.toString())
 
@@ -123,27 +123,6 @@ export class GraphDebugSystem implements ISystem {
 		)
 	}
 
-	enqueueCreateNode = (
-		index: number,
-		container: Phaser.GameObjects.Container
-	) => {
-		// Add our node to the queue
-		this.actionQueue.actions.push(
-			new CreateNodeCommand(this.events, index, container)
-		)
-	}
-
-	enqueueCreateEdge = (
-		src: Node,
-		dst: Node,
-		container: Phaser.GameObjects.Container
-	) => {
-		// Add our node to the queue
-		this.actionQueue.actions.push(
-			new CreateEdgeCommand(this.events, src, dst, container)
-		)
-	}
-
 	// UI
 	setupControls = () => {
 		this.scene.add.text(230, 70, 'step', {
@@ -186,7 +165,7 @@ export class GraphDebugSystem implements ISystem {
 
 			// Only update text for nodes (not edges)
 			if (this.actionQueue.actions[i].type === 'createNode') {
-				const node = this.actionQueue.actions[i] as CreateNodeCommand
+				const node = this.actionQueue.actions[i] as CreateNodeAction
 				indexes.push(node.index)
 				this.graphText.setText(JSON.stringify(indexes))
 			}

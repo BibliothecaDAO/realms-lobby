@@ -7,8 +7,12 @@ import { COLORS } from '../../config'
 import { Graph } from '../../components/graph'
 import { Node } from './node'
 
+// Actions
+import { CreateNodeAction } from './debug/actions/createNodeAction'
+
 // Components
 import { Transform } from '../../components/transform'
+import { ActionQueue } from '../../components/actionQueue'
 
 export class RenderNodeSystem implements ISystem {
 	private ecs: Registry
@@ -44,6 +48,7 @@ export class RenderNodeSystem implements ISystem {
 		// We received a graph from the server, parse it and calculate ndoes
 		this.events.on('spawnZone', this.setupGraph)
 		this.events.on('setupPlayer', this.setupPlayer)
+		this.events.on('enqueueCreateNode', this.enqueueCreateNode)
 		this.events.on('executeCreateNode', this.drawNode)
 		this.events.on('clearCanvas', this.clearNodes)
 
@@ -54,6 +59,7 @@ export class RenderNodeSystem implements ISystem {
 		//
 	}
 
+	// Event Listeners
 	// Store the entity for our graph so we can pull it down when needed
 	setupGraph = (entity: string) => {
 		this.graphEntity = entity
@@ -64,6 +70,20 @@ export class RenderNodeSystem implements ISystem {
 		this.playerEntity = entity
 		const transform = this.ecs.getComponent(entity, 'transform') as Transform
 		this.selectNode(entity, transform.node)
+	}
+
+	enqueueCreateNode = (
+		index: number,
+		container: Phaser.GameObjects.Container
+	) => {
+		const actionQueue = this.ecs.getComponentsByType(
+			'actionQueue'
+		)[0] as ActionQueue
+
+		// Add our node to the queue
+		actionQueue.actions.push(
+			new CreateNodeAction(this.events, index, container)
+		)
 	}
 
 	drawNode = (index: number, container: Phaser.GameObjects.Container) => {

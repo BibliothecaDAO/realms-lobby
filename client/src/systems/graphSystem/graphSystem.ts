@@ -112,16 +112,11 @@ export class GraphSystem implements ISystem {
 	calculateNodes = (graph: Graph): void => {
 		// Start walking through each node
 		for (let i = 0; i < graph.nodes.size; i++) {
-			this.events.emit('createNode', graph.nodes.get(i).index, this.container)
-
-			// // let the rendering system know to draw this node
-			// this.events.emit(
-			// 	'createNode',
-			// 	index,
-			// 	graph.nodes.get(i).x,
-			// 	graph.nodes.get(i).y,
-			// 	this.container
-			// )
+			this.events.emit(
+				'enqueueCreateNode',
+				graph.nodes.get(i).index,
+				this.container
+			)
 		}
 	}
 
@@ -132,7 +127,7 @@ export class GraphSystem implements ISystem {
 			const dst = graph.edges[i].dst_identifier
 
 			this.events.emit(
-				'createEdge',
+				'enqueueCreateEdge',
 				graph.nodes.get(src),
 				graph.nodes.get(dst),
 				this.container
@@ -200,9 +195,5 @@ export class GraphSystem implements ISystem {
 				})
 			}
 		}
-	}
-
-	debug = (graph: Graph) => {
-		console.log(graph.edges)
 	}
 }

@@ -9,6 +9,10 @@ import { COLORS } from '../../config'
 
 // Components
 import { Graph } from '../../components/graph'
+import { ActionQueue } from '../../components/actionQueue'
+
+// Actions
+import { CreateEdgeAction } from './debug/actions/createEdgeAction'
 
 export class RenderEdgeSystem implements ISystem {
 	private ecs: Registry
@@ -37,6 +41,7 @@ export class RenderEdgeSystem implements ISystem {
 		// Save graph entity info so we can reference it later
 		this.events.on('spawnZone', this.setupGraph)
 		// We received a graph from the server, parse it and calculate ndoes
+		this.events.on('enqueueCreateEdge', this.enqueueCreateEdge)
 		this.events.on('executeCreateEdge', this.drawEdge)
 		this.events.on('clearCanvas', this.clearEdges)
 	}
@@ -49,6 +54,21 @@ export class RenderEdgeSystem implements ISystem {
 	setupGraph = (entity: string) => {
 		this.graphEntity = entity
 		this.graphics = this.scene.add.graphics()
+	}
+
+	enqueueCreateEdge = (
+		src: Node,
+		dst: Node,
+		container: Phaser.GameObjects.Container
+	) => {
+		const actionQueue = this.ecs.getComponentsByType(
+			'actionQueue'
+		)[0] as ActionQueue
+
+		// Add our node to the queue
+		actionQueue.actions.push(
+			new CreateEdgeAction(this.events, src, dst, container)
+		)
 	}
 
 	drawEdge = (
@@ -64,7 +84,7 @@ export class RenderEdgeSystem implements ISystem {
 
 		// Draw our line
 
-		this.graphics.lineStyle(2, 0xffffff)
+		this.graphics.lineStyle(2, edgeColor)
 		const tmp = this.graphics.lineBetween(src.x, src.y, dst.x, dst.y)
 		container.add(tmp).sendToBack(tmp) // Containers ignore setDepth so instead we send this object to the back of the queue
 	}
