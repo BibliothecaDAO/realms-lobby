@@ -9,7 +9,7 @@ import { World } from '../engine/world'
 import { GraphSystem } from '../systems/graphSystem/graphSystem'
 import { SpawnSystem } from '../systems/spawnSystem'
 
-import { GraphDebugSystem } from '../systems/graphSystem/debug/graphDebugSystem'
+import { ActionQueueSystem } from '../systems/actionQueueSystem'
 
 import { RenderNodeSystem } from '../systems/graphSystem/renderNodeSystem'
 import { RenderEdgeSystem } from '../systems/graphSystem/renderEdgeSystem'
@@ -50,7 +50,7 @@ export class DebugScene extends Phaser.Scene {
 		// Initialize subscenes
 
 		// Initialize Game Rendering systems
-		this.ecs.addSystem(new GraphDebugSystem(this.events, this.ecs))
+		this.ecs.addSystem(new ActionQueueSystem(this.events, this.ecs))
 		this.ecs.addSystem(new RenderNodeSystem(this.events, this.ecs, this))
 		this.ecs.addSystem(new RenderEdgeSystem(this.events, this.ecs, this))
 

@@ -2,18 +2,15 @@
 // Should help us debug the graph and eventually be re-used for player actions (e.g. instant replay)
 
 import Phaser from 'phaser'
-import { ISystem, Registry } from '../../../engine/registry'
-import { IAction } from './actions/IAction'
-
-import { DEBUGCOLORS } from '../../../config'
+import { ISystem, Registry } from '../engine/registry'
+import { IAction } from './graphSystem/debug/actions/IAction'
 
 // Components
-import { ActionQueue } from '../../../components/actionQueue'
+import { ActionQueue } from '../components/actionQueue'
 
 // Define Actions
-import { CreateNodeAction } from './actions/createNodeAction'
 
-export class GraphDebugSystem implements ISystem {
+export class ActionQueueSystem implements ISystem {
 	private events: Phaser.Events.EventEmitter
 	private ecs: Registry
 
