@@ -28,10 +28,22 @@ async function main() {
     // TODO: add connector back to graph
     const buildBranches = (seed, indexes) => {
         let graph = [];
-        let length = seed % max_edge_length
-
         for (let i = 0; i <= indexes.length; i++) {
+
+            // TODO: fix this
+            let length = seed % max_edge_length
+
+            // connect to random index
+            graph.push({ src_identifier: indexes[i], dst_identifier: indexes[i] * 100, weight: 0 });
+
+            // build branch
             graph.push(buildStraightLine(indexes[i] * 100, length + indexes[i] * 100))
+
+            // connect branch to random index
+            let connecting_node = (seed + indexes[i] * 123546) % num
+
+            // add connection back to graph
+            graph.push({ src_identifier: indexes[i] * 100 + length, dst_identifier: connecting_node, weight: 0 });
         }
         return graph.flatMap(x => x);
     }
