@@ -4,7 +4,7 @@ async function main() {
     // get random edges from indexes from seed
     // add branches starting from edges
     const num = 16;
-    const seed = 185323178;
+    const seed = 2153178;
     const max_edge_length = 8;
 
     const buildStraightLine = (start_index, length) => {
@@ -28,10 +28,10 @@ async function main() {
     // TODO: add connector back to graph
     const buildBranches = (seed, indexes) => {
         let graph = [];
-        for (let i = 0; i <= indexes.length; i++) {
+        for (let i = 0; i < indexes.length; i++) {
 
             // TODO: fix this
-            let length = seed % max_edge_length
+            let length = (seed + i * 123456789) % max_edge_length
 
             // connect to random index
             graph.push({ src_identifier: indexes[i], dst_identifier: indexes[i] * 100, weight: 0 });
@@ -47,6 +47,7 @@ async function main() {
         }
         return graph.flatMap(x => x);
     }
+
 
     const graph = buildStraightLine(0, num);
     const indexes = randomIndexes(seed, graph);
