@@ -3,8 +3,8 @@ async function main() {
     // build directed straight line of length of crypt
     // get random edges from indexes from seed
     // add branches starting from edges
-    const num = 16;
-    const seed = 2153178;
+    const num = 5;
+    const seed = 21253178;
     const max_edge_length = 8;
 
     const buildStraightLine = (start_index, length) => {
@@ -17,7 +17,10 @@ async function main() {
 
 
     const randomIndexes = (seed, graph) => {
-        let length = seed % graph.length
+        const l = graph.length
+
+        let length = seed % l
+
         let indexes = [];
         for (let i = 0; i < length; i++) {
             indexes.push(graph[(seed + i * 123456789) % graph.length].src_identifier);
@@ -57,7 +60,11 @@ async function main() {
 
     const graph_full = graph.concat(branches);
 
+    const entities = randomIndexes(seed, graph_full);
+
     console.log(graph_full);
+
+    console.log(entities);
 }
 
 main()
