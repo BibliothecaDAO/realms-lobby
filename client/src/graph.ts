@@ -25,7 +25,7 @@ async function main() {
         return indexes;
     }
 
-    // TODO: add connector back to graph
+
     const buildBranches = (seed, indexes) => {
         let graph = [];
         for (let i = 0; i < indexes.length; i++) {
@@ -47,6 +47,8 @@ async function main() {
         }
         return graph.flatMap(x => x);
     }
+
+    // TODO: add entity creation
 
 
     const graph = buildStraightLine(0, num);
