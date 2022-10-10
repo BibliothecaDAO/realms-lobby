@@ -6,9 +6,11 @@ import { ISystem, Registry } from '../../engine/registry'
 import { COLORS } from '../../config'
 import { Graph } from '../../components/graph'
 import { Node } from './node'
+import _ from 'lodash'
 
 // Actions
 import { CreateNodeAction } from './debug/actions/createNodeAction'
+import { DepthStepAction } from './debug/actions/depthStepAction'
 
 // Components
 import { Transform } from '../../components/transform'
@@ -254,26 +256,38 @@ export class RenderNodeSystem implements ISystem {
 		return false
 	}
 	// Returns the depth of a given node (via BFS)
-	getDepth = (node: Node, graph) => {
+	getDepth = (node: Node, graph: Graph) => {
 		const start = 0 // We always start at position zero
 		let depth = 0 // Keep track of the depth we've traversed
 
 		const visited = new Set()
 		const queue = [start]
+		// ACTION - Started search
+		// We need to use cloneDeep because the array changes value during our delayed queue
+		this.queueStep(node.index, _.cloneDeep(queue), '  start')
 
 		while (queue.length > 0) {
+			this.queueStep(node.index, _.cloneDeep(queue), `shift: ${queue[0]}`)
 			const _node = queue.shift()
 			if (_node === node.index) {
+				// ACTION - Found depth
+				this.queueStep(node.index, _.cloneDeep(queue), `found: ${depth}`)
 				return depth
 			}
 
 			const neighbors = graph.adjacency.get(_node)
+
 			if (neighbors) {
 				for (let i = 0; i < neighbors.length; i++) {
 					if (!visited.has(neighbors[i])) {
-						// We found a new node, add it to the queue
+						// ACTION - AddNeighborToQueue
 						depth++
 						visited.add(neighbors[i])
+						this.queueStep(
+							node.index,
+							_.cloneDeep(queue),
+							`unshift: ${neighbors[i]}`
+						)
 						queue.unshift(neighbors[i])
 					}
 				}
@@ -284,5 +298,17 @@ export class RenderNodeSystem implements ISystem {
 		}
 
 		return depth
+	}
+
+	// Queues up an action
+	queueStep = (index: number, queue: Array<number>, step: string) => {
+		const actionQueue = this.ecs.getComponentsByType(
+			'actionQueue'
+		)[0] as ActionQueue
+
+		// Add our node to the queue
+		actionQueue.actions.push(
+			new DepthStepAction(this.events, index, queue, step)
+		)
 	}
 }
