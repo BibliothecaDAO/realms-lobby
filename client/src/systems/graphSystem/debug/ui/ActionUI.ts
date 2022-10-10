@@ -1,4 +1,4 @@
-// graphDebugUI - Handles drawing any debug UI (e.g. arrows to traverse) when debugging a graph
+// ActionUI - UI to control an action queue (page forward/back within the queue)
 
 import Phaser from 'phaser'
 import { ISystem, Registry } from '../../../../engine/registry'
@@ -10,8 +10,9 @@ import { IAction } from '../actions/IAction'
 
 // Actions
 import { CreateNodeAction } from '../actions/createNodeAction'
+import { DepthStepAction } from '../actions/depthStepAction'
 
-export class GraphDebugUI implements ISystem {
+export class ActionUI implements ISystem {
 	private events: Phaser.Events.EventEmitter
 	private ecs: Registry
 	private scene: Phaser.Scene
@@ -32,7 +33,7 @@ export class GraphDebugUI implements ISystem {
 	private rightArrow: Phaser.GameObjects.Text
 
 	// Display current graph state
-	private graphText: Phaser.GameObjects.Text
+	private actionText: Phaser.GameObjects.Text
 
 	// Define keys
 	private rightArrowKey: Phaser.Input.Keyboard.Key
@@ -75,7 +76,6 @@ export class GraphDebugUI implements ISystem {
 
 	update() {
 		// Make sure we've initialized the action queue
-		// console.log(this.actionQueue)
 		if (this.actionQueue) {
 			// Check if we should de-activate buttons
 			if (this.allowPrev && this.actionQueue.currentStep == 0) {
@@ -121,7 +121,7 @@ export class GraphDebugUI implements ISystem {
 	// Store the entity for our graph so we can pull it down when needed
 	setupGraph = (entity: string) => {
 		// Place graph text on the screen
-		this.graphText = this.scene.add.text(
+		this.actionText = this.scene.add.text(
 			this.scene.cameras.main.width * 0.4,
 			this.scene.cameras.main.height / 9,
 			'[]',
@@ -137,12 +137,22 @@ export class GraphDebugUI implements ISystem {
 		this.indexes = []
 	}
 
+	// HACK - Render whatever custom data we want at the top of the screen
 	updateStep = (action: IAction) => {
 		// Only update text for nodes (not edges)
 		if (action.type === 'createNode') {
-			const node = action as CreateNodeAction
-			this.indexes.push(node.index)
-			this.graphText.setText(JSON.stringify(this.indexes))
+			const nodeAction = action as CreateNodeAction
+			this.indexes.push(nodeAction.index)
+			this.actionText.setText(JSON.stringify(this.indexes))
+		}
+		if (action.type === 'depthStep') {
+			const depthAction = action as DepthStepAction
+
+			// Add final depth to our list
+			if (depthAction.step.startsWith('found')) {
+				this.indexes.push(JSON.parse(depthAction.step.split(' ')[1]))
+				this.actionText.setText(JSON.stringify(this.indexes))
+			}
 		}
 	}
 
@@ -240,7 +250,6 @@ export class GraphDebugUI implements ISystem {
 	}
 
 	nextStep = () => {
-		console.log('got here')
 		this.actionQueue.currentStep++
 		this.currentStepText.setText(this.actionQueue.currentStep.toString())
 		this.events.emit('stepQueue', this.actionQueue.currentStep)

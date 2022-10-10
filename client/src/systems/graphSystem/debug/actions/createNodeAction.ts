@@ -22,7 +22,7 @@ export class CreateNodeAction implements IAction {
 	}
 
 	execute = () => {
-		console.log('we executin')
+		// TODO - Migrate 'create node' (draw node) here
 		this.events.emit('executeCreateNode', this.index, this.container)
 	}
 }

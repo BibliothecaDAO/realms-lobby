@@ -72,15 +72,20 @@ export class ActionQueueSystem implements ISystem {
 	stepThroughQueue = (index: number) => {
 		// Clear the queue and re-draw from scratch
 
+		// HACK - removed this as we're not redrawing atm
 		// Destroy all our game objects and redraw them (vs an undo step)
-		this.events.emit('clearCanvas')
+		// this.events.emit('clearCanvas')
 
 		// Process items in the queue
-		for (let i = 0; i <= index; i++) {
-			this.actionQueue.actions[i].execute()
-			this.events.emit('tookAction', this.actionQueue.actions[i])
+		// for (let i = 0; i <= index; i++) {
+		// this.actionQueue.actions[i].execute()
+		// this.events.emit('tookAction', this.actionQueue.actions[i])
 
-			// TODO - Test edge rendering
-		}
+		// TODO - Test edge rendering
+		// }
+
+		// HACK - just step through each action so we avoid dupe queues
+		this.actionQueue.actions[index].execute()
+		this.events.emit('tookAction', this.actionQueue.actions[index])
 	}
 }

@@ -78,7 +78,8 @@ export class GraphSystem implements ISystem {
 		)
 
 		this.calculateNodes(graph)
-		this.calculateVertices(graph)
+		// this.calculateVertices(graph)
+		this.calculateDepths(graph)
 	}
 
 	createVertices = (graph: Graph): void => {
@@ -113,7 +114,8 @@ export class GraphSystem implements ISystem {
 		// Start walking through each node
 		for (let i = 0; i < graph.nodes.size; i++) {
 			this.events.emit(
-				'enqueueCreateNode',
+				'executeCreateNode',
+				// 'enqueueCreateNode', // Toggle this to render nodes step by step
 				graph.nodes.get(i).index,
 				this.container
 			)
@@ -125,14 +127,23 @@ export class GraphSystem implements ISystem {
 		for (let i = 0; i < graph.edges.length; i++) {
 			const src = graph.edges[i].src_identifier
 			const dst = graph.edges[i].dst_identifier
-
 			this.events.emit(
-				'enqueueCreateEdge',
+				'executeCreateEdge',
+				// 'enqueueCreateEdge', // Toggle this to render edges step by step
 				graph.nodes.get(src),
 				graph.nodes.get(dst),
 				this.container
 			)
-			// this.events.emit('testevent', src, dst, this.container)
+		}
+	}
+
+	calculateDepths = (graph: Graph): void => {
+		// Loop through each edge (vertices)
+		for (let i = 0; i < graph.nodes.size; i++) {
+			const node = graph.nodes.get(i)
+
+			// TODO - Calculate depths initially and then render them via this action?
+			this.events.emit('getDepth', node, graph)
 		}
 	}
 

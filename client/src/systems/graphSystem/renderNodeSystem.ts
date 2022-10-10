@@ -50,9 +50,15 @@ export class RenderNodeSystem implements ISystem {
 		this.events.on('setupPlayer', this.setupPlayer)
 		this.events.on('enqueueCreateNode', this.enqueueCreateNode)
 		this.events.on('executeCreateNode', this.drawNode)
-		this.events.on('clearCanvas', this.clearNodes)
 
-		this.events.on('moveSuccess', this.selectNode)
+		// Clear all nodes from the screen so we can redraw them
+		// HACK - We redraw the whole screen instead of implementing an undo
+		// this.events.on('clearCanvas', this.clearNodes)
+
+		// Move the player to a new node (HACK - toggled off so we can debug the graph)
+		// this.events.on('moveSuccess', this.selectNode)
+		// HACK - allow us to call 'select node' from elsewhere
+		this.events.on('selectNode', this.selectNode)
 	}
 
 	update = () => {
@@ -69,7 +75,8 @@ export class RenderNodeSystem implements ISystem {
 	setupPlayer = (entity: string) => {
 		this.playerEntity = entity
 		const transform = this.ecs.getComponent(entity, 'transform') as Transform
-		this.selectNode(entity, transform.node)
+		// HACK - deselected node
+		// this.selectNode(entity, transform.node)
 	}
 
 	enqueueCreateNode = (
@@ -128,8 +135,6 @@ export class RenderNodeSystem implements ISystem {
 			.setFontSize(20)
 		this.nodeTexts.set(index, text)
 		container.add(text)
-
-		// TODO - Make sure this renders correctly
 	}
 
 	clearNodes = () => {
@@ -169,7 +174,8 @@ export class RenderNodeSystem implements ISystem {
 			})
 
 			// Color other nodes so player knows where they can go
-			this.colorValidNodes(index)
+			// HACK - Commented this out so we could override node colors for debugging getDepth
+			// this.colorValidNodes(index)
 		}
 	}
 
