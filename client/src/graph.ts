@@ -10,7 +10,7 @@ async function main() {
     const buildStraightLine = (start_index, length) => {
         let graph = [];
         for (let i = start_index; i <= length; i++) {
-            graph.push({ src_identifier: i, dst_identifier: i + 1, weight: 0 });
+            graph.push({ src_identifier: i, dst_identifier: i + 1, weight: 1 });
         }
         return graph
     }
@@ -37,7 +37,7 @@ async function main() {
             let length = (seed + i * 123456789) % max_edge_length
 
             // connect to random index
-            graph.push({ src_identifier: indexes[i], dst_identifier: indexes[i] * 100, weight: 0 });
+            graph.push({ src_identifier: indexes[i], dst_identifier: indexes[i] * 100, weight: 1 });
 
             // build branch
             graph.push(buildStraightLine(indexes[i] * 100, (length - 1) + indexes[i] * 100))
@@ -48,7 +48,7 @@ async function main() {
             console.log(connecting_node)
 
             // add connection back to graph
-            graph.push({ src_identifier: indexes[i] * 100 + length, dst_identifier: connecting_node, weight: 0 });
+            graph.push({ src_identifier: indexes[i] * 100 + length, dst_identifier: connecting_node, weight: 1 });
         }
         return graph.flatMap(x => x);
     }
