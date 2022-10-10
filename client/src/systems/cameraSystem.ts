@@ -38,6 +38,8 @@ export class CameraSystem implements ISystem {
 		// If we call zoom in the game constructor, followPlayer breaks.
 		this.scene.cameras.main.zoomTo(4, 100)
 
+		// HACK - we don't have an x, y for the zone yet
+		/*
 		// Set bounds of world to the same size as our tilemap.
 		// This allows us to call world coordinates (e.g. via mouse pointer)
 		this.scene.physics.world.setBounds(
@@ -53,7 +55,7 @@ export class CameraSystem implements ISystem {
 			0,
 			zone.width * GRID_SIZE,
 			zone.height * GRID_SIZE
-		)
+		) */
 	}
 
 	// Follow the player as they move around

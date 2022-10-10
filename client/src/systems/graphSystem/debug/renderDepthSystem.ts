@@ -76,8 +76,6 @@ export class RenderDepthSystem implements ISystem {
 			yOffset + node.y + queueYOffset
 		)
 
-		console.log('setText')
-		console.log(queue)
 		this.queueText.setText(queue.toString())
 	}
 }

@@ -77,6 +77,7 @@ export class RenderNodeSystem implements ISystem {
 	setupPlayer = (entity: string) => {
 		this.playerEntity = entity
 		const transform = this.ecs.getComponent(entity, 'transform') as Transform
+
 		// HACK - deselected node
 		// this.selectNode(entity, transform.node)
 	}
@@ -264,10 +265,12 @@ export class RenderNodeSystem implements ISystem {
 		const queue = [start]
 		// ACTION - Started search
 		// We need to use cloneDeep because the array changes value during our delayed queue
+
 		this.queueStep(node.index, _.cloneDeep(queue), '  start')
 
 		while (queue.length > 0) {
 			this.queueStep(node.index, _.cloneDeep(queue), `shift: ${queue[0]}`)
+
 			const _node = queue.shift()
 			if (_node === node.index) {
 				// ACTION - Found depth
@@ -306,6 +309,7 @@ export class RenderNodeSystem implements ISystem {
 			'actionQueue'
 		)[0] as ActionQueue
 
+		console.log('wat')
 		// Add our node to the queue
 		actionQueue.actions.push(
 			new DepthStepAction(this.events, index, queue, step)

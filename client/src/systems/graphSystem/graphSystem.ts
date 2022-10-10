@@ -76,9 +76,9 @@ export class GraphSystem implements ISystem {
 			this.scene.cameras.main.centerX,
 			this.scene.cameras.main.centerY
 		)
-
 		this.calculateNodes(graph)
-		// this.calculateVertices(graph)
+
+		this.calculateVertices(graph)
 		this.calculateDepths(graph)
 	}
 
