@@ -60,11 +60,7 @@ export class SpawnSystem implements ISystem {
 				component = new Transform(components[i].node)
 				break
 			case 'zone':
-				component = new Zone(
-					components[i].width,
-					components[i].height,
-					components[i].graph
-				)
+				component = new Zone(components[i].seed, components[i].length)
 				break
 			default:
 				throw new Error(`component '${components[i].type}' not found`)

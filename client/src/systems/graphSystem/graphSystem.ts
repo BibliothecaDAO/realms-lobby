@@ -137,7 +137,6 @@ export class GraphSystem implements ISystem {
 	drawNodes = (graph: Graph): void => {
 		// Start walking through each node
 		for (const [key, value] of graph.nodes) {
-			console.log(graph.nodes.get(key).index)
 			this.events.emit(
 				'executeCreateNode',
 				// 'enqueueCreateNode', // Toggle this to render nodes step by step
@@ -148,8 +147,6 @@ export class GraphSystem implements ISystem {
 	}
 
 	drawEdges = (graph: Graph): void => {
-		console.log('wt')
-
 		// Loop through each edge (vertices)
 		for (let i = 0; i < graph.edges.length; i++) {
 			const src = graph.edges[i].src_identifier

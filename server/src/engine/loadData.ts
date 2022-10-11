@@ -80,7 +80,7 @@ export class LoadData {
 
 				// Make sure we have a graph defined (otherwise zone will fail)
 				if (components[i].type === 'zone') {
-					if (components[i].graph) {
+					if (components[i].seed && components[i].length) {
 						hasGraph = true
 					}
 				}
