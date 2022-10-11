@@ -1,10 +1,9 @@
-async function main() {
+async function main(seed, length) {
 
     // build directed straight line of length of crypt
     // get random edges from indexes from seed
     // add branches starting from edges
-    const num = 5;
-    const seed = 312531178;
+
     const max_edge_length = 8;
 
     const buildStraightLine = (start_index, length) => {
@@ -43,7 +42,7 @@ async function main() {
             graph.push(buildStraightLine(indexes[i] * 100, (length - 1) + indexes[i] * 100))
 
             // connect branch to random index - TODO: this is not right
-            let connecting_node = (seed + i * 123456789) % num
+            let connecting_node = (seed + i * 123456789) % length
 
             console.log(connecting_node)
 
@@ -56,7 +55,7 @@ async function main() {
     // TODO: add entity creation
 
 
-    const graph = buildStraightLine(0, num);
+    const graph = buildStraightLine(0, length);
     const indexes = randomIndexes(seed, graph);
     const branches = buildBranches(seed, indexes);
 
@@ -66,10 +65,10 @@ async function main() {
     console.log('indexes', indexes)
     console.log(graph_full);
 
-    console.log(entities);
+    return { graph: graph_full, entities: entities };
 }
 
-main()
+main(312531178, 5)
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);
