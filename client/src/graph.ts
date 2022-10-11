@@ -43,7 +43,7 @@ async function main() {
             graph.push(buildStraightLine(indexes[i] * 100, (length - 1) + indexes[i] * 100))
 
             // connect branch to random index - TODO: this is not right
-            let connecting_node = (seed + indexes[i] * 123546) % num
+            let connecting_node = (seed + i * 123456789) % num
 
             console.log(connecting_node)
 
