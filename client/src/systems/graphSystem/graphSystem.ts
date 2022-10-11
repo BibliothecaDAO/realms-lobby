@@ -4,13 +4,19 @@
 import { GameObjects } from 'phaser'
 import { ISystem, Registry } from '../../engine/registry'
 
+import _ from 'lodash'
+
 // Components
 import { Zone } from '../../components/zone'
 import { Graph } from '../../components/graph'
+import { ActionQueue } from '../../components/actionQueue'
 
 // Graph data structures
 import { Edge } from './edge'
 import { Node } from './node'
+
+// Actions
+import { DepthStepAction } from './debug/actions/depthStepAction'
 
 export class GraphSystem implements ISystem {
 	private events: Phaser.Events.EventEmitter
@@ -36,6 +42,12 @@ export class GraphSystem implements ISystem {
 		// Event Handlers
 		// We received a graph from the server, parse it and calculate ndoes
 		this.events.on('spawnZone', this.setupGraph)
+
+		// Create area where we'll draw our graph
+		this.container = this.scene.add.container(
+			this.scene.cameras.main.centerX,
+			this.scene.cameras.main.centerY
+		)
 	}
 
 	update = () => {
@@ -46,11 +58,7 @@ export class GraphSystem implements ISystem {
 	setupGraph = (entity: string, component: Zone): void => {
 		const edges: Edge[] = []
 
-		// Sort graph by src (first) then destination
-		// component.graph.sort((a, b) => {
-		// 	return a[0] - b[0] || a[1] - b[1]
-		// })
-
+		// Get list of edges
 		for (let i = 0; i < component.graph.length; i++) {
 			const edge = new Edge(
 				component.graph[i][0],
@@ -65,24 +73,26 @@ export class GraphSystem implements ISystem {
 		this.graphEntity = entity
 		this.ecs.addComponent(entity, graph)
 
-		// Create adjacency list that we can traverse
-		this.createVertices(graph)
+		// Get Adjacency List for all nodes (so we can calculate nodes and edges)
+		this.getAdjacencyList(graph)
 
-		// Identify nodes via breath first search
-		this.breadthFirst(graph)
+		// Identify nodes via depth first search
+		this.depthFirst(graph)
 
-		// create a container which will adjust the position of all child gameobjects inside it
-		this.container = this.scene.add.container(
-			this.scene.cameras.main.centerX,
-			this.scene.cameras.main.centerY
-		)
-		this.calculateNodes(graph)
+		// Calculate depths for each node (so we can space them out horizontally / vertically)
+		this.getDepths(graph)
 
-		this.calculateVertices(graph)
-		this.calculateDepths(graph)
+		// Calculate a depth list so we know how many nodes are at a given depth (and can space them vertically)
+		this.getDepthList(graph)
+
+		// Draw our nodes
+		this.drawNodes(graph)
+
+		// Draw edges between nodes
+		this.drawEdges(graph)
 	}
 
-	createVertices = (graph: Graph): void => {
+	getAdjacencyList = (graph: Graph): void => {
 		// Walk through each node of the 'dungeon' and define connections between edges
 		// Create an adjacency list (e.g. node 0 -> 1, 2)
 		// Example: { 0 => [ 1 ], 1 => [ 2, 4 ], 2 => [ 3 ], 3 => [ 4 ] }
@@ -100,29 +110,46 @@ export class GraphSystem implements ISystem {
 			}
 			// Add destination to adjacency list
 			graph.adjacency.get(src).push(dst)
-
-			if (!graph.reverseAdjacency.get(dst)) {
-				graph.reverseAdjacency.set(dst, [])
-			}
-
-			// Add source to reverse adjacency list
-			graph.reverseAdjacency.get(dst).push(src)
 		}
 	}
 
-	calculateNodes = (graph: Graph): void => {
+	getDepths = (graph: Graph): void => {
+		// Calculate depth for each individual node
+		for (const [key, value] of graph.nodes) {
+			const depth = this.calculateDepth(graph.nodes.get(key), graph)
+			graph.depth.set(key, depth)
+		}
+	}
+
+	getDepthList = (graph: Graph): void => {
+		// Generate a depth list (chcek how many nodes have a given depth)
+		for (const [key, value] of graph.depth) {
+			// Make sure we have an array for this depth
+			if (!graph.depthList.get(value)) {
+				graph.depthList.set(value, [])
+			}
+
+			// Add this node to depth list
+			graph.depthList.get(value).push(key)
+		}
+	}
+
+	drawNodes = (graph: Graph): void => {
 		// Start walking through each node
-		for (let i = 0; i < graph.nodes.size; i++) {
+		for (const [key, value] of graph.nodes) {
+			console.log(graph.nodes.get(key).index)
 			this.events.emit(
 				'executeCreateNode',
 				// 'enqueueCreateNode', // Toggle this to render nodes step by step
-				graph.nodes.get(i).index,
+				graph.nodes.get(key).index,
 				this.container
 			)
 		}
 	}
 
-	calculateVertices = (graph: Graph): void => {
+	drawEdges = (graph: Graph): void => {
+		console.log('wt')
+
 		// Loop through each edge (vertices)
 		for (let i = 0; i < graph.edges.length; i++) {
 			const src = graph.edges[i].src_identifier
@@ -134,16 +161,6 @@ export class GraphSystem implements ISystem {
 				graph.nodes.get(dst),
 				this.container
 			)
-		}
-	}
-
-	calculateDepths = (graph: Graph): void => {
-		// Loop through each edge (vertices)
-		for (let i = 0; i < graph.nodes.size; i++) {
-			const node = graph.nodes.get(i)
-
-			// TODO - Calculate depths initially and then render them via this action?
-			this.events.emit('getDepth', node, graph)
 		}
 	}
 
@@ -171,7 +188,7 @@ export class GraphSystem implements ISystem {
 				graph.adjacency.get(currentVertex).forEach((neighbor) => {
 					if (!visited[neighbor]) {
 						visited[neighbor] = true
-						queue.push(neighbor)
+						queue.unshift(neighbor)
 					}
 				})
 			}
@@ -206,5 +223,74 @@ export class GraphSystem implements ISystem {
 				})
 			}
 		}
+	}
+
+	// Returns the depth of a given node (via BFS)
+	calculateDepth = (node: Node, graph: Graph) => {
+		const start = 0 // We always start at position zero
+		let depth = 0 // Keep track of the depth we've traversed
+
+		const visited = new Set()
+		const queue = [start]
+		// ACTION - Started search
+		// We need to use cloneDeep because the array changes value during our delayed queue
+		this.queueStep(node.index, _.cloneDeep(queue), depth, '  start')
+
+		while (queue.length > 0) {
+			this.queueStep(
+				node.index,
+				_.cloneDeep(queue),
+				depth,
+				`remove: ${queue[0]}`
+			)
+
+			const _node = queue.shift()
+
+			if (_node === node.index) {
+				// ACTION - Found depth
+				this.queueStep(node.index, _.cloneDeep(queue), depth, `found: ${depth}`)
+				return depth
+			}
+
+			const neighbors = graph.adjacency.get(_node)
+
+			// We need to go one level deeper
+			if (neighbors) {
+				depth++
+				for (let i = 0; i < neighbors.length; i++) {
+					if (!visited.has(neighbors[i])) {
+						// ACTION - AddNeighborToQueue
+						// depth++
+						visited.add(neighbors[i])
+						this.queueStep(
+							node.index,
+							_.cloneDeep(queue),
+							depth,
+							`add: ${neighbors[i]}`
+						)
+						queue.unshift(neighbors[i])
+					}
+				}
+			}
+		}
+
+		return depth
+	}
+
+	// Queues up an action
+	queueStep = (
+		index: number,
+		queue: Array<number>,
+		depth: number,
+		step: string
+	) => {
+		const actionQueue = this.ecs.getComponentsByType(
+			'actionQueue'
+		)[0] as ActionQueue
+
+		// Add our node to the queue
+		actionQueue.actions.push(
+			new DepthStepAction(this.events, index, queue, depth, step)
+		)
 	}
 }

@@ -23,8 +23,6 @@ export class World {
 		this.events.on('snapshot', (playerId: string, state) => {
 			// Populate each entity
 			for (const entity of Object.keys(state)) {
-				console.log(state[entity])
-
 				this.events.emit('spawn', entity, state[entity])
 			}
 

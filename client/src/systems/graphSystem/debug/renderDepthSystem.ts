@@ -18,6 +18,7 @@ export class RenderDepthSystem implements ISystem {
 	// Gameobject that describes the current step
 	public stepText: GameObjects.Text
 	public queueText: GameObjects.Text
+	public depthText: GameObjects.Text
 
 	// 'global' values from graph system
 	private graphEntity: string
@@ -45,6 +46,11 @@ export class RenderDepthSystem implements ISystem {
 			fontSize: '16px',
 			color: COLORS.primary.toString(),
 		})
+
+		this.depthText = this.scene.add.text(0, 0, '', {
+			fontSize: '16px',
+			color: COLORS.secondary.toString(),
+		})
 	}
 
 	update = () => {
@@ -57,7 +63,12 @@ export class RenderDepthSystem implements ISystem {
 		this.graphEntity = entity
 	}
 
-	displayStep = (index: number, queue: Array<number>, step: string) => {
+	displayStep = (
+		index: number,
+		queue: Array<number>,
+		depth: number,
+		step: string
+	) => {
 		// HACK - to avoid passing containers around
 		const xOffset = 680
 		const yOffset = 320
@@ -77,5 +88,15 @@ export class RenderDepthSystem implements ISystem {
 		)
 
 		this.queueText.setText(queue.toString())
+
+		// Display the current depth
+		const depthXOffset = 37
+		const depthYOffset = 130
+		this.depthText.setPosition(
+			xOffset + node.x + depthXOffset,
+			yOffset + node.y + depthYOffset
+		)
+
+		this.depthText.setText(depth.toString())
 	}
 }

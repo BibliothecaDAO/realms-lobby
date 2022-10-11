@@ -5,8 +5,6 @@ import { GameObjects } from 'phaser'
 import { ISystem, Registry } from '../../engine/registry'
 import { COLORS } from '../../config'
 import { Graph } from '../../components/graph'
-import { Node } from './node'
-import _ from 'lodash'
 
 // Actions
 import { CreateNodeAction } from './debug/actions/createNodeAction'
@@ -104,18 +102,30 @@ export class RenderNodeSystem implements ISystem {
 		const yOffset = 100
 
 		// Create a circle for the node
-		// Calculate the depth of the node
-		const depth = this.getDepth(graph.nodes.get(index), graph)
-
+		// Spread nodes out based on depth in graph.
+		// E.g. root node is at depth 0, next set of nodes is at depth 1 (to the right), etc.
+		// This gives us a left -> right view of our graph.
+		const depth = graph.depth.get(index)
 		const x = xOffset * depth
-		graph.nodes.get(index).x = x
+		graph.nodes.get(index).x = x // Set the x value for the node for future use
 
-		// Calculate how many edges each node has - more edges means it gets drawn further down the screen
-		const numEdges = graph.reverseAdjacency.get(graph.nodes.get(index).index)
-			? graph.reverseAdjacency.get(graph.nodes.get(index).index).length
-			: 2
+		// Determine how many nodes we should draw at this depth
+		// Space them out evenly based on the number of nodes at this depth
+		// e.g. if we have 3 nodes at depth 1, we should draw them at 1/4, 2/4, and 3/4 of the canvas height
 
-		const y = yOffset * (numEdges - 1) // we subtract 1 so our graph is centered vertically
+		// Get the number of nodes at this depth
+		const depthList = graph.depthList.get(depth)
+		const numNodesWithDepth = depthList.length
+
+		// Determine this node's position at this depth
+		const depthIndex = depthList.indexOf(index)
+
+		// graph.reverseAdjacency.get(graph.nodes.get(index).index)
+		// 	? graph.reverseAdjacency.get(graph.nodes.get(index).index).length
+		// 	: 2
+
+		// TODO - Figure out how to increment within a depth list
+		const y = yOffset * (depthIndex - 1) // we subtract 1 so our graph is centered vertically
 		graph.nodes.get(index).y = y
 
 		// Save our container for future use
@@ -255,64 +265,5 @@ export class RenderNodeSystem implements ISystem {
 		}
 
 		return false
-	}
-	// Returns the depth of a given node (via BFS)
-	getDepth = (node: Node, graph: Graph) => {
-		const start = 0 // We always start at position zero
-		let depth = 0 // Keep track of the depth we've traversed
-
-		const visited = new Set()
-		const queue = [start]
-		// ACTION - Started search
-		// We need to use cloneDeep because the array changes value during our delayed queue
-
-		this.queueStep(node.index, _.cloneDeep(queue), '  start')
-
-		while (queue.length > 0) {
-			this.queueStep(node.index, _.cloneDeep(queue), `shift: ${queue[0]}`)
-
-			const _node = queue.shift()
-			if (_node === node.index) {
-				// ACTION - Found depth
-				this.queueStep(node.index, _.cloneDeep(queue), `found: ${depth}`)
-				return depth
-			}
-
-			const neighbors = graph.adjacency.get(_node)
-
-			if (neighbors) {
-				for (let i = 0; i < neighbors.length; i++) {
-					if (!visited.has(neighbors[i])) {
-						// ACTION - AddNeighborToQueue
-						depth++
-						visited.add(neighbors[i])
-						this.queueStep(
-							node.index,
-							_.cloneDeep(queue),
-							`unshift: ${neighbors[i]}`
-						)
-						queue.unshift(neighbors[i])
-					}
-				}
-			} else {
-				// We didn't encounter a subgraph so we should backtrack
-				depth--
-			}
-		}
-
-		return depth
-	}
-
-	// Queues up an action
-	queueStep = (index: number, queue: Array<number>, step: string) => {
-		const actionQueue = this.ecs.getComponentsByType(
-			'actionQueue'
-		)[0] as ActionQueue
-
-		console.log('wat')
-		// Add our node to the queue
-		actionQueue.actions.push(
-			new DepthStepAction(this.events, index, queue, step)
-		)
 	}
 }
