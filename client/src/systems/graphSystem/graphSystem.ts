@@ -58,6 +58,40 @@ export class GraphSystem implements ISystem {
 	setupGraph = (entity: string, component: Zone): void => {
 		const edges: Edge[] = []
 
+		// HACK - plug in tmp variable
+		component.graph = [
+			[0, 1, 1],
+			[1, 2, 1],
+			[2, 3, 1],
+			[3, 4, 1],
+			[4, 5, 1],
+			[5, 6, 1],
+			[6, 7, 1],
+			[7, 8, 1],
+			[8, 9, 1],
+			[9, 10, 1],
+			[10, 11, 1],
+			[3, 300, 1],
+			[300, 301, 1],
+			[301, 302, 1],
+			[302, 0, 1],
+			[8, 800, 1],
+			[800, 801, 1],
+			[801, 802, 1],
+			[802, 803, 1],
+			[803, 804, 1],
+			[804, 805, 1],
+			[805, 806, 1],
+			[806, 807, 1],
+			[807, 2, 1],
+			[2, 200, 1],
+			[200, 201, 1],
+			[201, 202, 1],
+			[202, 203, 1],
+			[203, 204, 1],
+			// [204, 0, 1],
+		]
+
 		// Get list of edges
 		for (let i = 0; i < component.graph.length; i++) {
 			const edge = new Edge(
@@ -73,7 +107,7 @@ export class GraphSystem implements ISystem {
 		this.graphEntity = entity
 		this.ecs.addComponent(entity, graph)
 
-		// Get Adjacency List for all nodes (so we can calculate nodes and edges)
+		// Get Adjacency List & reverse Adjacency List for all nodes (so we can calculate nodes and edges)
 		this.getAdjacencyList(graph)
 
 		// Identify nodes via depth first search
@@ -112,6 +146,13 @@ export class GraphSystem implements ISystem {
 			}
 			// Add destination to adjacency list
 			graph.adjacency.get(src).push(dst)
+
+			// Check if node is already in reverse adjacency list
+			if (!graph.reverseAdjacency.get(dst)) {
+				graph.reverseAdjacency.set(dst, [])
+			}
+			// Add destination to adjacency list
+			graph.reverseAdjacency.get(dst).push(src)
 		}
 	}
 

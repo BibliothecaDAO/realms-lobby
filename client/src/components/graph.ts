@@ -10,6 +10,7 @@ export class Graph implements IComponent {
 	public edges: Edge[] = []
 	public nodes: Map<number, Node> = new Map()
 	public adjacency: Map<number, number[]> = new Map()
+	public reverseAdjacency: Map<number, number[]> = new Map()
 	public depth: Map<number, number> = new Map()
 	public depthList: Map<number, number[]> = new Map()
 

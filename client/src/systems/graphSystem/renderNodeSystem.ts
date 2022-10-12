@@ -97,8 +97,8 @@ export class RenderNodeSystem implements ISystem {
 		const graph = this.ecs.getComponent(this.graphEntity, 'graph') as Graph
 
 		// How far from the edge of the canvas should we draw each node?
-		const xOffset = 100
-		const yOffset = 100
+		const xOffset = 150
+		const yOffset = 150
 
 		// Create a circle for the node
 		// Spread nodes out based on depth in graph.
@@ -118,12 +118,17 @@ export class RenderNodeSystem implements ISystem {
 		// Determine this node's position at this depth
 		const depthIndex = depthList.indexOf(index)
 
-		// graph.reverseAdjacency.get(graph.nodes.get(index).index)
-		// 	? graph.reverseAdjacency.get(graph.nodes.get(index).index).length
-		// 	: 2
+		let y
+		if (graph.reverseAdjacency.get(0).includes(index)) {
+			// HACK - This connects to the root node, draw it at the top
+			y = yOffset * (depthIndex - 2)
+		} else if (graph.reverseAdjacency.get(index).length > 1) {
+			// HACK - Catch nodes with multiple adjacencies
+			y = yOffset * depthIndex + 1
+		} else {
+			y = yOffset * (depthIndex - 1) // we subtract 1 so our graph is centered vertically
+		}
 
-		// TODO - Figure out how to increment within a depth list
-		const y = yOffset * (depthIndex - 1) // we subtract 1 so our graph is centered vertically
 		graph.nodes.get(index).y = y
 
 		// Save our container for future use
@@ -159,7 +164,6 @@ export class RenderNodeSystem implements ISystem {
 	}
 
 	selectNode = (uid: string, index: number) => {
-		console.log('got here')
 		const graph = this.ecs.getComponent(this.graphEntity, 'graph') as Graph
 		if (graph != undefined) {
 			// Remove old selection

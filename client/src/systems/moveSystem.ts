@@ -43,8 +43,6 @@ export class MoveSystem implements ISystem {
 	}
 
 	selectNode = (entity: string, index: number) => {
-		console.log(entity)
-		console.log(index)
 		// Note: entity is null here
 		this.transform.node = index
 	}
