@@ -28,6 +28,7 @@ export class World {
 
 			// TODO - Dedupe these events
 			// Make sure we flag our player's entity (e.g. attach player component)
+
 			this.events.emit('setupPlayer', playerId)
 		})
 	}

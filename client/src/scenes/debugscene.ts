@@ -4,21 +4,24 @@ import { Registry } from '../engine/registry'
 import { World } from '../engine/world'
 
 // Initialize sub-scenes
-import { GameUIScene } from './uiscene'
 
 // Initialize systems
 import { GraphSystem } from '../systems/graphSystem/graphSystem'
 import { SpawnSystem } from '../systems/spawnSystem'
-import { PlayerSystem } from '../systems/playerSystem'
-import { MoveSystem } from '../systems/moveSystem'
-
+import { ActionQueueSystem } from '../systems/actionQueueSystem'
 import { RenderNodeSystem } from '../systems/graphSystem/renderNodeSystem'
 import { RenderEdgeSystem } from '../systems/graphSystem/renderEdgeSystem'
+import { RenderDepthSystem } from '../systems/graphSystem/debug/renderDepthSystem'
+import { CameraSystem } from '../systems/cameraSystem'
+import { MoveSystem } from '../systems/moveSystem'
+
+// UI Systems
+import { ActionUI } from '../systems/graphSystem/debug/ui/ActionUI'
 
 // Components
 
-export class GraphScene extends Phaser.Scene {
-	public static Name = 'graph-scene'
+export class DebugScene extends Phaser.Scene {
+	public static Name = 'debug-scene'
 
 	// Event bus
 	public events: Phaser.Events.EventEmitter
@@ -30,7 +33,7 @@ export class GraphScene extends Phaser.Scene {
 	public world: World
 
 	constructor() {
-		super(GraphScene.Name)
+		super(DebugScene.Name)
 	}
 
 	preload(): void {
@@ -46,29 +49,24 @@ export class GraphScene extends Phaser.Scene {
 		// Setup
 
 		// Initialize subscenes
-		this.scene.add(GameUIScene.Name, GameUIScene, false, {
-			events: this.events,
-			ecs: this.ecs,
-		})
 
 		// Initialize Game Rendering systems
-		// Race conditions happen when we put these after the logic systems
+		this.ecs.addSystem(new ActionQueueSystem(this.events, this.ecs))
 		this.ecs.addSystem(new RenderNodeSystem(this.events, this.ecs, this))
 		this.ecs.addSystem(new RenderEdgeSystem(this.events, this.ecs, this))
+		this.ecs.addSystem(new RenderDepthSystem(this.events, this.ecs, this))
 
 		// Initialize Game Logic systems
 		this.ecs.addSystem(new GraphSystem(this.events, this.ecs, this))
 		this.ecs.addSystem(new SpawnSystem(this.events, this.ecs, this))
-		this.ecs.addSystem(new PlayerSystem(this.events, this.ecs))
+		this.ecs.addSystem(new CameraSystem(this.events, this.ecs, this))
 		this.ecs.addSystem(new MoveSystem(this.events, this.ecs))
+
+		// Initialize UI systems (HACK - Consider migrating this to its own component)
+		this.ecs.addSystem(new ActionUI(this.events, this.ecs, this))
 
 		// Running this up front because the camera can scroll before setPollAlways has been called (Resulting in improper values)
 		this.input.setPollAlways() // The cursor should poll for new positions while the camera is moving
-
-		// Monitor for events
-
-		// Enable UI Scene
-		this.scene.launch(GameUIScene.Name)
 
 		// We've loaded all our systems and event handlers so request data from server
 		this.events.emit('requestSnapshot')

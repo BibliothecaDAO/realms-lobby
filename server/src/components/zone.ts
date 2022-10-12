@@ -4,19 +4,17 @@
 import { IComponent } from '../engine/registry'
 
 export class Zone implements IComponent {
-    public type = 'zone'
+	public type = 'zone'
 
-    public width: number
-    public height: number
-    // TODO - Write interface for graph so we can validate them
-    public graph
+	// Used to generate the graph
+	public seed: number
+	public length: number
 
-    constructor(width: number, height: number, graph) {
-        if (!graph) {
-            throw new Error(`graph is required for this ${this.type} component`)
-        }
-        this.width = width
-        this.height = height
-        this.graph = graph
-    }
+	// Graph data (computed by server currently, eventually by client)
+	public graph
+
+	constructor(seed: number, length: number) {
+		this.seed = seed
+		this.length = length
+	}
 }

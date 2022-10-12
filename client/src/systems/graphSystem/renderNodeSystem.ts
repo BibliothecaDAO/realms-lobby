@@ -6,8 +6,12 @@ import { ISystem, Registry } from '../../engine/registry'
 import { COLORS } from '../../config'
 import { Graph } from '../../components/graph'
 
+// Actions
+import { CreateNodeAction } from './debug/actions/createNodeAction'
+
 // Components
 import { Transform } from '../../components/transform'
+import { ActionQueue } from '../../components/actionQueue'
 
 export class RenderNodeSystem implements ISystem {
 	private ecs: Registry
@@ -16,6 +20,7 @@ export class RenderNodeSystem implements ISystem {
 
 	// GameObjects for all the nodes (indexed by their graph index)
 	private nodeCircles: Map<number, GameObjects.Arc> = new Map()
+	private nodeTexts: Map<number, GameObjects.Text> = new Map()
 
 	// Current node the player is occupying
 	private selectedNode: number
@@ -42,14 +47,24 @@ export class RenderNodeSystem implements ISystem {
 		// We received a graph from the server, parse it and calculate ndoes
 		this.events.on('spawnZone', this.setupGraph)
 		this.events.on('setupPlayer', this.setupPlayer)
-		this.events.on('createNode', this.drawNode)
-		this.events.on('moveSuccess', this.selectNode)
+		this.events.on('enqueueCreateNode', this.enqueueCreateNode)
+		this.events.on('executeCreateNode', this.drawNode)
+
+		// Clear all nodes from the screen so we can redraw them
+		// HACK - We redraw the whole screen instead of implementing an undo
+		// this.events.on('clearCanvas', this.clearNodes)
+
+		// Move the player to a new node (HACK - toggled off so we can debug the graph)
+		// this.events.on('moveSuccess', this.selectNode)
+		// HACK - allow us to call 'select node' from elsewhere
+		this.events.on('selectNode', this.selectNode)
 	}
 
 	update = () => {
 		//
 	}
 
+	// Event Listeners
 	// Store the entity for our graph so we can pull it down when needed
 	setupGraph = (entity: string) => {
 		this.graphEntity = entity
@@ -59,15 +74,63 @@ export class RenderNodeSystem implements ISystem {
 	setupPlayer = (entity: string) => {
 		this.playerEntity = entity
 		const transform = this.ecs.getComponent(entity, 'transform') as Transform
-		this.selectNode(entity, transform.node)
+
+		// HACK - deselected node
+		// this.selectNode(entity, transform.node)
 	}
 
-	drawNode = (
+	enqueueCreateNode = (
 		index: number,
-		x: number,
-		y: number,
 		container: Phaser.GameObjects.Container
 	) => {
+		const actionQueue = this.ecs.getComponentsByType(
+			'actionQueue'
+		)[0] as ActionQueue
+
+		// Add our node to the queue
+		actionQueue.actions.push(
+			new CreateNodeAction(this.events, index, container)
+		)
+	}
+
+	drawNode = (index: number, container: Phaser.GameObjects.Container) => {
+		const graph = this.ecs.getComponent(this.graphEntity, 'graph') as Graph
+
+		// How far from the edge of the canvas should we draw each node?
+		const xOffset = 150
+		const yOffset = 150
+
+		// Create a circle for the node
+		// Spread nodes out based on depth in graph.
+		// E.g. root node is at depth 0, next set of nodes is at depth 1 (to the right), etc.
+		// This gives us a left -> right view of our graph.
+		const depth = graph.depth.get(index)
+		const x = xOffset * depth
+		graph.nodes.get(index).x = x // Set the x value for the node for future use
+
+		// Determine how many nodes we should draw at this depth
+		// Space them out evenly based on the number of nodes at this depth
+		// e.g. if we have 3 nodes at depth 1, we should draw them at 1/4, 2/4, and 3/4 of the canvas height
+
+		// Get the number of nodes at this depth
+		const depthList = graph.depthList.get(depth)
+
+		// Determine this node's position at this depth
+		const depthIndex = depthList.indexOf(index)
+
+		let y
+		if (graph.reverseAdjacency.get(0).includes(index)) {
+			// HACK - This connects to the root node, draw it at the top
+			y = yOffset * (depthIndex - 2)
+		} else if (graph.reverseAdjacency.get(index).length > 1) {
+			// HACK - Catch nodes with multiple adjacencies
+			y = yOffset * depthIndex + 1
+		} else {
+			y = yOffset * (depthIndex - 1) // we subtract 1 so our graph is centered vertically
+		}
+
+		graph.nodes.get(index).y = y
+
 		// Save our container for future use
 		if (!this.container) {
 			this.container = container
@@ -86,9 +149,18 @@ export class RenderNodeSystem implements ISystem {
 			.text(x, y, index.toString(), { color: 'white' })
 			.setOrigin(0.5)
 			.setFontSize(20)
+		this.nodeTexts.set(index, text)
 		container.add(text)
+	}
 
-		// TODO - Make sure this renders correctly
+	clearNodes = () => {
+		for (const [key, value] of this.nodeCircles) {
+			this.nodeCircles.get(key).destroy()
+		}
+
+		for (const [key, value] of this.nodeTexts) {
+			this.nodeTexts.get(key).destroy()
+		}
 	}
 
 	selectNode = (uid: string, index: number) => {
@@ -118,7 +190,8 @@ export class RenderNodeSystem implements ISystem {
 			})
 
 			// Color other nodes so player knows where they can go
-			this.colorValidNodes(index)
+			// HACK - Commented this out so we could override node colors for debugging getDepth
+			// this.colorValidNodes(index)
 		}
 	}
 
@@ -131,11 +204,13 @@ export class RenderNodeSystem implements ISystem {
 
 		circle.on('pointerout', () => {
 			circle.setAlpha(1)
-			this.scene.input.setDefaultCursor('default')
+			this.scene.input.setDefaultCursor('grab')
 		})
 
 		circle.on('pointerup', () => {
-			this.events.emit('moveAttempt', index)
+			// HACK - our original 'moveAttempt' passed one command: index
+			this.events.emit('moveAttempt', null, index)
+			this.scene.input.setDefaultCursor('grab')
 		})
 	}
 
@@ -164,5 +239,36 @@ export class RenderNodeSystem implements ISystem {
 				this.validNodeCircles.push(circle)
 			}
 		}
+	}
+
+	// Utility functions
+	bfs = (index: number, graph) => {
+		// TODO debug this
+
+		const root = 0
+		const adj = graph.adjacency[index]
+
+		const queue = []
+		queue.push(root)
+
+		const discovered = []
+		discovered[root] = true
+
+		while (queue.length) {
+			const v = queue.shift()
+
+			if (v === index) {
+				return true
+			}
+
+			for (let i = 0; i < adj[v].length; i++) {
+				if (!discovered[adj[v][i]]) {
+					discovered[adj[v][i]] = true
+					queue.push(adj[v][i])
+				}
+			}
+		}
+
+		return false
 	}
 }

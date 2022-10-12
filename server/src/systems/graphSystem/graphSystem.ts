@@ -12,12 +12,15 @@ import { Graph } from '../../components/graph'
 import { Edge } from './edge'
 import { Node } from './node'
 
+import { GraphGenerator } from './graphGenerator'
+
 export class GraphSystem implements ISystem {
 	private events: EventEmitter
 	private ecs: Registry
 	public type = 'graphSystem'
 
 	// Graph data
+	public graphGenerator: GraphGenerator
 	public graphEntity: string
 
 	constructor(events: EventEmitter, ecs: Registry) {
@@ -35,6 +38,10 @@ export class GraphSystem implements ISystem {
 
 	// Instantiates edges and prepares to traverse them
 	setupGraph = (entity: string, component: Zone): void => {
+		// TODO - integrate loaf's class here
+		this.graphGenerator = new GraphGenerator(component.seed, component.length)
+
+		component.graph = this.graphGenerator.generate()
 		const edges: Edge[] = []
 
 		for (let i = 0; i < component.graph.length; i++) {
@@ -178,9 +185,5 @@ export class GraphSystem implements ISystem {
 				})
 			}
 		}
-	}
-
-	debug = (graph: Graph) => {
-		console.log(graph.edges)
 	}
 }
