@@ -8,11 +8,12 @@ import { World } from '../engine/world'
 // Initialize systems
 import { GraphSystem } from '../systems/graphSystem/graphSystem'
 import { SpawnSystem } from '../systems/spawnSystem'
-
 import { ActionQueueSystem } from '../systems/actionQueueSystem'
 import { RenderNodeSystem } from '../systems/graphSystem/renderNodeSystem'
 import { RenderEdgeSystem } from '../systems/graphSystem/renderEdgeSystem'
 import { RenderDepthSystem } from '../systems/graphSystem/debug/renderDepthSystem'
+import { CameraSystem } from '../systems/cameraSystem'
+import { MoveSystem } from '../systems/moveSystem'
 
 // UI Systems
 import { ActionUI } from '../systems/graphSystem/debug/ui/ActionUI'
@@ -58,6 +59,8 @@ export class DebugScene extends Phaser.Scene {
 		// Initialize Game Logic systems
 		this.ecs.addSystem(new GraphSystem(this.events, this.ecs, this))
 		this.ecs.addSystem(new SpawnSystem(this.events, this.ecs, this))
+		this.ecs.addSystem(new CameraSystem(this.events, this.ecs, this))
+		this.ecs.addSystem(new MoveSystem(this.events, this.ecs))
 
 		// Initialize UI systems (HACK - Consider migrating this to its own component)
 		this.ecs.addSystem(new ActionUI(this.events, this.ecs, this))

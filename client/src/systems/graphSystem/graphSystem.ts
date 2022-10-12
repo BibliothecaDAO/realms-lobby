@@ -87,9 +87,11 @@ export class GraphSystem implements ISystem {
 
 		// Draw our nodes
 		this.drawNodes(graph)
-
 		// Draw edges between nodes
 		this.drawEdges(graph)
+
+		// let other systems know our graph has been populated
+		this.events.emit('graphReady', entity, graph)
 	}
 
 	getAdjacencyList = (graph: Graph): void => {

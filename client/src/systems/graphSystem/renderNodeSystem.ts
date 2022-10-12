@@ -8,7 +8,6 @@ import { Graph } from '../../components/graph'
 
 // Actions
 import { CreateNodeAction } from './debug/actions/createNodeAction'
-import { DepthStepAction } from './debug/actions/depthStepAction'
 
 // Components
 import { Transform } from '../../components/transform'
@@ -115,7 +114,6 @@ export class RenderNodeSystem implements ISystem {
 
 		// Get the number of nodes at this depth
 		const depthList = graph.depthList.get(depth)
-		const numNodesWithDepth = depthList.length
 
 		// Determine this node's position at this depth
 		const depthIndex = depthList.indexOf(index)
@@ -161,6 +159,7 @@ export class RenderNodeSystem implements ISystem {
 	}
 
 	selectNode = (uid: string, index: number) => {
+		console.log('got here')
 		const graph = this.ecs.getComponent(this.graphEntity, 'graph') as Graph
 		if (graph != undefined) {
 			// Remove old selection
@@ -201,11 +200,13 @@ export class RenderNodeSystem implements ISystem {
 
 		circle.on('pointerout', () => {
 			circle.setAlpha(1)
-			this.scene.input.setDefaultCursor('default')
+			this.scene.input.setDefaultCursor('grab')
 		})
 
 		circle.on('pointerup', () => {
-			this.events.emit('moveAttempt', index)
+			// HACK - our original 'moveAttempt' passed one command: index
+			this.events.emit('moveAttempt', null, index)
+			this.scene.input.setDefaultCursor('grab')
 		})
 	}
 

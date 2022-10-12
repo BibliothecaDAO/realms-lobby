@@ -63,6 +63,7 @@ export class GraphSystem implements ISystem {
 
 		// Identify nodes via breath first search
 		this.breadthFirst(graph)
+		console.log(graph)
 	}
 
 	createVertices = (graph: Graph): void => {

@@ -69,6 +69,7 @@ export class GraphGenerator {
 			)
 
 			// connect branch to random index - TODO: this is not right
+			// TODO - Create automated test to run through crypt seeds and see if it spits out NaN
 			const connecting_node = (seed + i * 123456789) % length
 
 			// add connection back to graph

@@ -54,7 +54,6 @@ export class ActionUI implements ISystem {
 
 		// Listen for events
 		this.events.on('setupActionQueue', this.setupActionQueue)
-		this.events.on('spawnZone', this.setupGraph)
 		this.events.on('clearCanvas', this.clearActions)
 		this.events.on('tookAction', this.updateStep)
 
@@ -67,6 +66,17 @@ export class ActionUI implements ISystem {
 		)
 		this.leftArrowKey = this.scene.input.keyboard.addKey(
 			Phaser.Input.Keyboard.KeyCodes.LEFT
+		)
+
+		// // Place graph text on the screen
+		this.actionText = this.scene.add.text(
+			this.scene.cameras.main.width * 0.4,
+			this.scene.cameras.main.height / 9,
+			'[]',
+			{
+				fontSize: '100px',
+				color: DEBUGCOLORS.primary.toString(),
+			}
 		)
 
 		// Draw 'panel' that sits behind buttons
@@ -116,20 +126,6 @@ export class ActionUI implements ISystem {
 			entity,
 			'actionQueue'
 		) as ActionQueue
-	}
-
-	// Store the entity for our graph so we can pull it down when needed
-	setupGraph = (entity: string) => {
-		// Place graph text on the screen
-		this.actionText = this.scene.add.text(
-			this.scene.cameras.main.width * 0.4,
-			this.scene.cameras.main.height / 9,
-			'[]',
-			{
-				fontSize: '100px',
-				color: DEBUGCOLORS.primary.toString(),
-			}
-		)
 	}
 
 	// Clear out the recent actions so we can redraw the screen

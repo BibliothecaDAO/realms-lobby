@@ -10,6 +10,7 @@ import { GameUIScene } from './uiscene'
 import { GraphSystem } from '../systems/graphSystem/graphSystem'
 import { SpawnSystem } from '../systems/spawnSystem'
 import { PlayerSystem } from '../systems/playerSystem'
+import { MoveSystem } from '../systems/moveSystem'
 
 import { RenderNodeSystem } from '../systems/graphSystem/renderNodeSystem'
 import { RenderEdgeSystem } from '../systems/graphSystem/renderEdgeSystem'
@@ -59,6 +60,7 @@ export class GraphScene extends Phaser.Scene {
 		this.ecs.addSystem(new GraphSystem(this.events, this.ecs, this))
 		this.ecs.addSystem(new SpawnSystem(this.events, this.ecs, this))
 		this.ecs.addSystem(new PlayerSystem(this.events, this.ecs))
+		this.ecs.addSystem(new MoveSystem(this.events, this.ecs))
 
 		// Running this up front because the camera can scroll before setPollAlways has been called (Resulting in improper values)
 		this.input.setPollAlways() // The cursor should poll for new positions while the camera is moving
