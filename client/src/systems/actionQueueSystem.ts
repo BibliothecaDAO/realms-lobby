@@ -3,12 +3,20 @@
 
 import Phaser from 'phaser'
 import { ISystem, Registry } from '../engine/registry'
-import { IAction } from './graphSystem/debug/actions/IAction'
 
 // Components
 import { ActionQueue } from '../components/actionQueue'
 
 // Define Actions
+
+// IAction - Abstract actions into an object using command pattern
+// currently used to queue up actions in our graph debugger
+
+export interface IAction {
+	type: string
+
+	execute: () => void
+}
 
 export class ActionQueueSystem implements ISystem {
 	private events: Phaser.Events.EventEmitter

@@ -7,18 +7,20 @@ import { World } from '../engine/world'
 import { GameUIScene } from './uiscene'
 
 // Initialize systems
-import { GraphSystem } from '../systems/graphSystem/graphSystem'
 import { SpawnSystem } from '../systems/spawnSystem'
 import { PlayerSystem } from '../systems/playerSystem'
 import { MoveSystem } from '../systems/moveSystem'
 
-import { RenderNodeSystem } from '../systems/graphSystem/renderNodeSystem'
+// Setup graph
+import { GraphSystem } from '../systems/graphSystem/graphSystem'
+import { RenderSystem } from '../systems/renderSystem'
 import { RenderEdgeSystem } from '../systems/graphSystem/renderEdgeSystem'
+import { CameraSystem } from '../systems/cameraSystem'
 
 // Components
 
-export class GraphScene extends Phaser.Scene {
-	public static Name = 'graph-scene'
+export class GameScene extends Phaser.Scene {
+	public static Name = 'game-scene'
 
 	// Event bus
 	public events: Phaser.Events.EventEmitter
@@ -29,8 +31,13 @@ export class GraphScene extends Phaser.Scene {
 	// World to store our connection (so it persists between scenes)
 	public world: World
 
+	// Container where we'll draw our game objects
+	public gameContainer: Phaser.GameObjects.Container
+
+	public cursorFollow: Phaser.GameObjects.Text
+
 	constructor() {
-		super(GraphScene.Name)
+		super(GameScene.Name)
 	}
 
 	preload(): void {
@@ -44,6 +51,12 @@ export class GraphScene extends Phaser.Scene {
 		this.world = data.world
 
 		// Setup
+		// Create area where we'll draw our graph
+		// TODO - move this somewhere that makes more sense
+		this.gameContainer = this.add.container(
+			this.cameras.main.centerX,
+			this.cameras.main.centerY
+		)
 
 		// Initialize subscenes
 		this.scene.add(GameUIScene.Name, GameUIScene, false, {
@@ -51,9 +64,11 @@ export class GraphScene extends Phaser.Scene {
 			ecs: this.ecs,
 		})
 
+		// this.scene.add.
+
 		// Initialize Game Rendering systems
 		// Race conditions happen when we put these after the logic systems
-		this.ecs.addSystem(new RenderNodeSystem(this.events, this.ecs, this))
+
 		this.ecs.addSystem(new RenderEdgeSystem(this.events, this.ecs, this))
 
 		// Initialize Game Logic systems
@@ -61,7 +76,10 @@ export class GraphScene extends Phaser.Scene {
 		this.ecs.addSystem(new SpawnSystem(this.events, this.ecs, this))
 		this.ecs.addSystem(new PlayerSystem(this.events, this.ecs))
 		this.ecs.addSystem(new MoveSystem(this.events, this.ecs))
-
+		this.ecs.addSystem(new CameraSystem(this.events, this.ecs, this))
+		this.ecs.addSystem(
+			new RenderSystem(this.events, this.ecs, this, this.gameContainer)
+		)
 		// Running this up front because the camera can scroll before setPollAlways has been called (Resulting in improper values)
 		this.input.setPollAlways() // The cursor should poll for new positions while the camera is moving
 

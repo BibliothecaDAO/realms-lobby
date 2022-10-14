@@ -53,8 +53,7 @@ export class World {
 	// Create a new player and add it to our list of players
 	addPlayer = (entity: string) => {
 		// Hardcode spawn values for now
-		// this.loadData.loadEntity('characters/bard', entity)
-		this.loadData.loadEntity('characters/knight', entity)
+		this.loadData.loadEntity('characters/warrior', entity)
 	}
 
 	// Remove a player that times out

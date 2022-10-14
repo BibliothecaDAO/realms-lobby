@@ -4,19 +4,14 @@
 import { GameObjects } from 'phaser'
 import { ISystem, Registry } from '../../engine/registry'
 
-import _ from 'lodash'
-
 // Components
 import { Zone } from '../../components/zone'
 import { Graph } from '../../components/graph'
-import { ActionQueue } from '../../components/actionQueue'
+import { Node } from '../../components/node'
 
 // Graph data structures
 import { Edge } from './edge'
-import { Node } from './node'
-
-// Actions
-import { DepthStepAction } from './debug/actions/depthStepAction'
+import nodeTest from 'node:test'
 
 export class GraphSystem implements ISystem {
 	private events: Phaser.Events.EventEmitter
@@ -42,12 +37,6 @@ export class GraphSystem implements ISystem {
 		// Event Handlers
 		// We received a graph from the server, parse it and calculate ndoes
 		this.events.on('spawnZone', this.setupGraph)
-
-		// Create area where we'll draw our graph
-		this.container = this.scene.add.container(
-			this.scene.cameras.main.centerX,
-			this.scene.cameras.main.centerY
-		)
 	}
 
 	update = () => {
@@ -57,40 +46,6 @@ export class GraphSystem implements ISystem {
 	// Instantiates edges and prepares to traverse them
 	setupGraph = (entity: string, component: Zone): void => {
 		const edges: Edge[] = []
-
-		// HACK - plug in tmp variable
-		component.graph = [
-			[0, 1, 1],
-			[1, 2, 1],
-			[2, 3, 1],
-			[3, 4, 1],
-			[4, 5, 1],
-			[5, 6, 1],
-			[6, 7, 1],
-			[7, 8, 1],
-			[8, 9, 1],
-			[9, 10, 1],
-			[10, 11, 1],
-			[3, 300, 1],
-			[300, 301, 1],
-			[301, 302, 1],
-			[302, 0, 1],
-			[8, 800, 1],
-			[800, 801, 1],
-			[801, 802, 1],
-			[802, 803, 1],
-			[803, 804, 1],
-			[804, 805, 1],
-			[805, 806, 1],
-			[806, 807, 1],
-			[807, 2, 1],
-			[2, 200, 1],
-			[200, 201, 1],
-			[201, 202, 1],
-			[202, 203, 1],
-			[203, 204, 1],
-			// [204, 0, 1],
-		]
 
 		// Get list of edges
 		for (let i = 0; i < component.graph.length; i++) {
@@ -120,12 +75,14 @@ export class GraphSystem implements ISystem {
 		this.getDepthList(graph)
 
 		// Draw our nodes
-		this.drawNodes(graph)
+		// this.drawNodes(graph)
+
 		// Draw edges between nodes
-		this.drawEdges(graph)
+		// this.drawEdges(graph)
 
 		// let other systems know our graph has been populated
-		this.events.emit('graphReady', entity, graph)
+		// HACK - we pass a container in here
+		this.events.emit('graphReady', entity, graph, this.container)
 	}
 
 	getAdjacencyList = (graph: Graph): void => {
@@ -159,7 +116,11 @@ export class GraphSystem implements ISystem {
 	getDepths = (graph: Graph): void => {
 		// Calculate depth for each individual node
 		for (const [key, value] of graph.nodes) {
-			const depth = this.calculateDepth(graph.nodes.get(key), graph)
+			const entity = graph.nodes.get(key)
+			const node = this.ecs.getComponent(entity, 'node') as Node
+
+			const depth = this.calculateDepth(node.index, graph)
+			node.depth = depth
 			graph.depth.set(key, depth)
 		}
 	}
@@ -177,17 +138,12 @@ export class GraphSystem implements ISystem {
 		}
 	}
 
-	drawNodes = (graph: Graph): void => {
-		// Start walking through each node
-		for (const [key, value] of graph.nodes) {
-			this.events.emit(
-				'executeCreateNode',
-				// 'enqueueCreateNode', // Toggle this to render nodes step by step
-				graph.nodes.get(key).index,
-				this.container
-			)
-		}
-	}
+	// drawNodes = (graph: Graph): void => {
+	// 	// Start walking through each node
+	// 	for (const [key, value] of graph.nodes) {
+	// 		this.events.emit('executeCreateNode', value, this.container)
+	// 	}
+	// }
 
 	drawEdges = (graph: Graph): void => {
 		// Loop through each edge (vertices)
@@ -196,7 +152,6 @@ export class GraphSystem implements ISystem {
 			const dst = graph.edges[i].dst_identifier
 			this.events.emit(
 				'executeCreateEdge',
-				// 'enqueueCreateEdge', // Toggle this to render edges step by step
 				graph.nodes.get(src),
 				graph.nodes.get(dst),
 				this.container
@@ -205,6 +160,13 @@ export class GraphSystem implements ISystem {
 	}
 
 	// Utility functions
+	createNode = (index: number): string => {
+		const entity = this.ecs.createEntity()
+		const node = new Node(index)
+		this.ecs.addComponent(entity, node)
+		return entity
+	}
+
 	breadthFirst = (graph: Graph) => {
 		// Use BFS (depth-first) search
 		const start = 0 // We always start at position zero
@@ -220,7 +182,9 @@ export class GraphSystem implements ISystem {
 		while (queue.length) {
 			// Grab the first node
 			currentVertex = queue.shift()
-			const node = new Node(currentVertex)
+
+			// Create a new node and store it in our graph
+			const node = this.createNode(currentVertex)
 			graph.nodes.set(currentVertex, node)
 
 			// Make sure node has a next step
@@ -250,7 +214,9 @@ export class GraphSystem implements ISystem {
 		while (stack.length) {
 			// Grab the first node
 			currentVertex = stack.pop()
-			const node = new Node(currentVertex)
+
+			// Create a new node and store it in our graph
+			const node = this.createNode(currentVertex)
 			graph.nodes.set(currentVertex, node)
 
 			// Make sure node has a next step
@@ -266,29 +232,19 @@ export class GraphSystem implements ISystem {
 	}
 
 	// Returns the depth of a given node (via BFS)
-	calculateDepth = (node: Node, graph: Graph) => {
+	calculateDepth = (index: number, graph: Graph) => {
+		// const node = this.ecs.getComponent(entity, 'node') as Node
+
 		const start = 0 // We always start at position zero
 		let depth = 0 // Keep track of the depth we've traversed
 
 		const visited = new Set()
 		const queue = [start]
-		// ACTION - Started search
-		// We need to use cloneDeep because the array changes value during our delayed queue
-		this.queueStep(node.index, _.cloneDeep(queue), depth, '  start')
 
 		while (queue.length > 0) {
-			this.queueStep(
-				node.index,
-				_.cloneDeep(queue),
-				depth,
-				`remove: ${queue[0]}`
-			)
-
 			const _node = queue.shift()
 
-			if (_node === node.index) {
-				// ACTION - Found depth
-				this.queueStep(node.index, _.cloneDeep(queue), depth, `found: ${depth}`)
+			if (_node === index) {
 				return depth
 			}
 
@@ -299,15 +255,7 @@ export class GraphSystem implements ISystem {
 				depth++
 				for (let i = 0; i < neighbors.length; i++) {
 					if (!visited.has(neighbors[i])) {
-						// ACTION - AddNeighborToQueue
-						// depth++
 						visited.add(neighbors[i])
-						this.queueStep(
-							node.index,
-							_.cloneDeep(queue),
-							depth,
-							`add: ${neighbors[i]}`
-						)
 						queue.unshift(neighbors[i])
 					}
 				}
@@ -315,22 +263,5 @@ export class GraphSystem implements ISystem {
 		}
 
 		return depth
-	}
-
-	// Queues up an action
-	queueStep = (
-		index: number,
-		queue: Array<number>,
-		depth: number,
-		step: string
-	) => {
-		const actionQueue = this.ecs.getComponentsByType(
-			'actionQueue'
-		)[0] as ActionQueue
-
-		// Add our node to the queue
-		actionQueue.actions.push(
-			new DepthStepAction(this.events, index, queue, depth, step)
-		)
 	}
 }

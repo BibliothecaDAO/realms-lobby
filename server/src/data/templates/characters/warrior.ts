@@ -1,18 +1,18 @@
 /* eslint-disable no-unused-labels */
 
-// Template for a skeleton enemy
+// Template for a player in the game
 // contains the components to load for this object type and the default values that will be loaded unless overridden
 
 {
 	components: [
-		{ type: 'transform', x: 5, y: 5 },
+		{ type: 'transform', node: 0 }, // Players always spawn at start of dungeon
 		{
 			type: 'sprite',
-			name: '_enemy',
+			name: 'warrior',
 		},
 		{
 			type: 'inventory',
-			items: [], // Monsters spawn w/ empty inventory (can be overridden by loot tables)
+			items: [], // Player spawns w/ empty inventory
 		},
 	]
 }

@@ -12,8 +12,7 @@ import { gameConfig } from './config'
 import { World } from './engine/world'
 
 // Load our scenes (each scene defines a mode of gameplay)
-import { GraphScene } from './scenes/graphscene'
-import { DebugScene } from './scenes/debugscene'
+import { GameScene } from './scenes/gamescene'
 
 export default class Game extends Phaser.Game {
 	public world: World // The current instance of the game world
@@ -24,20 +23,12 @@ export default class Game extends Phaser.Game {
 		// Instantiate our world and populate it with initial data
 		this.world = new World()
 
-		if (window.location.hash.includes('debug')) {
-			this.scene.start(DebugScene.Name, {
-				ecs: this.world.ecs,
-				world: this.world,
-				events: this.world.events,
-			})
-		} else {
-			// Start loading scenes in background (but we kick off LoadingScreen)
-			this.scene.add(GraphScene.Name, GraphScene, false, {
-				ecs: this.world.ecs,
-				world: this.world,
-				events: this.world.events,
-			})
-		}
+		// Start loading scenes in background (but we kick off LoadingScreen)
+		this.scene.add(GameScene.Name, GameScene, false, {
+			ecs: this.world.ecs,
+			world: this.world,
+			events: this.world.events,
+		})
 	}
 }
 
@@ -56,10 +47,5 @@ window.sizeChanged = () => {
 window.onresize = () => window.sizeChanged()
 
 window.onload = () => {
-	// Load debug scene if we pass in a url param
-
-	if (window.location.hash.includes('debug')) {
-		gameConfig.scene = [DebugScene]
-	}
 	const game = new Game(gameConfig)
 }

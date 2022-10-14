@@ -74,7 +74,11 @@ export class LoadData {
 					: {}
 
 				// Pull in any custom logic from the current zone definitino file
-				components = this.merge(template, zoneData.entities[i].components)
+				components = this.merge(
+					template,
+					zoneData.entities[i].components,
+					zoneData.entities[i].base
+				)
 			} else {
 				components = zoneData.entities[i].components
 
@@ -126,7 +130,7 @@ export class LoadData {
 		return files.flat()
 	}
 
-	merge = (first, second) => {
+	merge = (first, second, base) => {
 		// We need to 'clone' or deep copy an object because javascript copies by reference by default (meaning we'd be overwriting the template)
 		// cloneDeep is the fastest way to deep copy an object as per https://frontbackend.com/javascript/what-is-the-the-fastest-way-to-deep-clone-an-object-in-javascript#:~:text=According%20to%20the%20benchmark%20test,deep%20clone%20function%20since%20Object.
 		const clone = this.clone(first) // Filename is not stored in templates in case we need to change it
@@ -150,7 +154,7 @@ export class LoadData {
 						clone.push(component)
 					}
 				} else {
-					throw new Error('missing template file')
+					throw new Error(`missing template file: ${base}`)
 				}
 			}
 		}

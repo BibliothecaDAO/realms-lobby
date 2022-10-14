@@ -4,15 +4,13 @@
 import { GameObjects } from 'phaser'
 import { ISystem, Registry } from '../../engine/registry'
 
-import { Node } from './node'
 import { COLORS } from '../../config'
 
 // Components
 import { Graph } from '../../components/graph'
-import { ActionQueue } from '../../components/actionQueue'
+import { Node } from '../../components/node'
 
 // Actions
-import { CreateEdgeAction } from './debug/actions/createEdgeAction'
 
 export class RenderEdgeSystem implements ISystem {
 	private ecs: Registry
@@ -20,13 +18,9 @@ export class RenderEdgeSystem implements ISystem {
 	private scene: Phaser.Scene
 
 	private graphics: GameObjects.Graphics
-	private edges: Map<number, GameObjects.Arc> = new Map()
-	private selectedNode: number
-	private selectedCircle: GameObjects.Arc
 
 	// 'global' values from graph system
 	private graphEntity: string
-	private container: GameObjects.Container
 
 	constructor(
 		events: Phaser.Events.EventEmitter,
@@ -41,7 +35,6 @@ export class RenderEdgeSystem implements ISystem {
 		// Save graph entity info so we can reference it later
 		this.events.on('spawnZone', this.setupGraph)
 		// We received a graph from the server, parse it and calculate ndoes
-		this.events.on('enqueueCreateEdge', this.enqueueCreateEdge)
 		this.events.on('executeCreateEdge', this.drawEdge)
 		this.events.on('clearCanvas', this.clearEdges)
 	}
@@ -56,28 +49,14 @@ export class RenderEdgeSystem implements ISystem {
 		this.graphics = this.scene.add.graphics()
 	}
 
-	enqueueCreateEdge = (
-		src: Node,
-		dst: Node,
-		container: Phaser.GameObjects.Container
-	) => {
-		const actionQueue = this.ecs.getComponentsByType(
-			'actionQueue'
-		)[0] as ActionQueue
-
-		// Add our node to the queue
-		actionQueue.actions.push(
-			new CreateEdgeAction(this.events, src, dst, container)
-		)
-	}
-
 	drawEdge = (
-		src: Node,
-		dst: Node,
+		src: string,
+		dst: string,
 		container: Phaser.GameObjects.Container
 	) => {
 		// Determine if edge should be visitable or disabled (grayed out)
-		const graph = this.ecs.getComponent(this.graphEntity, 'graph') as Graph
+		const srcNode = this.ecs.getComponent(src, 'node') as Node
+		const dstNode = this.ecs.getComponent(dst, 'node') as Node
 
 		// Only draw edgse that the user can move to in bright colors
 		const edgeColor = COLORS.primary.hex
@@ -85,7 +64,12 @@ export class RenderEdgeSystem implements ISystem {
 		// Draw our line
 
 		this.graphics.lineStyle(2, edgeColor)
-		const tmp = this.graphics.lineBetween(src.x, src.y, dst.x, dst.y)
+		const tmp = this.graphics.lineBetween(
+			srcNode.x,
+			srcNode.y,
+			dstNode.x,
+			dstNode.y
+		)
 		container.add(tmp).sendToBack(tmp) // Containers ignore setDepth so instead we send this object to the back of the queue
 	}
 

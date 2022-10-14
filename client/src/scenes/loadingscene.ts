@@ -1,7 +1,7 @@
 /* LoadingScene - Shown between scenes when the game needs to load assets. */
 
 import { GameObjects, Scene } from 'phaser'
-import { GraphScene } from './graphscene'
+import { GameScene } from './gamescene'
 // import logo from ''
 export class LoadingScene extends Scene {
 	public static Name = 'loading-scene'
@@ -17,7 +17,7 @@ export class LoadingScene extends Scene {
 		this.load.on(
 			'complete',
 			function () {
-				this.scene.start(GraphScene.Name)
+				this.scene.start(GameScene.Name)
 			},
 			this
 		) // Pass in this as context so we can call the next scene
@@ -25,6 +25,7 @@ export class LoadingScene extends Scene {
 		this.load.baseURL = 'assets/'
 
 		// Load character
+		this.load.image('warrior', 'sprites/characters/warrior.png')
 
 		// Load items
 		this.load.image('sword', 'sprites/items/sword.png')
@@ -43,4 +44,5 @@ export class LoadingScene extends Scene {
 	create(): void {
 		this.cameras.main.setBackgroundColor('#141414') // Set bg to purple while loading
 	}
+	// TODO - PIXEL THE ART !!
 }

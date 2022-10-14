@@ -2,14 +2,16 @@
 
 import { ISystem } from '../engine/registry'
 import { Registry } from '../engine/registry'
+import { DEPTH } from '../config'
 
 // Hardcode components for our lookup table
 import { Inventory } from '../components/inventory'
 import { Zone } from '../components/zone'
+import { Node } from '../components/node'
 import { Player } from '../components/player'
 import { Sprite } from '../components/sprite'
 import { Transform } from '../components/transform'
-import { DEPTH } from '../config'
+import { Graph } from '../components/graph'
 
 export class SpawnSystem implements ISystem {
 	private events: Phaser.Events.EventEmitter
@@ -63,12 +65,15 @@ export class SpawnSystem implements ISystem {
 				component = new Sprite(components[index].name, sprite)
 				break
 			}
-			case 'transform':
+			case 'transform': {
 				component = new Transform(components[index].node)
+
 				break
+			}
 			default:
 				throw new Error(`component '${index}' not found`)
 			}
+
 			this.ecs.addComponent(entity, component)
 
 			// HACK - special case zone spawn so the client can load pathfinding and tilemaps
@@ -77,6 +82,7 @@ export class SpawnSystem implements ISystem {
 				this.events.emit('spawnZone', entity, component)
 			}
 		}
+
 		// Let other systems know we've intiialized a new entity
 		this.events.emit('spawnSuccess', entity)
 	}

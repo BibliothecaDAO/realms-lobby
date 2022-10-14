@@ -2,7 +2,7 @@
 
 import { IComponent } from '../engine/registry'
 
-import { IAction } from '../systems/graphSystem/debug/actions/IAction'
+import { IAction } from '../systems/actionQueueSystem'
 
 export class ActionQueue implements IComponent {
 	public type = 'actionQueue'

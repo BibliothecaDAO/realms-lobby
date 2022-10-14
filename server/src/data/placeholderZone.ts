@@ -19,7 +19,7 @@
 
 		// Enemies
 		{
-			base: 'enemies/_enemy',
+			base: 'enemies/skeleton',
 			components: [
 				{
 					type: 'transform',
