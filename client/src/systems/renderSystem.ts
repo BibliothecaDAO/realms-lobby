@@ -29,18 +29,15 @@ export class RenderSystem implements ISystem {
 
 	// 'global' values from graph system
 	private graphEntity: string
-	private container: GameObjects.Container
 
 	constructor(
 		events: Phaser.Events.EventEmitter,
 		ecs: Registry,
-		scene: Phaser.Scene,
-		container: GameObjects.Container
+		scene: Phaser.Scene
 	) {
 		this.events = events
 		this.ecs = ecs
 		this.scene = scene
-		this.container = container
 
 		// Event Handlers
 		// We received a graph from the server, parse it and calculate ndoes
@@ -82,7 +79,6 @@ export class RenderSystem implements ISystem {
 				const graph = this.ecs.getComponent(this.graphEntity, 'graph') as Graph
 				const node = graph.nodes.get(JSON.parse(transform.node))
 				this.drawSprite(entity, node, sprite)
-				this.container.add(sprite.sprite)
 			}
 		}
 	}
@@ -106,35 +102,12 @@ export class RenderSystem implements ISystem {
 
 			if (node != undefined) {
 				const location = getLocation(node, graph)
+				// this.scene.add
+				// .text(location.x, location.y, node.index.toString())
+				// .setDepth(5)
 
 				// TODO - figure out why none of these objects are drawing to scene
 				sprite.sprite.setX(location.x).setY(location.y).setScale(4)
-
-				// this.container.add(sprite.sprite)
-				// this.container.add(rect)
-
-				// // Draw the circular background
-				// const circle = this.scene.add.circle(
-				// 	location.x,
-				// 	location.y,
-				// 	30,
-				// 	COLORS.secondary.hex
-				// )
-				// this.nodeCircles.set(node.index, circle)
-				// this.container.add(circle)
-
-				// Let the user click on the newly created circle (to move there)
-				// this.enableClick(entity, circle)
-
-				// Draw the node number
-				// const text = this.scene.add
-				// 	.text(location.x, location.y, node.index.toString(), {
-				// 		color: 'white',
-				// 	})
-				// 	.setOrigin(0.5)
-				// 	.setFontSize(20)
-				// this.nodeTexts.set(node.index, text)
-				// this.container.add(text)
 			} else {
 				throw new Error(`Node ${nodeEntity} does not exist`)
 			}
@@ -166,7 +139,6 @@ export class RenderSystem implements ISystem {
 		this.selectedCircle = this.scene.add
 			.circle(node.x, node.y, 36, 0x000000, 0)
 			.setStrokeStyle(2, COLORS.primary.hex, 1) // To draw a circle w/o fill, we set fill alpha to 0 and add a stroke
-		this.container.add(this.selectedCircle)
 
 		// Node selector should pulse to indicate it's selected
 		this.scene.tweens.add({

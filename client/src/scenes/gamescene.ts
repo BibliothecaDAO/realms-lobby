@@ -52,11 +52,6 @@ export class GameScene extends Phaser.Scene {
 
 		// Setup
 		// Create area where we'll draw our graph
-		// TODO - move this somewhere that makes more sense
-		this.gameContainer = this.add.container(
-			this.cameras.main.centerX,
-			this.cameras.main.centerY
-		)
 
 		// Initialize subscenes
 		this.scene.add(GameUIScene.Name, GameUIScene, false, {
@@ -75,12 +70,8 @@ export class GameScene extends Phaser.Scene {
 		this.ecs.addSystem(new PlayerSystem(this.events, this.ecs))
 		this.ecs.addSystem(new MoveSystem(this.events, this.ecs))
 		this.ecs.addSystem(new CameraSystem(this.events, this.ecs, this))
-		this.ecs.addSystem(
-			new RenderSystem(this.events, this.ecs, this, this.gameContainer)
-		)
-		this.ecs.addSystem(
-			new RenderEdgeSystem(this.events, this.ecs, this, this.gameContainer)
-		)
+		this.ecs.addSystem(new RenderSystem(this.events, this.ecs, this))
+		this.ecs.addSystem(new RenderEdgeSystem(this.events, this.ecs, this))
 
 		// Running this up front because the camera can scroll before setPollAlways has been called (Resulting in improper values)
 		this.input.setPollAlways() // The cursor should poll for new positions while the camera is moving

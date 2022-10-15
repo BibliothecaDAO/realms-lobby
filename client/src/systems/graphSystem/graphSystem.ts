@@ -74,11 +74,7 @@ export class GraphSystem implements ISystem {
 		// Calculate a depth list so we know how many nodes are at a given depth (and can space them vertically)
 		this.getDepthList(graph)
 
-		// Draw our nodes
-		// this.drawNodes(graph)
-
-		// Draw edges between nodes
-		// this.drawEdges(graph)
+		console.log(graph)
 
 		// let other systems know our graph has been populated
 		this.events.emit('graphReady', entity, graph)

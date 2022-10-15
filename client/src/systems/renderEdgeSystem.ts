@@ -19,7 +19,6 @@ export class RenderEdgeSystem implements ISystem {
 	private scene: Phaser.Scene
 
 	private graphics: GameObjects.Graphics
-	private container: GameObjects.Container
 
 	// 'global' values from graph system
 	private graph: Graph
@@ -27,13 +26,11 @@ export class RenderEdgeSystem implements ISystem {
 	constructor(
 		events: Phaser.Events.EventEmitter,
 		ecs: Registry,
-		scene: Phaser.Scene,
-		container: GameObjects.Container
+		scene: Phaser.Scene
 	) {
 		this.events = events
 		this.ecs = ecs
 		this.scene = scene
-		this.container = container
 
 		// Event Handlers
 		// We received a graph from the server, parse it and calculate ndoes
@@ -72,13 +69,10 @@ export class RenderEdgeSystem implements ISystem {
 
 			// Draw our line
 			this.graphics.lineStyle(2, edgeColor)
-			const tmp = this.graphics.lineBetween(
-				srcLocation.x,
-				srcLocation.y,
-				dstLocation.x,
-				dstLocation.y
-			)
-			this.container.add(tmp).sendToBack(tmp) // Containers ignore setDepth so instead we send this object to the back of the queue
+			const tmp = this.graphics
+				.lineBetween(srcLocation.x, srcLocation.y, dstLocation.x, dstLocation.y)
+				.setDepth(1)
+				.setAlpha(0.2)
 		}
 	}
 
