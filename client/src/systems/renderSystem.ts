@@ -106,7 +106,9 @@ export class RenderSystem implements ISystem {
 				// .text(location.x, location.y, node.index.toString())
 				// .setDepth(5)
 
-				// TODO - figure out why none of these objects are drawing to scene
+				// TODO - find the one rogue edge
+				// then figure out how a player moves through the scene.
+
 				sprite.sprite.setX(location.x).setY(location.y).setScale(4)
 			} else {
 				throw new Error(`Node ${nodeEntity} does not exist`)
