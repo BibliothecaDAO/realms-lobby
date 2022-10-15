@@ -82,6 +82,7 @@ export class RenderSystem implements ISystem {
 				const graph = this.ecs.getComponent(this.graphEntity, 'graph') as Graph
 				const node = graph.nodes.get(JSON.parse(transform.node))
 				this.drawSprite(entity, node, sprite)
+				this.container.add(sprite.sprite)
 			}
 		}
 	}

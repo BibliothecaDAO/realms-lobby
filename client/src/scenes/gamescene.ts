@@ -14,7 +14,7 @@ import { MoveSystem } from '../systems/moveSystem'
 // Setup graph
 import { GraphSystem } from '../systems/graphSystem/graphSystem'
 import { RenderSystem } from '../systems/renderSystem'
-import { RenderEdgeSystem } from '../systems/graphSystem/renderEdgeSystem'
+import { RenderEdgeSystem } from '../systems/renderEdgeSystem'
 import { CameraSystem } from '../systems/cameraSystem'
 
 // Components
@@ -69,8 +69,6 @@ export class GameScene extends Phaser.Scene {
 		// Initialize Game Rendering systems
 		// Race conditions happen when we put these after the logic systems
 
-		this.ecs.addSystem(new RenderEdgeSystem(this.events, this.ecs, this))
-
 		// Initialize Game Logic systems
 		this.ecs.addSystem(new GraphSystem(this.events, this.ecs, this))
 		this.ecs.addSystem(new SpawnSystem(this.events, this.ecs, this))
@@ -80,6 +78,10 @@ export class GameScene extends Phaser.Scene {
 		this.ecs.addSystem(
 			new RenderSystem(this.events, this.ecs, this, this.gameContainer)
 		)
+		this.ecs.addSystem(
+			new RenderEdgeSystem(this.events, this.ecs, this, this.gameContainer)
+		)
+
 		// Running this up front because the camera can scroll before setPollAlways has been called (Resulting in improper values)
 		this.input.setPollAlways() // The cursor should poll for new positions while the camera is moving
 

@@ -81,8 +81,7 @@ export class GraphSystem implements ISystem {
 		// this.drawEdges(graph)
 
 		// let other systems know our graph has been populated
-		// HACK - we pass a container in here
-		this.events.emit('graphReady', entity, graph, this.container)
+		this.events.emit('graphReady', entity, graph)
 	}
 
 	getAdjacencyList = (graph: Graph): void => {
