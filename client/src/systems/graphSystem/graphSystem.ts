@@ -16,7 +16,7 @@ import nodeTest from 'node:test'
 export class GraphSystem implements ISystem {
 	private events: Phaser.Events.EventEmitter
 	private ecs: Registry
-	private scene: Phaser.Scene
+
 	public type = 'graphSystem'
 
 	// Graph data
@@ -25,14 +25,9 @@ export class GraphSystem implements ISystem {
 	// Game Objects
 	public container: GameObjects.Container
 
-	constructor(
-		events: Phaser.Events.EventEmitter,
-		ecs: Registry,
-		scene: Phaser.Scene
-	) {
+	constructor(events: Phaser.Events.EventEmitter, ecs: Registry) {
 		this.events = events
 		this.ecs = ecs
-		this.scene = scene
 
 		// Event Handlers
 		// We received a graph from the server, parse it and calculate ndoes
@@ -66,7 +61,10 @@ export class GraphSystem implements ISystem {
 		this.getAdjacencyList(graph)
 
 		// Identify nodes via depth first search
-		this.depthFirst(graph)
+		this.getNodes(graph)
+
+		// Assign adjacency list to individual nodes
+		this.addAdjacencyListToNodes(graph)
 
 		// Calculate depths for each node (so we can space them out horizontally / vertically)
 		this.getDepths(graph)
@@ -74,7 +72,11 @@ export class GraphSystem implements ISystem {
 		// Calculate a depth list so we know how many nodes are at a given depth (and can space them vertically)
 		this.getDepthList(graph)
 
-		console.log(graph)
+		// Draw our nodes
+		// this.drawNodes(graph)
+
+		// Draw edges between nodes
+		// this.drawEdges(graph)
 
 		// let other systems know our graph has been populated
 		this.events.emit('graphReady', entity, graph)
@@ -106,6 +108,57 @@ export class GraphSystem implements ISystem {
 			// Add destination to adjacency list
 			graph.reverseAdjacency.get(dst).push(src)
 		}
+	}
+
+	getNodes = (graph: Graph) => {
+		// Use DFS (depth-first) search so we can add a spacer after we hit a dead end
+		const start = 0 // We always start at position zero
+
+		// Walk through each node of the 'dungeon' and output the path
+		const stack = [start]
+		const visited = {}
+		visited[start] = true
+
+		let currentVertex
+
+		// Iterate until there are no edges left to visit
+		while (stack.length) {
+			// Grab the first node
+			currentVertex = stack.pop()
+
+			// Create a new node and store it in our graph
+			const node = this.createNode(currentVertex)
+			graph.nodes.set(currentVertex, node)
+
+			// Make sure node has a next step
+			if (graph.adjacency.get(currentVertex)) {
+				graph.adjacency.get(currentVertex).forEach((neighbor) => {
+					if (!visited[neighbor]) {
+						visited[neighbor] = true
+						stack.push(neighbor)
+					}
+				})
+			}
+		}
+	}
+
+	// Set the adjacent nodes on a given node so we can look it up later (e.g. pathfinding)
+	// The current adjacencylist uses indexes so we need to convert them to entities for traversal
+	addAdjacencyListToNodes = (graph: Graph): void => {
+		// Add the adjacency list to each node
+		graph.nodes.forEach((nodeEntity) => {
+			const node = this.ecs.getComponent(nodeEntity, 'node') as Node
+
+			node.adjacent = []
+
+			const adjacent = graph.adjacency.get(node.index)
+			// Our last node doesn't have any adjacent nodes (and throws undefined)
+			if (adjacent && adjacent.length > 0) {
+				for (let i = 0; i < adjacent.length; i++) {
+					node.adjacent.push(graph.nodes.get(adjacent[i]))
+				}
+			}
+		})
 	}
 
 	getDepths = (graph: Graph): void => {
@@ -160,70 +213,6 @@ export class GraphSystem implements ISystem {
 		const node = new Node(index)
 		this.ecs.addComponent(entity, node)
 		return entity
-	}
-
-	breadthFirst = (graph: Graph) => {
-		// Use BFS (depth-first) search
-		const start = 0 // We always start at position zero
-
-		// Walk through each node of the 'dungeon' and output the path
-		const queue = [start]
-		const visited = {}
-		visited[start] = true
-
-		let currentVertex
-
-		// Iterate until there are no edges left to visit
-		while (queue.length) {
-			// Grab the first node
-			currentVertex = queue.shift()
-
-			// Create a new node and store it in our graph
-			const node = this.createNode(currentVertex)
-			graph.nodes.set(currentVertex, node)
-
-			// Make sure node has a next step
-			if (graph.adjacency.get(currentVertex)) {
-				graph.adjacency.get(currentVertex).forEach((neighbor) => {
-					if (!visited[neighbor]) {
-						visited[neighbor] = true
-						queue.unshift(neighbor)
-					}
-				})
-			}
-		}
-	}
-
-	depthFirst = (graph: Graph) => {
-		// Use DFS (depth-first) search so we can add a spacer after we hit a dead end
-		const start = 0 // We always start at position zero
-
-		// Walk through each node of the 'dungeon' and output the path
-		const stack = [start]
-		const visited = {}
-		visited[start] = true
-
-		let currentVertex
-
-		// Iterate until there are no edges left to visit
-		while (stack.length) {
-			// Grab the first node
-			currentVertex = stack.pop()
-
-			// Create a new node and store it in our graph
-			const node = this.createNode(currentVertex)
-			graph.nodes.set(currentVertex, node)
-
-			// Make sure node has a next step
-			if (graph.adjacency.get(currentVertex)) {
-				graph.adjacency.get(currentVertex).forEach((neighbor) => {
-					if (!visited[neighbor]) {
-						visited[neighbor] = true
-						stack.push(neighbor)
-					}
-				})
-			}
-		}
 	}
 
 	// Returns the depth of a given node (via BFS)

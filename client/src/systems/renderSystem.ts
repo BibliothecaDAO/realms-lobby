@@ -17,16 +17,6 @@ export class RenderSystem implements ISystem {
 	private events: Phaser.Events.EventEmitter
 	private scene: Phaser.Scene
 
-	// GameObjects for all the nodes (indexed by their graph index)
-	private nodeCircles: Map<number, GameObjects.Arc> = new Map()
-	private nodeTexts: Map<number, GameObjects.Text> = new Map()
-
-	// Current node the player is occupying
-	private selectedCircle: GameObjects.Arc
-
-	// Nodes that the player can move to from current position
-	private validNodeCircles: Array<GameObjects.Arc> = []
-
 	// 'global' values from graph system
 	private graphEntity: string
 
@@ -42,8 +32,6 @@ export class RenderSystem implements ISystem {
 		// Event Handlers
 		// We received a graph from the server, parse it and calculate ndoes
 		this.events.on('spawnZone', this.setupGraph)
-		// this.events.on('executeCreateNode', this.drawSprite)
-		this.events.on('setupPlayer', this.setupPlayer)
 
 		// Draw the entity when they first spawn
 		this.events.on('spawnSuccess', this.handleSpawn)
@@ -60,12 +48,6 @@ export class RenderSystem implements ISystem {
 	// Store the entity for our graph so we can pull it down when needed
 	setupGraph = (entity: string) => {
 		this.graphEntity = entity
-	}
-
-	setupPlayer = (entity: string) => {
-		const graph = this.ecs.getComponent(this.graphEntity, 'graph') as Graph
-		const node = graph.nodes.get(0)
-		this.selectNode(null, node)
 	}
 
 	handleSpawn = (entity: string) => {
@@ -102,14 +84,12 @@ export class RenderSystem implements ISystem {
 
 			if (node != undefined) {
 				const location = getLocation(node, graph)
-				// this.scene.add
-				// .text(location.x, location.y, node.index.toString())
-				// .setDepth(5)
 
-				// TODO - find the one rogue edge
 				// then figure out how a player moves through the scene.
-
 				sprite.sprite.setX(location.x).setY(location.y).setScale(4)
+
+				// uncomment to see node indexes
+				// this.debug(location.x, location.y, node.index.toString())
 			} else {
 				throw new Error(`Node ${nodeEntity} does not exist`)
 			}
@@ -118,89 +98,35 @@ export class RenderSystem implements ISystem {
 		}
 	}
 
-	clearNodes = () => {
-		for (const [key, value] of this.nodeCircles) {
-			this.nodeCircles.get(key).destroy()
-		}
+	// colorValidNodes = (node: number) => {
+	// 	// Reset all nodes to default color
+	// 	if (this.validNodeCircles.length > 0) {
+	// 		for (let i = 0; i < this.validNodeCircles.length; i++) {
+	// 			this.validNodeCircles[i].fillColor = COLORS.secondary.hex
+	// 		}
+	// 		this.validNodeCircles = []
+	// 	}
 
-		for (const [key, value] of this.nodeTexts) {
-			this.nodeTexts.get(key).destroy()
-		}
-	}
+	// 	// Color current circle to show it's selected
+	// 	this.nodeCircles.get(node).setFillStyle(COLORS.primary.hex)
 
-	selectNode = (uid: string, entity: string) => {
-		// Remove old selection
-		if (this.selectedCircle) {
-			this.selectedCircle.destroy()
-		}
+	// 	// Determine which nodes the player can move to
+	// 	const graph = this.ecs.getComponent(this.graphEntity, 'graph') as Graph
 
-		// Determine where we should draw our selection
-		const node = this.ecs.getComponent(entity, 'node') as Node
+	// 	// Color nodes adjacent to current node
+	// 	const nextNodes = graph.adjacency.get(node)
 
-		// Draw the a circle around the currently selected node
-		this.selectedCircle = this.scene.add
-			.circle(node.x, node.y, 36, 0x000000, 0)
-			.setStrokeStyle(2, COLORS.primary.hex, 1) // To draw a circle w/o fill, we set fill alpha to 0 and add a stroke
-
-		// Node selector should pulse to indicate it's selected
-		this.scene.tweens.add({
-			targets: this.selectedCircle,
-			alpha: { value: 0.3, duration: 600 },
-			ease: 'Sine.easeInOut',
-			yoyo: true,
-			loop: -1,
-		})
-
-		// Color other nodes so player knows where they can go
-		// HACK - Commented this out so we could override node colors for debugging getDepth
-		// this.colorValidNodes(index)
-	}
-
-	enableClick = (entity: string, circle: GameObjects.Arc) => {
-		circle.setInteractive()
-		circle.on('pointerover', () => {
-			circle.setAlpha(0.8)
-			this.scene.input.setDefaultCursor('pointer')
-		})
-
-		circle.on('pointerout', () => {
-			circle.setAlpha(1)
-			this.scene.input.setDefaultCursor('grab')
-		})
-
-		circle.on('pointerup', () => {
-			// HACK - our original 'moveAttempt' passed one command: index
-			this.events.emit('moveAttempt', null, entity)
-			this.scene.input.setDefaultCursor('grab')
-		})
-	}
-
-	colorValidNodes = (node: number) => {
-		// Reset all nodes to default color
-		if (this.validNodeCircles.length > 0) {
-			for (let i = 0; i < this.validNodeCircles.length; i++) {
-				this.validNodeCircles[i].fillColor = COLORS.secondary.hex
-			}
-			this.validNodeCircles = []
-		}
-
-		// Color current circle to show it's selected
-		this.nodeCircles.get(node).setFillStyle(COLORS.primary.hex)
-
-		// Determine which nodes the player can move to
-		const graph = this.ecs.getComponent(this.graphEntity, 'graph') as Graph
-
-		// Color nodes adjacent to current node
-		const nextNodes = graph.adjacency.get(node)
-
-		if (nextNodes != undefined) {
-			for (let i = 0; i < nextNodes.length; i++) {
-				const circle = this.nodeCircles.get(nextNodes[i])
-				circle.fillColor = COLORS.primary.hex
-				this.validNodeCircles.push(circle)
-			}
-		}
-	}
+	// 	if (nextNodes != undefined) {
+	// 		for (let i = 0; i < nextNodes.length; i++) {
+	// 			const circle = this.nodeCircles.get(nextNodes[i])
+	// 			circle.fillColor = COLORS.primary.hex
+	// 			this.validNodeCircles.push(circle)
+	// 		}
+	// 	}
+	// }
 
 	// Utility functions
+	debug = (x: number, y: number, index: string) => {
+		this.scene.add.text(x, y, index).setDepth(5)
+	}
 }

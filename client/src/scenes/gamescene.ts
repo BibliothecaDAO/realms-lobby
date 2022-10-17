@@ -65,10 +65,10 @@ export class GameScene extends Phaser.Scene {
 		// Race conditions happen when we put these after the logic systems
 
 		// Initialize Game Logic systems
-		this.ecs.addSystem(new GraphSystem(this.events, this.ecs, this))
+		this.ecs.addSystem(new GraphSystem(this.events, this.ecs))
 		this.ecs.addSystem(new SpawnSystem(this.events, this.ecs, this))
 		this.ecs.addSystem(new PlayerSystem(this.events, this.ecs))
-		this.ecs.addSystem(new MoveSystem(this.events, this.ecs))
+		this.ecs.addSystem(new MoveSystem(this.events, this.ecs, this))
 		this.ecs.addSystem(new CameraSystem(this.events, this.ecs, this))
 		this.ecs.addSystem(new RenderSystem(this.events, this.ecs, this))
 		this.ecs.addSystem(new RenderEdgeSystem(this.events, this.ecs, this))
