@@ -222,6 +222,7 @@ export class Registry {
 		// Get a list of entities with transforms
 		const transformEntities = this.getEntitiesByComponentType('transform')
 
+		console.log(node)
 		// Loop through these until you find a transform with the correct index
 		for (let i = 0; i < transformEntities.length; i++) {
 			const transform = this.getComponent(
@@ -231,6 +232,8 @@ export class Registry {
 
 			// Add that entity to our list
 			if (transform.node === node) {
+				console.log('wt')
+				console.log(transform.node)
 				entities.push(transformEntities[i])
 			}
 		}

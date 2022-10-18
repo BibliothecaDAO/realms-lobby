@@ -80,21 +80,25 @@ export class MoveSystem implements ISystem {
 	enableClick = (node: number) => {
 		const graph = this.ecs.getComponentsByType('graph')[0] as Graph
 
-		// // TODO - Figure out why enabling this block causes the whole canvas to shift to the top left corner
-		// // Grab a list of adjacent nodes
+		// Grab a list of adjacent nodes
 		if (node != undefined) {
+			console.log(node)
 			const adjacents = graph.adjacency.get(node)
+			console.log(adjacents)
 			// 	// We have a path! Make 'em clickable
 			if (adjacents.length > 0) {
 				for (let i = 0; i < adjacents.length; i++) {
 					// Find the entity from this node location (index number)
 					const node = graph.nodes.get(adjacents[i])
 
+					console.log(node)
 					// Loop through the entities, highlight them, and highlight their paths (edges)
+					// TODO: Look into location filter now that we removed ecs nodes
 					const entitiesAtLocation = this.ecs.locationFilter(node.index)
+					console.log(entitiesAtLocation)
 					for (let j = 0; j < entitiesAtLocation.length; j++) {
 						// Make the sprite(s) clickable, highlight colors, etc
-						this.makeNodeVisitable(entitiesAtLocation[j])
+						this.makeNodeVisitable(entitiesAtLocation[j], node.index)
 						// this.events.emit('selectPath', nodeEntity, entitiesAtLocation[j])
 					}
 				}
@@ -103,8 +107,8 @@ export class MoveSystem implements ISystem {
 	}
 
 	// Utility functions
-	makeNodeVisitable = (node: string) => {
-		const sprite = (this.ecs.getComponent(node, 'sprite') as Sprite).sprite
+	makeNodeVisitable = (entity: string, node: number) => {
+		const sprite = (this.ecs.getComponent(entity, 'sprite') as Sprite).sprite
 
 		sprite.setTintFill(COLORS.primary.hex)
 		sprite.setAlpha(1)
@@ -119,8 +123,7 @@ export class MoveSystem implements ISystem {
 			this.scene.input.setDefaultCursor('grab')
 		})
 		sprite.on('pointerup', () => {
-			// HACK - our original 'moveAttempt' passed one command: index
-			this.events.emit('moveAttempt', null, node)
+			this.events.emit('moveAttempt', entity, node)
 			this.scene.input.setDefaultCursor('grab')
 		})
 	}
