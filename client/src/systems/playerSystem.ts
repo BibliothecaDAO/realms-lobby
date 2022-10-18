@@ -5,6 +5,7 @@ import { ISystem, Registry } from '../engine/registry'
 
 // Components
 import { Player } from '../components/player'
+import { Sprite } from '../components/sprite'
 
 export class PlayerSystem implements ISystem {
 	private events: Phaser.Events.EventEmitter
@@ -27,6 +28,14 @@ export class PlayerSystem implements ISystem {
 		// Attach 'Player' component so we know which entity is our player
 		const player = new Player()
 		this.ecs.addComponent(entity, player)
+
+		// Set player sprite to white
+		const sprite = this.ecs.getComponent(entity, 'sprite') as Sprite
+
+		if (sprite != undefined) {
+			sprite.sprite.setAlpha(1)
+			sprite.sprite.setTintFill(0xffffff)
+		}
 	}
 
 	// Utility functions

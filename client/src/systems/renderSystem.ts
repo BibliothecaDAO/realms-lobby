@@ -6,8 +6,10 @@ import { ISystem, Registry } from '../engine/registry'
 import { COLORS } from '../config'
 import { getLocation } from './utils/getLocation'
 
+// Graph
+import { Node } from './graphSystem/node'
+
 // Components
-import { Node } from '../components/node'
 import { Graph } from '../components/graph'
 import { Sprite } from '../components/sprite'
 import { Transform } from '../components/transform'
@@ -57,15 +59,12 @@ export class RenderSystem implements ISystem {
 		if (sprite != undefined) {
 			const transform = this.ecs.getComponent(entity, 'transform') as Transform
 			if (transform != undefined) {
-				// We get a node index (e.g. 1) from the server, but we need to get the actual node object
-				const graph = this.ecs.getComponent(this.graphEntity, 'graph') as Graph
-				const node = graph.nodes.get(JSON.parse(transform.node))
-				this.drawSprite(entity, node, sprite)
+				this.drawSprite(entity, transform.node, sprite)
 			}
 		}
 	}
 
-	handleMove = (entity: string, node: string) => {
+	handleMove = (entity: string, node: number) => {
 		const sprite = this.ecs.getComponent(entity, 'sprite') as Sprite
 		// Make sure we have a sprite
 		if (sprite != undefined) {
@@ -76,54 +75,25 @@ export class RenderSystem implements ISystem {
 	}
 
 	// Update a given sprite's on-screen position based on the node they occupy
-	drawSprite = (entity: string, nodeEntity: string, sprite: Sprite) => {
+	drawSprite = (entity: string, node: number, sprite: Sprite) => {
 		const graph = this.ecs.getComponent(this.graphEntity, 'graph') as Graph
 
 		if (graph != undefined) {
-			const node = this.ecs.getComponent(nodeEntity, 'node') as Node
-
 			if (node != undefined) {
 				const location = getLocation(node, graph)
 
-				// then figure out how a player moves through the scene.
 				sprite.sprite.setX(location.x).setY(location.y).setScale(4)
+				sprite.sprite.setAlpha(0.6)
 
 				// uncomment to see node indexes
 				// this.debug(location.x, location.y, node.index.toString())
 			} else {
-				throw new Error(`Node ${nodeEntity} does not exist`)
+				throw new Error(`No node passed in to render ${sprite.sprite}`)
 			}
 		} else {
 			throw new Error('No graph found when drawing sprite')
 		}
 	}
-
-	// colorValidNodes = (node: number) => {
-	// 	// Reset all nodes to default color
-	// 	if (this.validNodeCircles.length > 0) {
-	// 		for (let i = 0; i < this.validNodeCircles.length; i++) {
-	// 			this.validNodeCircles[i].fillColor = COLORS.secondary.hex
-	// 		}
-	// 		this.validNodeCircles = []
-	// 	}
-
-	// 	// Color current circle to show it's selected
-	// 	this.nodeCircles.get(node).setFillStyle(COLORS.primary.hex)
-
-	// 	// Determine which nodes the player can move to
-	// 	const graph = this.ecs.getComponent(this.graphEntity, 'graph') as Graph
-
-	// 	// Color nodes adjacent to current node
-	// 	const nextNodes = graph.adjacency.get(node)
-
-	// 	if (nextNodes != undefined) {
-	// 		for (let i = 0; i < nextNodes.length; i++) {
-	// 			const circle = this.nodeCircles.get(nextNodes[i])
-	// 			circle.fillColor = COLORS.primary.hex
-	// 			this.validNodeCircles.push(circle)
-	// 		}
-	// 	}
-	// }
 
 	// Utility functions
 	debug = (x: number, y: number, index: string) => {

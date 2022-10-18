@@ -9,9 +9,6 @@ import { getLocation } from './utils/getLocation'
 
 // Components
 import { Graph } from '../components/graph'
-import { Node } from '../components/node'
-
-// Actions
 
 export class RenderEdgeSystem implements ISystem {
 	private ecs: Registry
@@ -35,6 +32,7 @@ export class RenderEdgeSystem implements ISystem {
 		// Event Handlers
 		// We received a graph from the server, parse it and calculate ndoes
 		this.events.on('graphReady', this.drawEdges)
+		this.events.on('selectPath', this.highlightEdge)
 		this.events.on('clearCanvas', this.clearEdges)
 	}
 
@@ -47,22 +45,13 @@ export class RenderEdgeSystem implements ISystem {
 
 		for (let i = 0; i < graph.edges.length; i++) {
 			// Determine if edge should be visitable or disabled (grayed out)
-			const srcNodeId = graph.edges[i].src_identifier
+			const src = graph.edges[i].src_identifier
 
-			const srcNode = this.ecs.getComponent(
-				graph.nodes.get(srcNodeId),
-				'node'
-			) as Node
-
-			const dstNodeId = graph.edges[i].dst_identifier
-			const dstNode = this.ecs.getComponent(
-				graph.nodes.get(dstNodeId),
-				'node'
-			) as Node
+			const dst = graph.edges[i].dst_identifier
 
 			// Get locations of each node
-			const srcLocation = getLocation(srcNode, graph)
-			const dstLocation = getLocation(dstNode, graph)
+			const srcLocation = getLocation(src, graph)
+			const dstLocation = getLocation(dst, graph)
 
 			// Only draw edgse that the user can move to in bright colors
 			const edgeColor = COLORS.primary.hex
@@ -75,6 +64,8 @@ export class RenderEdgeSystem implements ISystem {
 				.setAlpha(0.2)
 		}
 	}
+
+	highlightEdge = (src: string, dst: string) => {}
 
 	clearEdges = () => {
 		// because we're just drawing lines, we can clear the drawbuffer

@@ -2,13 +2,14 @@
 
 import { IComponent } from '../engine/registry'
 import { Edge } from '../systems/graphSystem/edge'
+import { Node } from '../systems/graphSystem/node'
 
 export class Graph implements IComponent {
 	public type = 'graph'
 
 	public edges: Edge[] = []
 	// Reference to other entities (strings)
-	public nodes: Map<number, string> = new Map()
+	public nodes: Map<number, Node> = new Map()
 	public adjacency: Map<number, number[]> = new Map()
 	public reverseAdjacency: Map<number, number[]> = new Map()
 	public depth: Map<number, number> = new Map()

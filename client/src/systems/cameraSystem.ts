@@ -8,7 +8,6 @@ import { getLocation } from './utils/getLocation'
 // Components
 import { Zone } from '../components/zone'
 import { Transform } from '../components/transform'
-import { Node } from '../components/node'
 import { Graph } from '../components/graph'
 
 export class CameraSystem implements ISystem {
@@ -40,24 +39,7 @@ export class CameraSystem implements ISystem {
 		this.setupClickToDrag()
 	}
 
-	update = () => {
-		// Snap camera to player's position (current node)
-		// Only activate if we have our player's transform and graph setup
-		// When player moves, zoom to their new node
-		// if (this.transform != undefined && this.graph != undefined) {
-		// 	// Fire once (When our player moves to a new node)
-		// 	if (this.currentNode != this.transform.node) {
-		// 		// HACK - hardcoded from graphSystem.ts
-		// 		const xOffset = this.scene.cameras.main.centerX
-		// 		const yOffset = this.scene.cameras.main.centerY
-		// 		this.currentNode = this.transform.node
-		// 		const node = this.ecs.getComponent(this.currentNode, 'node') as Node
-		// 		const x = xOffset + node.x
-		// 		const y = yOffset + node.y
-		// 		// this.camera.centerOn(x, y)
-		// 	}
-		// }
-	}
+	update = () => {}
 
 	// Event responders
 	setupClickToDrag = () => {
@@ -115,17 +97,9 @@ export class CameraSystem implements ISystem {
 
 		// Get the player's current location
 		if (transform.node != undefined) {
-			const node = this.ecs.getComponent(transform.node, 'node') as Node
-
 			// Find the x/y coordinates of that node
-			if (node != undefined) {
-				const location = getLocation(node, this.graph)
-				this.scene.cameras.main.centerOn(location.x, location.y)
-			} else {
-				throw new Error(
-					`Node ${transform.node} cannot be found after ecs lookup`
-				)
-			}
+			const location = getLocation(transform.node, this.graph)
+			this.scene.cameras.main.centerOn(location.x, location.y)
 		} else {
 			throw new Error(`Player ${entity} has no node associated in Transform`)
 		}

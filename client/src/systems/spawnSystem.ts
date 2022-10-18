@@ -7,11 +7,9 @@ import { DEPTH } from '../config'
 // Hardcode components for our lookup table
 import { Inventory } from '../components/inventory'
 import { Zone } from '../components/zone'
-import { Node } from '../components/node'
 import { Player } from '../components/player'
 import { Sprite } from '../components/sprite'
 import { Transform } from '../components/transform'
-import { Graph } from '../components/graph'
 
 export class SpawnSystem implements ISystem {
 	private events: Phaser.Events.EventEmitter

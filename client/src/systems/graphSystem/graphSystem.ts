@@ -7,11 +7,10 @@ import { ISystem, Registry } from '../../engine/registry'
 // Components
 import { Zone } from '../../components/zone'
 import { Graph } from '../../components/graph'
-import { Node } from '../../components/node'
 
 // Graph data structures
 import { Edge } from './edge'
-import nodeTest from 'node:test'
+import { Node } from './node'
 
 export class GraphSystem implements ISystem {
 	private events: Phaser.Events.EventEmitter
@@ -64,7 +63,7 @@ export class GraphSystem implements ISystem {
 		this.getNodes(graph)
 
 		// Assign adjacency list to individual nodes
-		this.addAdjacencyListToNodes(graph)
+		// this.addAdjacencyListToNodes(graph)
 
 		// Calculate depths for each node (so we can space them out horizontally / vertically)
 		this.getDepths(graph)
@@ -127,7 +126,8 @@ export class GraphSystem implements ISystem {
 			currentVertex = stack.pop()
 
 			// Create a new node and store it in our graph
-			const node = this.createNode(currentVertex)
+			// const node = this.createNode(currentVertex)
+			const node = new Node(currentVertex)
 			graph.nodes.set(currentVertex, node)
 
 			// Make sure node has a next step
@@ -142,30 +142,27 @@ export class GraphSystem implements ISystem {
 		}
 	}
 
-	// Set the adjacent nodes on a given node so we can look it up later (e.g. pathfinding)
-	// The current adjacencylist uses indexes so we need to convert them to entities for traversal
-	addAdjacencyListToNodes = (graph: Graph): void => {
-		// Add the adjacency list to each node
-		graph.nodes.forEach((nodeEntity) => {
-			const node = this.ecs.getComponent(nodeEntity, 'node') as Node
+	// // Set the adjacent nodes on a given node so we can look it up later (e.g. pathfinding)
+	// // The current adjacencylist uses indexes so we need to convert them to entities for traversal
+	// addAdjacencyListToNodes = (graph: Graph): void => {
+	// 	// Add the adjacency list to each node
+	// 	graph.nodes.forEach((node) => {
+	// 		node.adjacent = []
 
-			node.adjacent = []
-
-			const adjacent = graph.adjacency.get(node.index)
-			// Our last node doesn't have any adjacent nodes (and throws undefined)
-			if (adjacent && adjacent.length > 0) {
-				for (let i = 0; i < adjacent.length; i++) {
-					node.adjacent.push(graph.nodes.get(adjacent[i]))
-				}
-			}
-		})
-	}
+	// 		const adjacent = graph.adjacency.get(node.index)
+	// 		// Our last node doesn't have any adjacent nodes (and throws undefined)
+	// 		if (adjacent && adjacent.length > 0) {
+	// 			for (let i = 0; i < adjacent.length; i++) {
+	// 				node.adjacent.push(graph.nodes.get(adjacent[i]))
+	// 			}
+	// 		}
+	// 	})
+	// }
 
 	getDepths = (graph: Graph): void => {
 		// Calculate depth for each individual node
 		for (const [key, value] of graph.nodes) {
-			const entity = graph.nodes.get(key)
-			const node = this.ecs.getComponent(entity, 'node') as Node
+			const node = graph.nodes.get(key)
 
 			const depth = this.calculateDepth(node.index, graph)
 			node.depth = depth
@@ -208,12 +205,12 @@ export class GraphSystem implements ISystem {
 	}
 
 	// Utility functions
-	createNode = (index: number): string => {
-		const entity = this.ecs.createEntity()
-		const node = new Node(index)
-		this.ecs.addComponent(entity, node)
-		return entity
-	}
+	// createNode = (index: number): string => {
+	// 	const entity = this.ecs.createEntity()
+	// 	const node = new Node(index)
+	// 	this.ecs.addComponent(entity, node)
+	// 	return entity
+	// }
 
 	// Returns the depth of a given node (via BFS)
 	calculateDepth = (index: number, graph: Graph) => {

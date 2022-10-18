@@ -76,14 +76,16 @@ export class GameUIScene extends Phaser.Scene {
 	drawBackground(): void {
 		const xOffset = 0.44
 
-		const background = this.add.rectangle(
-			0,
-			0,
-			this.cameras.main.width * xOffset,
-			this.cameras.main.height,
-			COLORS.bg.hex
-		)
-		background.setOrigin(0, 0)
+		const background = this.add
+			.rectangle(
+				0,
+				0,
+				this.cameras.main.width * xOffset,
+				this.cameras.main.height,
+				COLORS.bg.hex
+			)
+			.setOrigin(0, 0)
+			.setAlpha(0.8)
 	}
 
 	// Headline text 'danger awaits'

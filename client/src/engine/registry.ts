@@ -215,12 +215,12 @@ export class Registry {
 	}
 
 	// Filters - Search for entities based on a specific criteria (e.g. "get me all the entities with Transform position (3, 6)")
-	// TODO - Eventually we want some sort of an interface like a 'query' that can be passed in here and would say things like "get a list of entities with node = 3 and a sprite component"
-	locationFilter = (node: string) => {
+	// TODO - Eventually we] want some sort of an interface like a 'query' that can be passed in here and would say things like "get a list of entities with node = 3 and a sprite component"
+	locationFilter = (node: number) => {
 		const entities: Array<string> = []
 		// HACK - Filters by a specific component type and index
 		// Get a list of entities with transforms
-		const transformEntities = this.getEntitiesByComponentType('Transform')
+		const transformEntities = this.getEntitiesByComponentType('transform')
 
 		// Loop through these until you find a transform with the correct index
 		for (let i = 0; i < transformEntities.length; i++) {

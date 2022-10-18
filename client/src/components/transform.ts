@@ -7,9 +7,9 @@ export class Transform implements IComponent {
 	public type = 'transform'
 
 	// Which graph node are we currently occupying
-	public node: string
+	public node: number
 
-	constructor(node: string) {
+	constructor(node: number) {
 		this.node = node
 	}
 }

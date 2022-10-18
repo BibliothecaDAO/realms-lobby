@@ -3,11 +3,11 @@
 // Client can send moveRequests to the server which will then send back a validMove event.
 
 import { ISystem, Registry } from '../engine/registry'
+import { COLORS } from '../config'
 
 // Components
 import { Transform } from '../components/transform'
 import { Graph } from '../components/graph'
-import { Node } from '../components/node'
 import { Sprite } from '../components/sprite'
 
 export class MoveSystem implements ISystem {
@@ -47,24 +47,24 @@ export class MoveSystem implements ISystem {
 		const graph = this.ecs.getComponentsByType('graph')[0] as Graph
 
 		// Hack - convert all nodes to entities
-		const transforms = this.ecs.getComponentsByType(
-			'transform'
-		) as Array<Transform>
+		// const transforms = this.ecs.getComponentsByType(
+		// 	'transform'
+		// ) as Array<Transform>
 
-		for (let i = 0; i < transforms.length; i++) {
-			transforms[i].node = graph.nodes.get(JSON.parse(transforms[i].node))
-		}
+		// for (let i = 0; i < transforms.length; i++) {
+		// 	transforms[i].node = graph.nodes.get(JSON.parse(transforms[i].node))
+		// }
 
 		this.events.emit('selectNode', entity, this.transform.node)
 	}
 
 	// Receive a valid move from the server
-	validMove = (entity: string, node: string) => {
+	validMove = (entity: string, node: number) => {
 		const transform = this.ecs.getComponent(entity, 'transform') as Transform
 		transform.node = node
 	}
 
-	selectNode = (entity: string, node: string) => {
+	selectNode = (entity: string, node: number) => {
 		// TODO - Check if the move is valid
 
 		// Disable click for our cnrrent position so we can't move to previous nodes
@@ -77,59 +77,51 @@ export class MoveSystem implements ISystem {
 		this.enableClick(this.transform.node)
 	}
 
-	enableClick = (nodeEntity: string) => {
+	enableClick = (node: number) => {
 		const graph = this.ecs.getComponentsByType('graph')[0] as Graph
-		// // Derive index for node from its entity
-		let index
-		for (const [key, value] of graph.nodes) {
-			if (value == nodeEntity) {
-				index = key
-			}
-		}
+
 		// // TODO - Figure out why enabling this block causes the whole canvas to shift to the top left corner
 		// // Grab a list of adjacent nodes
-		if (index != undefined) {
-			const adjacents = graph.adjacency.get(index)
+		if (node != undefined) {
+			const adjacents = graph.adjacency.get(node)
 			// 	// We have a path! Make 'em clickable
 			if (adjacents.length > 0) {
 				for (let i = 0; i < adjacents.length; i++) {
-					// Find the entity whose location is this node
-					// TODO write a basic filter system
-					// TODO - Figure out why the hell locations are getting reset to top left of map
-
+					// Find the entity from this node location (index number)
 					const node = graph.nodes.get(adjacents[i])
-					// const entitiesAtLocation = this.ecs.locationFilter(node)
-					// for (let i = 0; i < entitiesAtLocation.length; i++) {
-					// 	// const sprite = this.ecs.getComponent(
-					// 	// 	entitiesAtLocation[i],
-					// 	// 	'sprite'
-					// 	// ) as Sprite
-					// 	// sprite.sprite.setInteractive()
-					// 	// sprite.sprite.on('pointerdown', () => {
-					// 	// 	this.events.emit('moveAttempt', entitiesAtLocation[i], node)
-					// 	// })
-					// }
 
-					// const sprite = this.ecs.getComponent(node, 'sprite') as Sprite
-					// const _sprite = sprite.sprite
-					// sprite.sprite.setInteractive()
-					// 			sprite.on('pointerover', () => {
-					// 				sprite.setAlpha(0.8)
-					// 				this.scene.input.setDefaultCursor('pointer')
-					// 			})
-					// 			sprite.on('pointerout', () => {
-					// 				sprite.setAlpha(1)
-					// 				this.scene.input.setDefaultCursor('grab')
-					// 			})
-					// 			sprite.on('pointerup', () => {
-					// 				// HACK - our original 'moveAttempt' passed one command: index
-					// 				this.events.emit('moveAttempt', null, node)
-					// 				this.scene.input.setDefaultCursor('grab')
-					// 			})
+					// Loop through the entities, highlight them, and highlight their paths (edges)
+					const entitiesAtLocation = this.ecs.locationFilter(node.index)
+					for (let j = 0; j < entitiesAtLocation.length; j++) {
+						// Make the sprite(s) clickable, highlight colors, etc
+						this.makeNodeVisitable(entitiesAtLocation[j])
+						// this.events.emit('selectPath', nodeEntity, entitiesAtLocation[j])
+					}
 				}
 			}
 		}
 	}
 
 	// Utility functions
+	makeNodeVisitable = (node: string) => {
+		const sprite = (this.ecs.getComponent(node, 'sprite') as Sprite).sprite
+
+		sprite.setTintFill(COLORS.primary.hex)
+		sprite.setAlpha(1)
+
+		sprite.setInteractive()
+		sprite.on('pointerover', () => {
+			sprite.setTintFill(0xffffff)
+			this.scene.input.setDefaultCursor('pointer')
+		})
+		sprite.on('pointerout', () => {
+			sprite.setTintFill(COLORS.primary.hex)
+			this.scene.input.setDefaultCursor('grab')
+		})
+		sprite.on('pointerup', () => {
+			// HACK - our original 'moveAttempt' passed one command: index
+			this.events.emit('moveAttempt', null, node)
+			this.scene.input.setDefaultCursor('grab')
+		})
+	}
 }
