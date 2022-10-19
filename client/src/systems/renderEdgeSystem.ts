@@ -15,7 +15,8 @@ export class RenderEdgeSystem implements ISystem {
 	private events: Phaser.Events.EventEmitter
 	private scene: Phaser.Scene
 
-	private graphics: GameObjects.Graphics
+	private edges: GameObjects.Graphics
+	private selectedEdges: GameObjects.Graphics
 
 	// 'global' values from graph system
 	private graph: Graph
@@ -32,8 +33,12 @@ export class RenderEdgeSystem implements ISystem {
 		// Event Handlers
 		// We received a graph from the server, parse it and calculate ndoes
 		this.events.on('graphReady', this.drawEdges)
-		this.events.on('selectPath', this.highlightEdge)
+		this.events.on('highlightEdge', this.highlightEdge)
 		this.events.on('clearCanvas', this.clearEdges)
+		this.events.on('clearSelectedEdges', this.clearSelectedEdges)
+
+		this.edges = this.scene.add.graphics()
+		this.selectedEdges = this.scene.add.graphics()
 	}
 
 	update = () => {
@@ -41,35 +46,65 @@ export class RenderEdgeSystem implements ISystem {
 	}
 
 	drawEdges = (entity: string, graph: Graph) => {
-		this.graphics = this.scene.add.graphics()
+		try {
+			// store graph for future use
+			this.graph = graph
 
-		for (let i = 0; i < graph.edges.length; i++) {
-			// Determine if edge should be visitable or disabled (grayed out)
-			const src = graph.edges[i].src_identifier
+			for (let i = 0; i < graph.edges.length; i++) {
+				// Determine if edge should be visitable or disabled (grayed out)
+				const src = graph.edges[i].src_identifier
 
-			const dst = graph.edges[i].dst_identifier
+				const dst = graph.edges[i].dst_identifier
 
-			// Get locations of each node
-			const srcLocation = getLocation(src, graph)
-			const dstLocation = getLocation(dst, graph)
+				// Get locations of each node
+				const srcLocation = getLocation(src, graph)
+				const dstLocation = getLocation(dst, graph)
 
-			// Only draw edgse that the user can move to in bright colors
-			const edgeColor = COLORS.primary.hex
+				// Only draw edgse that the user can move to in bright colors
+				const edgeColor = COLORS.primary.hex
 
-			// Draw our line
-			this.graphics.lineStyle(2, edgeColor)
-			const tmp = this.graphics
-				.lineBetween(srcLocation.x, srcLocation.y, dstLocation.x, dstLocation.y)
-				.setDepth(1)
-				.setAlpha(0.2)
+				// Draw our line
+				this.edges
+					.lineStyle(2, edgeColor)
+					.lineBetween(
+						srcLocation.x,
+						srcLocation.y,
+						dstLocation.x,
+						dstLocation.y
+					)
+					.setDepth(1)
+					.setAlpha(0.2)
+			}
+		} catch (error) {
+			console.log(error)
 		}
 	}
 
-	highlightEdge = (src: string, dst: string) => {}
+	// Highlight an edge so a user can see where they can move to
+	highlightEdge = (srcIndex: number, dstIndex: number) => {
+		try {
+			const srcLocation = getLocation(srcIndex, this.graph)
+			const dstLocation = getLocation(dstIndex, this.graph)
+
+			this.selectedEdges
+				.lineStyle(3, COLORS.primary.hex)
+				.lineBetween(srcLocation.x, srcLocation.y, dstLocation.x, dstLocation.y)
+				.setDepth(1)
+				.setAlpha(1)
+		} catch (error) {
+			console.error(error)
+		}
+	}
 
 	clearEdges = () => {
 		// because we're just drawing lines, we can clear the drawbuffer
 		// vs. removing every individual line
-		this.graphics.clear()
+		this.edges.clear()
+	}
+
+	clearSelectedEdges = () => {
+		console.log('got here')
+		// wipe the drawbuffer for selected edges
+		this.selectedEdges.clear()
 	}
 }

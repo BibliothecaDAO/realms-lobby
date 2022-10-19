@@ -75,15 +75,6 @@
 			components: [
 				{
 					type: 'transform',
-					node: 1,
-				},
-			],
-		},
-		{
-			base: 'environment/door',
-			components: [
-				{
-					type: 'transform',
 					node: 7,
 				},
 			],

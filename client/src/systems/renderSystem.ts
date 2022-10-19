@@ -65,8 +65,6 @@ export class RenderSystem implements ISystem {
 	}
 
 	handleMove = (entity: string, node: number) => {
-		console.log(entity)
-		console.log(node)
 		const sprite = this.ecs.getComponent(entity, 'sprite') as Sprite
 		// Make sure we have a sprite
 		if (sprite != undefined) {

@@ -6,6 +6,7 @@ import EventEmitter from 'events'
 import { LoadData } from './loadData'
 import { TICK_RATE } from '../config'
 import { Registry } from './registry'
+import { Player } from '../components/player'
 
 export class World {
 	public id: string

@@ -46,15 +46,6 @@ export class MoveSystem implements ISystem {
 
 		const graph = this.ecs.getComponentsByType('graph')[0] as Graph
 
-		// Hack - convert all nodes to entities
-		// const transforms = this.ecs.getComponentsByType(
-		// 	'transform'
-		// ) as Array<Transform>
-
-		// for (let i = 0; i < transforms.length; i++) {
-		// 	transforms[i].node = graph.nodes.get(JSON.parse(transforms[i].node))
-		// }
-
 		this.events.emit('selectNode', entity, this.transform.node)
 	}
 
@@ -80,26 +71,27 @@ export class MoveSystem implements ISystem {
 	enableClick = (node: number) => {
 		const graph = this.ecs.getComponentsByType('graph')[0] as Graph
 
+		// Clear existing clickables
+		this.events.emit('clearSelectedEdges')
+
 		// Grab a list of adjacent nodes
 		if (node != undefined) {
-			console.log(node)
 			const adjacents = graph.adjacency.get(node)
-			console.log(adjacents)
 			// 	// We have a path! Make 'em clickable
 			if (adjacents.length > 0) {
 				for (let i = 0; i < adjacents.length; i++) {
 					// Find the entity from this node location (index number)
-					const node = graph.nodes.get(adjacents[i])
+					const destNode = graph.nodes.get(adjacents[i])
 
-					console.log(node)
 					// Loop through the entities, highlight them, and highlight their paths (edges)
-					// TODO: Look into location filter now that we removed ecs nodes
-					const entitiesAtLocation = this.ecs.locationFilter(node.index)
-					console.log(entitiesAtLocation)
+					const entitiesAtLocation = this.ecs.locationFilter(destNode.index)
 					for (let j = 0; j < entitiesAtLocation.length; j++) {
 						// Make the sprite(s) clickable, highlight colors, etc
-						this.makeNodeVisitable(entitiesAtLocation[j], node.index)
-						// this.events.emit('selectPath', nodeEntity, entitiesAtLocation[j])
+						this.makeNodeVisitable(entitiesAtLocation[j], destNode.index)
+
+						// Highlight the edges as well
+						// TODO - figure out how to fire this event and draw the current edge
+						this.events.emit('highlightEdge', node, adjacents[i])
 					}
 				}
 			}
@@ -127,4 +119,6 @@ export class MoveSystem implements ISystem {
 			this.scene.input.setDefaultCursor('grab')
 		})
 	}
+
+	// makeNodeNotVisibtable
 }
