@@ -18,6 +18,8 @@ export class MoveSystem implements ISystem {
 	// Player's transform to track movement
 	transform: Transform
 
+	adjacentNodes: Array<string> = []
+
 	constructor(
 		events: Phaser.Events.EventEmitter,
 		ecs: Registry,
@@ -72,6 +74,7 @@ export class MoveSystem implements ISystem {
 		const graph = this.ecs.getComponentsByType('graph')[0] as Graph
 
 		// Clear existing clickables
+		this.removeClickableNode()
 		this.events.emit('clearSelectedEdges')
 
 		// Grab a list of adjacent nodes
@@ -87,11 +90,13 @@ export class MoveSystem implements ISystem {
 					const entitiesAtLocation = this.ecs.locationFilter(destNode.index)
 					for (let j = 0; j < entitiesAtLocation.length; j++) {
 						// Make the sprite(s) clickable, highlight colors, etc
-						this.makeNodeVisitable(entitiesAtLocation[j], destNode.index)
+						this.addClickableNode(entitiesAtLocation[j], destNode.index)
 
 						// Highlight the edges as well
-						// TODO - figure out how to fire this event and draw the current edge
 						this.events.emit('highlightEdge', node, adjacents[i])
+
+						// Store this entity so we can disable it later when the player moves somewhere else
+						this.adjacentNodes.push(entitiesAtLocation[j])
 					}
 				}
 			}
@@ -99,7 +104,7 @@ export class MoveSystem implements ISystem {
 	}
 
 	// Utility functions
-	makeNodeVisitable = (entity: string, node: number) => {
+	addClickableNode = (entity: string, node: number) => {
 		const sprite = (this.ecs.getComponent(entity, 'sprite') as Sprite).sprite
 
 		sprite.setTintFill(COLORS.primary.hex)
@@ -120,5 +125,17 @@ export class MoveSystem implements ISystem {
 		})
 	}
 
-	// makeNodeNotVisibtable
+	//
+	removeClickableNode = () => {
+		for (let i = 0; i < this.adjacentNodes.length; i++) {
+			const sprite = (
+				this.ecs.getComponent(this.adjacentNodes[i], 'sprite') as Sprite
+			).sprite
+
+			sprite.clearTint()
+			sprite.setAlpha(0.5)
+
+			sprite.removeAllListeners()
+		}
+	}
 }
