@@ -50,9 +50,14 @@ export class Connection {
 
 		// Client -> Server events
 		// Send move to the server
-		this.events.on('moveAttempt', (index: number) => {
-			this.socket.emit('moveAttempt', index)
-		})
+		this.events.on(
+			'moveAttempt',
+			(entity: string, srcNode: number, dstNode: number) => {
+				try {
+					this.socket.emit('moveAttempt', dstNode)
+				} catch (e) {}
+			}
+		)
 
 		// Request state so we can load the map
 		this.events.on('requestSnapshot', () => {

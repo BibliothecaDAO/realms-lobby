@@ -43,23 +43,27 @@ export class CameraSystem implements ISystem {
 
 	// Event responders
 	setupClickToDrag = () => {
-		// Set the cursor to 'grab' so user knows they can grab thet screen
-		this.scene.input.setDefaultCursor('grab')
-
-		// When mouse is pressed down and moving, move the camera left/right
-		this.scene.input.on('pointermove', (p) => {
-			if (!p.isDown) return
-
-			// Pan camera left/right if we drag the mouse (but not up/down)
-			this.scene.cameras.main.scrollX -=
-				(p.x - p.prevPosition.x) / this.scene.cameras.main.zoom
-			this.scene.input.setDefaultCursor('grabbing')
-		})
-
-		// When cursor is released, reset the cursor to 'grab'
-		this.scene.input.on('pointerup', (p) => {
+		try {
+			// Set the cursor to 'grab' so user knows they can grab thet screen
 			this.scene.input.setDefaultCursor('grab')
-		})
+
+			// When mouse is pressed down and moving, move the camera left/right
+			this.scene.input.on('pointermove', (p) => {
+				if (!p.isDown) return
+
+				// Pan camera left/right if we drag the mouse (but not up/down)
+				this.scene.cameras.main.scrollX -=
+					(p.x - p.prevPosition.x) / this.scene.cameras.main.zoom
+				this.scene.input.setDefaultCursor('grabbing')
+			})
+
+			// When cursor is released, reset the cursor to 'grab'
+			this.scene.input.on('pointerup', (p) => {
+				this.scene.input.setDefaultCursor('grab')
+			})
+		} catch (e) {
+			console.error(e)
+		}
 	}
 	// Set the bounds of the world so we know when to start panning
 	setMapBounds = (entity, zone: Zone) => {
@@ -92,16 +96,20 @@ export class CameraSystem implements ISystem {
 	}
 
 	setupPlayer = (entity: string) => {
-		// Start camera are player's current location
-		const transform = this.ecs.getComponent(entity, 'transform') as Transform
+		try {
+			// Start camera are player's current location
+			const transform = this.ecs.getComponent(entity, 'transform') as Transform
 
-		// Get the player's current location
-		if (transform.node != undefined) {
-			// Find the x/y coordinates of that node
-			const location = getLocation(transform.node, this.graph)
-			this.scene.cameras.main.centerOn(location.x, location.y)
-		} else {
-			throw new Error(`Player ${entity} has no node associated in Transform`)
+			// Get the player's current location
+			if (transform.node != undefined) {
+				// Find the x/y coordinates of that node
+				const location = getLocation(transform.node, this.graph)
+				this.scene.cameras.main.centerOn(location.x, location.y)
+			} else {
+				throw new Error(`Player ${entity} has no node associated in Transform`)
+			}
+		} catch (e) {
+			console.error(e)
 		}
 	}
 

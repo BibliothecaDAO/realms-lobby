@@ -97,14 +97,21 @@ export class RenderEdgeSystem implements ISystem {
 	}
 
 	clearEdges = () => {
-		// because we're just drawing lines, we can clear the drawbuffer
-		// vs. removing every individual line
-		this.edges.clear()
+		try {
+			// because we're just drawing lines, we can clear the drawbuffer
+			// vs. removing every individual line
+			this.edges.clear()
+		} catch (e) {
+			console.error(e)
+		}
 	}
 
 	clearSelectedEdges = () => {
-		console.log('got here')
-		// wipe the drawbuffer for selected edges
-		this.selectedEdges.clear()
+		try {
+			// wipe the drawbuffer for selected edges
+			this.selectedEdges.clear()
+		} catch (e) {
+			console.error(e)
+		}
 	}
 }

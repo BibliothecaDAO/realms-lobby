@@ -53,45 +53,60 @@ export class RenderSystem implements ISystem {
 	}
 
 	handleSpawn = (entity: string) => {
-		const sprite = this.ecs.getComponent(entity, 'sprite') as Sprite
+		try {
+			const sprite = this.ecs.getComponent(entity, 'sprite') as Sprite
 
-		// Make sure this entity has a sprite (so we should draw it)
-		if (sprite != undefined) {
-			const transform = this.ecs.getComponent(entity, 'transform') as Transform
-			if (transform != undefined) {
-				this.drawSprite(entity, transform.node, sprite)
+			// Make sure this entity has a sprite (so we should draw it)
+			if (sprite != undefined) {
+				const transform = this.ecs.getComponent(
+					entity,
+					'transform'
+				) as Transform
+				if (transform != undefined) {
+					this.drawSprite(entity, transform.node, sprite)
+				}
 			}
+		} catch (e) {
+			console.error(e)
 		}
 	}
 
-	handleMove = (entity: string, node: number) => {
-		const sprite = this.ecs.getComponent(entity, 'sprite') as Sprite
-		// Make sure we have a sprite
-		if (sprite != undefined) {
-			this.drawSprite(entity, node, sprite)
-		} else {
-			throw new Error(`Entity ${entity} does not have a sprite`)
+	handleMove = (entity: string, srcNode: number, dstNode: number) => {
+		try {
+			const sprite = this.ecs.getComponent(entity, 'sprite') as Sprite
+			// Make sure we have a sprite
+			if (sprite != undefined) {
+				this.drawSprite(entity, dstNode, sprite)
+			} else {
+				throw new Error(`Entity ${entity} does not have a sprite`)
+			}
+		} catch (e) {
+			console.error(e)
 		}
 	}
 
 	// Update a given sprite's on-screen position based on the node they occupy
 	drawSprite = (entity: string, node: number, sprite: Sprite) => {
-		const graph = this.ecs.getComponent(this.graphEntity, 'graph') as Graph
+		try {
+			const graph = this.ecs.getComponent(this.graphEntity, 'graph') as Graph
 
-		if (graph != undefined) {
-			if (node != undefined) {
-				const location = getLocation(node, graph)
+			if (graph != undefined) {
+				if (node != undefined) {
+					const location = getLocation(node, graph)
 
-				sprite.sprite.setX(location.x).setY(location.y).setScale(4)
-				sprite.sprite.setAlpha(0.6)
+					sprite.sprite.setX(location.x).setY(location.y).setScale(4)
+					sprite.sprite.setAlpha(0.6)
 
-				// uncomment to see node indexes
-				// this.debug(location.x, location.y, node.index.toString())
+					// uncomment to see node indexes
+					// this.debug(location.x, location.y, node.index.toString())
+				} else {
+					throw new Error(`No node passed in to render ${sprite.sprite}`)
+				}
 			} else {
-				throw new Error(`No node passed in to render ${sprite.sprite}`)
+				throw new Error('No graph found when drawing sprite')
 			}
-		} else {
-			throw new Error('No graph found when drawing sprite')
+		} catch (e) {
+			console.error(e)
 		}
 	}
 

@@ -25,16 +25,20 @@ export class PlayerSystem implements ISystem {
 
 	// Event responders
 	setupPlayer = (entity: string) => {
-		// Attach 'Player' component so we know which entity is our player
-		const player = new Player()
-		this.ecs.addComponent(entity, player)
+		try {
+			// Attach 'Player' component so we know which entity is our player
+			const player = new Player()
+			this.ecs.addComponent(entity, player)
 
-		// Set player sprite to white
-		const sprite = this.ecs.getComponent(entity, 'sprite') as Sprite
+			// Set player sprite to white
+			const sprite = this.ecs.getComponent(entity, 'sprite') as Sprite
 
-		if (sprite != undefined) {
-			sprite.sprite.setAlpha(1)
-			sprite.sprite.setTintFill(0xffffff)
+			if (sprite != undefined) {
+				sprite.sprite.setAlpha(1)
+				sprite.sprite.setTintFill(0xffffff)
+			}
+		} catch (e) {
+			console.error(e)
 		}
 	}
 
