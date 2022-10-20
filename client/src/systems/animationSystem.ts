@@ -46,6 +46,9 @@ export class AnimationSystem implements ISystem {
 				const startLocation = getLocation(src, this.graph)
 				const endLocation = getLocation(dst, this.graph)
 
+				// Keep track of our tween so we can destroy it upon completion
+				let shuffleTween
+
 				// Player moves from source to destination
 				sprite.scene.tweens.add({
 					delay: 0,
@@ -59,8 +62,24 @@ export class AnimationSystem implements ISystem {
 						to: endLocation.y,
 					},
 					ease: 'Power1',
-					duration: 1000,
+					duration: 2000,
 					repeat: 0,
+					onStart: () => {
+						console.log('got here')
+						shuffleTween = sprite.scene.tweens.add({
+							delay: 0,
+							targets: sprite,
+							rotation: 0.2,
+							ease: 'Power1',
+							duration: 100,
+							repeat: -1,
+							yoyo: true,
+						})
+					},
+					onComplete: () => {
+						console.log('got to end')
+						shuffleTween.destroy()
+					},
 				})
 			}
 			// Kick off (fast, looping) walk tween
