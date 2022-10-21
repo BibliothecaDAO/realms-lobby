@@ -49,7 +49,7 @@ export class AnimationSystem implements ISystem {
 				// Keep track of our tween so we can destroy it upon completion
 				let shuffleTween
 
-				// Player moves from source to destination
+				// Kick off (fast, single shot) walk tween to destination
 				sprite.scene.tweens.add({
 					delay: 0,
 					targets: sprite,
@@ -65,7 +65,7 @@ export class AnimationSystem implements ISystem {
 					duration: 2000,
 					repeat: 0,
 					onStart: () => {
-						console.log('got here')
+						// Kick off (short,looping) shuffle tween to destination
 						shuffleTween = sprite.scene.tweens.add({
 							delay: 0,
 							targets: sprite,
@@ -77,14 +77,21 @@ export class AnimationSystem implements ISystem {
 						})
 					},
 					onComplete: () => {
-						console.log('got to end')
 						shuffleTween.destroy()
+						// If we don't make it back to our idle rotation, quickly snap to it
+						if (sprite.rotation != 0) {
+							sprite.scene.tweens.add({
+								delay: 0,
+								targets: sprite,
+								rotation: 0,
+								ease: 'Power1',
+								duration: 100,
+								repeat: 0,
+							})
+						}
 					},
 				})
 			}
-			// Kick off (fast, looping) walk tween
-			// When player reaches destination
-			// Stop both tweens (can we ease into it?)
 		} catch (e) {
 			console.error(e)
 		}

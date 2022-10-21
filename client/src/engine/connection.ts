@@ -55,7 +55,9 @@ export class Connection {
 			(entity: string, srcNode: number, dstNode: number) => {
 				try {
 					this.socket.emit('moveAttempt', dstNode)
-				} catch (e) {}
+				} catch (e) {
+					console.error(e)
+				}
 			}
 		)
 
