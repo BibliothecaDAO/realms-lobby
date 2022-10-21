@@ -13,12 +13,15 @@ export class MoveSystem implements ISystem {
 	private events: EventEmitter
 	private ecs: Registry
 
+	private nodeList: Map<number, boolean> = new Map()
+
 	constructor(events: EventEmitter, ecs: Registry) {
 		this.events = events
 		this.ecs = ecs
 
 		// Event responders
 		this.events.on('moveAttempt', this.moveEntity)
+		this.events.on('spawnSuccess', this.checkForDuplicates)
 	}
 
 	update = () => {
@@ -47,6 +50,31 @@ export class MoveSystem implements ISystem {
 			}
 		} else {
 			throw new Error(`cannot find curent node for entity ${entity}`)
+		}
+	}
+
+	// Check to make sure no entities are spawned on the same node
+	// TODO: Consider moving this to a generic dataValidation System
+	checkForDuplicates = (entity: string, components) => {
+		let transform
+		let player
+
+		for (let i = 0; i < components.length; i++) {
+			if (components[i].type == 'transform') {
+				transform = components[i]
+			}
+			// HACK - Players can occupy the same node (?)
+			if (components[i].type == 'player') {
+				player == components[i]
+			}
+		}
+
+		if (transform != undefined && player == undefined) {
+			if (this.nodeList.get(transform.node) == undefined) {
+				this.nodeList.set(transform.node, true)
+			} else {
+				throw new Error(`This node is alerady occupied: ${transform.node}`)
+			}
 		}
 	}
 }

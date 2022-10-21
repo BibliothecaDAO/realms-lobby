@@ -8,6 +8,7 @@
 // Each component and each system should do one thing (and only one thing !) well
 
 import { v4 as uuidv4 } from 'uuid'
+import { Transform } from '../components/transform'
 
 export interface IComponent {
 	type: string
@@ -155,6 +156,22 @@ export class Registry {
 		return this.componentTypesToEntities.get(type)
 	}
 
+	// Find a single entity that has a specific component
+	// HACK - find a more efficient way to filter
+	getEntityByComponent = (component: IComponent): string => {
+		// Loop through each entity's component lists
+		for (const [key, value] of this.entitiesToComponents) {
+			for (let i = 0; i < value.length; i++) {
+				if (value[i] === component) {
+					return key
+				}
+			}
+		}
+
+		// we didn't find a matching component
+		return undefined
+	}
+
 	// Process Systems
 	addSystem = (system: ISystem) => {
 		this.systems.push(system)
@@ -195,6 +212,30 @@ export class Registry {
 				system.destroy()
 			}
 		}
+	}
+
+	// Filters - Search for entities based on a specific criteria (e.g. "get me all the entities with Transform position (3, 6)")
+	// TODO - Eventually we] want some sort of an interface like a 'query' that can be passed in here and would say things like "get a list of entities with node = 3 and a sprite component"
+	locationFilter = (node: number) => {
+		const entities: Array<string> = []
+		// HACK - Filters by a specific component type and index
+		// Get a list of entities with transforms
+		const transformEntities = this.getEntitiesByComponentType('transform')
+
+		// Loop through these until you find a transform with the correct index
+		for (let i = 0; i < transformEntities.length; i++) {
+			const transform = this.getComponent(
+				transformEntities[i],
+				'transform'
+			) as Transform
+
+			// Add that entity to our list
+			if (transform.node === node) {
+				entities.push(transformEntities[i])
+			}
+		}
+
+		return entities
 	}
 
 	// Returns a snapshot of the current state
