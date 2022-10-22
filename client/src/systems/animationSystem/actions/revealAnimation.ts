@@ -54,36 +54,38 @@ export class RevealAnimation implements IAction {
 
 		// Fade door out
 		openDoor.scene.tweens.add({
-			delay: 0,
+			delay: 2000,
 			targets: openDoor,
 			alpha: {
 				from: 1,
 				to: 0,
 			},
 			ease: 'Power1',
-			duration: 500,
+			duration: 700,
 			repeat: 0,
 		})
 
 		// Reveal the enemy
 		const camera = enemySprite.sprite.scene.cameras.main
 		// Slight screen shake
-		camera.shake(100, 0.005)
+
 		// Slight camera zoom in/out
 		enemySprite.sprite.scene.tweens.add({
-			delay: 0,
+			delay: 2300,
 			targets: camera,
 			zoom: 1.05,
 			ease: 'Sine.easeInOut',
 			duration: 120,
-			// blur: 5000,
 			repeat: 2,
 			yoyo: true,
+			onStart: () => {
+				camera.shake(100, 0.005)
+			},
 		})
 
 		this.ecs.addComponent(entity, enemySprite)
 		enemySprite.sprite.scene.tweens.add({
-			delay: 0,
+			delay: 2000,
 			targets: enemySprite.sprite,
 			alpha: {
 				from: 0,
