@@ -20,15 +20,20 @@ export default class Game extends Phaser.Game {
 	constructor(config) {
 		super(config)
 
-		// Instantiate our world and populate it with initial data
-		this.world = new World()
+		try {
+			// Instantiate our world and populate it with initial data
+			this.world = new World()
 
-		// Start loading scenes in background (but we kick off LoadingScreen)
-		this.scene.add(GameScene.Name, GameScene, false, {
-			ecs: this.world.ecs,
-			world: this.world,
-			events: this.world.events,
-		})
+			// Start loading scenes in background (but we kick off LoadingScreen)
+			this.scene.add(GameScene.Name, GameScene, false, {
+				ecs: this.world.ecs,
+				world: this.world,
+				events: this.world.events,
+				actions: this.world.actions,
+			})
+		} catch (e) {
+			console.error(e)
+		}
 	}
 }
 

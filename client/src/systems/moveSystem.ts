@@ -67,7 +67,7 @@ export class MoveSystem implements ISystem {
 			const transform = this.ecs.getComponent(entity, 'transform') as Transform
 			transform.node = node
 		} catch (e) {
-			console.log(e)
+			console.error(e)
 		}
 	}
 
@@ -119,7 +119,7 @@ export class MoveSystem implements ISystem {
 				}
 			}
 		} catch (e) {
-			console.log(e)
+			console.error(e)
 		}
 	}
 

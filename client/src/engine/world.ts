@@ -1,10 +1,12 @@
 // world.ts - Listens to events from server and spawns Map and Characters
 import { Registry } from './registry'
+import { ActionQueue } from './actionQueue'
 import { Connection } from './connection'
 
 export class World {
 	public ecs: Registry // ECS Registry containing our entities, components, and systems
 
+	public actions: ActionQueue // Queue of actions to run in sequence (e.g. move here then attack then get an item)
 	public events: Phaser.Events.EventEmitter // Event Emitter where components can listen for changes
 	public connection: Connection
 
@@ -14,6 +16,9 @@ export class World {
 
 		// Setup ECS registry
 		this.ecs = new Registry()
+
+		// Setup action queue so player can execute actions in sequence
+		this.actions = new ActionQueue()
 
 		// We should only have one world map instance (this might change as we introduce multiple zones)
 		this.connection = new Connection(this.events)

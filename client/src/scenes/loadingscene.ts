@@ -43,6 +43,7 @@ export class LoadingScene extends Scene {
 		// Load environment sprites
 		this.load.image('treasurechest', 'sprites/environment/treasurechest.png')
 		this.load.image('door', 'sprites/environment/door.png')
+		this.load.image('door-open', 'sprites/environment/door-open.png')
 	}
 
 	create(): void {
