@@ -1,27 +1,22 @@
-// Open a door and reveal it
-// This is how a player knows what's going to happen at this node
+// Reveal an enemy at a node
 
 import { IAction } from '../../../engine/actionQueue'
 import { Registry } from '../../../engine/registry'
+
 import { GameObjects } from 'phaser'
+
+// Components
 import { Sprite } from '../../../components/sprite'
 
 export class RevealAnimation implements IAction {
 	started = false
 	finished = false
 
-	doorSprite: Sprite // The door housing the enemy
 	entity: string // The entity that contains the door and enemy
 	enemySprite: Sprite // The enemy sprite
 	ecs: Registry
 
-	constructor(
-		doorSprite: Sprite,
-		entity: string,
-		enemySprite: Sprite,
-		ecs: Registry
-	) {
-		this.doorSprite = doorSprite
+	constructor(entity: string, enemySprite: Sprite, ecs: Registry) {
 		this.entity = entity
 		this.enemySprite = enemySprite
 		this.ecs = ecs
@@ -32,46 +27,26 @@ export class RevealAnimation implements IAction {
 		// Only play the animation once
 		if (!this.started) {
 			this.started = true
-			this.animate(this.doorSprite, this.entity, this.enemySprite, this.ecs)
+			this.animate(this.entity, this.enemySprite)
 		}
 	}
 
-	private animate = (
-		doorSprite: Sprite,
-		entity: string,
-		enemySprite: Sprite,
-		ecs: Registry
-	) => {
-		// Open the door
-		// Spawn a new door
-		const openDoor = doorSprite.sprite.scene.add
-			.sprite(doorSprite.sprite.x, doorSprite.sprite.y, 'door-open')
-			.setScale(4)
-		// Destroy existing door
-		console.log(this.ecs.getComponentsByEntity(entity))
-		this.ecs.removeComponent(entity, doorSprite)
-		doorSprite.sprite.destroy()
-
-		// Fade door out
-		openDoor.scene.tweens.add({
-			delay: 2000,
-			targets: openDoor,
-			alpha: {
-				from: 1,
-				to: 0,
-			},
-			ease: 'Power1',
-			duration: 700,
-			repeat: 0,
-		})
+	private animate = (entity: string, enemySprite: Sprite) => {
+		const sprite = enemySprite.sprite
+		// Shake the screen a bit on enemy reveal
+		this.shakeCamera(sprite)
 
 		// Reveal the enemy
-		const camera = enemySprite.sprite.scene.cameras.main
-		// Slight screen shake
+		this.ecs.addComponent(entity, enemySprite)
+		this.revealEnemy(sprite)
+	}
+
+	shakeCamera = (sprite: GameObjects.Sprite) => {
+		const camera = sprite.scene.cameras.main
 
 		// Slight camera zoom in/out
-		enemySprite.sprite.scene.tweens.add({
-			delay: 2300,
+		sprite.scene.tweens.add({
+			delay: 400,
 			targets: camera,
 			zoom: 1.05,
 			ease: 'Sine.easeInOut',
@@ -79,14 +54,17 @@ export class RevealAnimation implements IAction {
 			repeat: 2,
 			yoyo: true,
 			onStart: () => {
+				// Add slight screen shake
 				camera.shake(100, 0.005)
 			},
 		})
+	}
 
-		this.ecs.addComponent(entity, enemySprite)
-		enemySprite.sprite.scene.tweens.add({
-			delay: 2000,
-			targets: enemySprite.sprite,
+	revealEnemy = (sprite: GameObjects.Sprite) => {
+		// Fade in enemy
+		sprite.scene.tweens.add({
+			delay: 0,
+			targets: sprite,
 			alpha: {
 				from: 0,
 				to: 1,

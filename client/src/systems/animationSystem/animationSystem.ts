@@ -10,6 +10,7 @@ import { ActionQueue } from '../../engine/actionQueue'
 
 // Animations
 import { MoveAnimation } from './actions/moveAnimation'
+import { OpenDoorAnimation } from './actions/openDoorAnimation'
 import { RevealAnimation } from './actions/revealAnimation'
 
 export class AnimationSystem implements ISystem {
@@ -129,9 +130,12 @@ export class AnimationSystem implements ISystem {
 				.setAlpha(0)
 			const enemyComponent = new Sprite(enemy, enemySprite)
 
+			// Open the door
+			this.actions.add(new OpenDoorAnimation(doorSprite, doorEntity, this.ecs))
+
 			// Reveal enemy at the door
 			this.actions.add(
-				new RevealAnimation(doorSprite, doorEntity, enemyComponent, this.ecs)
+				new RevealAnimation(doorEntity, enemyComponent, this.ecs)
 			)
 			console.log('got here')
 
