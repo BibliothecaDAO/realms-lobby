@@ -12,6 +12,7 @@ import { ActionQueue } from '../../engine/actionQueue'
 import { MoveAnimation } from './actions/moveAnimation'
 import { OpenDoorAnimation } from './actions/openDoorAnimation'
 import { RevealAnimation } from './actions/revealAnimation'
+import { CombatAnimation } from './actions/combatAnimation'
 
 export class AnimationSystem implements ISystem {
 	private ecs: Registry
@@ -92,7 +93,7 @@ export class AnimationSystem implements ISystem {
 	}
 
 	// Plays the reveal -> Combat animation then moves the player to their destination
-	handleCombat = (entity: string, node: number, enemy: string) => {
+	handleCombat = (entity: string, node: number, enemyName: string) => {
 		if (node != undefined) {
 			// Keep track of our door
 			let doorSprite: Sprite
@@ -125,26 +126,29 @@ export class AnimationSystem implements ISystem {
 			// Enemy will start invisible
 
 			const enemySprite = this.scene.add
-				.sprite(doorSprite.sprite.x, doorSprite.sprite.y, enemy)
+				.sprite(doorSprite.sprite.x, doorSprite.sprite.y, enemyName)
 				.setScale(4)
 				.setAlpha(0)
-			const enemyComponent = new Sprite(enemy, enemySprite)
+			const enemyComponent = new Sprite(enemyName, enemySprite)
 
 			// Open the door
 			this.actions.add(new OpenDoorAnimation(doorSprite, doorEntity, this.ecs))
 
+			const enemy = doorEntity // For convenience, this is now an enemy entity :D
+
 			// Reveal enemy at the door
+			this.actions.add(new RevealAnimation(enemy, enemyComponent, this.ecs))
+
+			// Combat happens here !
+			// Get player's sprite
+			const sprite = this.ecs.getComponent(entity, 'sprite') as Sprite
 			this.actions.add(
-				new RevealAnimation(doorEntity, enemyComponent, this.ecs)
+				new CombatAnimation(entity, sprite, enemy, enemyComponent)
 			)
-			console.log('got here')
-
-			// const sprite = (this.ecs.getComponent(entity, 'sprite') as Sprite).sprite
-			// const playerLocation = new Phaser.Math.Vector2(sprite.x, sprite.y)
-
-			// // Combat happens here !
 
 			// // Move the player fo the final destination
+			// const playerLocation = new Phaser.Math.Vector2(sprite.x, sprite.y)
+
 			// const finishMove = this.actions.add(
 			// 	new MoveAnimation(sprite, playerLocation, getLocation(node, this.graph))
 			// )
