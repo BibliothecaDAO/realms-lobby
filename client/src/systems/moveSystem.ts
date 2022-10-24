@@ -34,8 +34,8 @@ export class MoveSystem implements ISystem {
 		// Move the character to anohter position on the map
 		// this.events.on('moveSuccess', this.validMove)
 		// HACK - Listen for client-side moves for now
+		this.events.on('deselectNodes', this.deselectNodes)
 		this.events.on('selectNode', this.selectNode)
-		this.events.on('moveAttempt', this.selectNode)
 	}
 
 	update = () => {
@@ -53,8 +53,6 @@ export class MoveSystem implements ISystem {
 				'transform'
 			) as Transform
 
-			const graph = this.ecs.getComponentsByType('graph')[0] as Graph
-
 			this.events.emit('selectNode', entity, null, playerTransform.node)
 		} catch (e) {
 			console.error(e)
@@ -67,15 +65,23 @@ export class MoveSystem implements ISystem {
 			const transform = this.ecs.getComponent(entity, 'transform') as Transform
 			transform.node = node
 		} catch (e) {
-			console.log(e)
+			console.error(e)
+		}
+	}
+
+	deselectNodes = () => {
+		try {
+			// Disable click for our cnrrent position so we can't move to previous nodes
+			this.disableClick()
+		} catch (e) {
+			console.error(e)
 		}
 	}
 
 	selectNode = (entity: string, srcNode: number, dstNode: number) => {
+		console.log(srcNode)
+		console.log(dstNode)
 		try {
-			// Disable click for our cnrrent position so we can't move to previous nodes
-			this.disableClick()
-
 			// Note: entity is null here
 			const playerTransform = this.ecs.getComponent(
 				this.player,
@@ -84,6 +90,7 @@ export class MoveSystem implements ISystem {
 			playerTransform.node = dstNode
 
 			// Enable clicks for nodes adjacent to our new position
+			// HACK - turning this on after animation til we find a better way
 			this.enableClick(playerTransform.node)
 		} catch (e) {
 			console.error(e)
@@ -119,7 +126,7 @@ export class MoveSystem implements ISystem {
 				}
 			}
 		} catch (e) {
-			console.log(e)
+			console.error(e)
 		}
 	}
 

@@ -1,7 +1,8 @@
 // graphscene.ts - Displays a graph that adventurers can explore
 
+// Initialize our engine
 import { Registry } from '../engine/registry'
-import { World } from '../engine/world'
+import { ActionQueue } from '../engine/actionQueue'
 
 // Initialize sub-scenes
 import { GameUIScene } from './uiscene'
@@ -10,13 +11,13 @@ import { GameUIScene } from './uiscene'
 import { SpawnSystem } from '../systems/spawnSystem'
 import { PlayerSystem } from '../systems/playerSystem'
 import { MoveSystem } from '../systems/moveSystem'
-import { AnimationSystem } from '../systems/animationSystem'
+import { AnimationSystem } from '../systems/animationSystem/animationSystem'
+import { CameraSystem } from '../systems/cameraSystem'
 
 // Setup graph
 import { GraphSystem } from '../systems/graphSystem/graphSystem'
 import { RenderSystem } from '../systems/renderSystem'
 import { RenderEdgeSystem } from '../systems/renderEdgeSystem'
-import { CameraSystem } from '../systems/cameraSystem'
 
 // Components
 
@@ -29,8 +30,8 @@ export class GameScene extends Phaser.Scene {
 	// ECS system to initialize entities and systems
 	public ecs: Registry
 
-	// World to store our connection (so it persists between scenes)
-	public world: World
+	// Action Queue that handles actions we want to string together in sequence (e.g. move here then attack then get an item)
+	private actions: ActionQueue
 
 	// Container where we'll draw our game objects
 	public gameContainer: Phaser.GameObjects.Container
@@ -49,7 +50,7 @@ export class GameScene extends Phaser.Scene {
 		// initialize engine
 		this.ecs = data.ecs
 		this.events = data.events
-		this.world = data.world
+		this.actions = data.actions
 
 		// Setup
 		// Create area where we'll draw our graph
@@ -60,23 +61,21 @@ export class GameScene extends Phaser.Scene {
 			ecs: this.ecs,
 		})
 
-		// this.scene.add.
-
-		// Initialize Game Rendering systems
-		// Race conditions happen when we put these after the logic systems
-
 		// Initialize Game Logic systems
-
 		this.ecs.addSystem(new GraphSystem(this.events, this.ecs))
 		this.ecs.addSystem(new SpawnSystem(this.events, this.ecs, this))
 		this.ecs.addSystem(new PlayerSystem(this.events, this.ecs))
 		this.ecs.addSystem(new MoveSystem(this.events, this.ecs, this))
 		this.ecs.addSystem(new CameraSystem(this.events, this.ecs, this))
+
+		// Initialize rendering systems
 		this.ecs.addSystem(new RenderSystem(this.events, this.ecs, this))
 		this.ecs.addSystem(new RenderEdgeSystem(this.events, this.ecs, this))
 
 		// Animation Systems
-		this.ecs.addSystem(new AnimationSystem(this.events, this.ecs))
+		this.ecs.addSystem(
+			new AnimationSystem(this.events, this.ecs, this, this.actions)
+		)
 
 		// Running this up front because the camera can scroll before setPollAlways has been called (Resulting in improper values)
 		this.input.setPollAlways() // The cursor should poll for new positions while the camera is moving
@@ -93,5 +92,6 @@ export class GameScene extends Phaser.Scene {
 	update(): void {
 		// Run through our systems and run each update function
 		this.ecs.update()
+		this.actions.update()
 	}
 }

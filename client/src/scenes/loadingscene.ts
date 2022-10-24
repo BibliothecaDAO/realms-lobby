@@ -24,8 +24,18 @@ export class LoadingScene extends Scene {
 
 		this.load.baseURL = 'assets/'
 
-		// Load character
-		this.load.image('warrior', 'sprites/characters/warrior.png')
+		// Load character spritesheets
+		// TODO Figure out asesprite loading
+		// this.load.spritesheet('warrior', 'sprites/characters/warrior.png', {
+		// 	frameWidth: 24,
+		// 	frameHeight: 24,
+		// })
+
+		this.load.aseprite(
+			'warrior',
+			'sprites/characters/warrior.png',
+			'sprites/characters/warrior.json'
+		)
 
 		// Load items
 		this.load.image('sword', 'sprites/items/sword.png')
@@ -39,10 +49,13 @@ export class LoadingScene extends Scene {
 
 		// Load enemies
 		this.load.image('skeleton', 'sprites/enemies/skeleton.png')
+		this.load.image('ghost', 'sprites/enemies/ghost.png')
+		this.load.image('oldman', 'sprites/enemies/oldman.png')
 
 		// Load environment sprites
 		this.load.image('treasurechest', 'sprites/environment/treasurechest.png')
 		this.load.image('door', 'sprites/environment/door.png')
+		this.load.image('door-open', 'sprites/environment/door-open.png')
 	}
 
 	create(): void {

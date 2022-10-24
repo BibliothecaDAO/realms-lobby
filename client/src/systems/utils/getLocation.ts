@@ -1,6 +1,6 @@
 // getLocation - returns an x, y (screen) position for a given node in the graph
 
-export const getLocation = (node: number, graph) => {
+export const getLocation = (node: number, graph): Phaser.Math.Vector2 => {
 	// How far from the edge of the canvas should we draw each node?
 	const xOffset = 150
 	const yOffset = 150
@@ -34,5 +34,5 @@ export const getLocation = (node: number, graph) => {
 		y = yOffset * (depthIndex - 1) // we subtract 1 so our graph is centered vertically
 	}
 
-	return { x: x, y: y }
+	return new Phaser.Math.Vector2(x, y)
 }

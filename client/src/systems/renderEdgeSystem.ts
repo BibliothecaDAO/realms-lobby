@@ -75,8 +75,8 @@ export class RenderEdgeSystem implements ISystem {
 					.setDepth(1)
 					.setAlpha(0.2)
 			}
-		} catch (error) {
-			console.log(error)
+		} catch (e) {
+			console.error(e)
 		}
 	}
 

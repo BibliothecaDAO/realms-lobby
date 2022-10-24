@@ -1,6 +1,6 @@
 // playerSystem.ts - Identifies our player
 
-import Phaser from 'phaser'
+import Phaser, { GameObjects } from 'phaser'
 import { ISystem, Registry } from '../engine/registry'
 
 // Components
@@ -11,6 +11,8 @@ export class PlayerSystem implements ISystem {
 	private events: Phaser.Events.EventEmitter
 	private ecs: Registry
 
+	private sprite: GameObjects.Sprite
+
 	constructor(events: Phaser.Events.EventEmitter, ecs: Registry) {
 		this.events = events
 		this.ecs = ecs
@@ -20,7 +22,10 @@ export class PlayerSystem implements ISystem {
 	}
 
 	update = () => {
-		//
+		// HACK - make sure player is always at 100% alpha
+		if (this.sprite && this.sprite.alpha != 1) {
+			this.sprite.alpha = 1
+		}
 	}
 
 	// Event responders
@@ -37,6 +42,9 @@ export class PlayerSystem implements ISystem {
 				sprite.sprite.setAlpha(1)
 				sprite.sprite.setTintFill(0xffffff)
 			}
+
+			// HACK force player alpha to 1 if it changes
+			this.sprite = sprite.sprite
 		} catch (e) {
 			console.error(e)
 		}
