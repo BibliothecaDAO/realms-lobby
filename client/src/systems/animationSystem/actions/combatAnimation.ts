@@ -17,16 +17,20 @@ export class CombatAnimation implements IAction {
 	defender: string // The entity that is being attacked
 	defenderComponent: Sprite
 
+	events: Phaser.Events.EventEmitter
+
 	constructor(
 		attacker: string,
 		attackerComponent: Sprite,
 		defender: string,
-		defenderComponent: Sprite
+		defenderComponent: Sprite,
+		events: Phaser.Events.EventEmitter
 	) {
 		this.attacker = attacker
 		this.attackerComponent = attackerComponent
 		this.defender = defender
 		this.defenderComponent = defenderComponent
+		this.events = events
 
 		this.registerAnimation()
 	}
@@ -51,15 +55,71 @@ export class CombatAnimation implements IAction {
 		defender: string,
 		defenderComponent: Sprite
 	) => {
+		// Dramatic Pause
 		// Player attacks an enemy
-		this.attack(attackerComponent, defenderComponent)
+		this.dramaticPause(attackerComponent.sprite)
+		this.enemyDamage(defender, defenderComponent.sprite)
 		// Enemy attacks the player
 		// Player attacks the enemy
 		// Enemy dies
 	}
 
-	attack = (attackerComponent: Sprite, defenderComponent: Sprite) => {
-		const attackerSprite = attackerComponent.sprite
+	dramaticPause = (sprite: GameObjects.Sprite) => {
+		this.attackerComponent.sprite.scene.tweens.add({
+			targets: this.attackerComponent.sprite,
+			alpha: {
+				from: 1,
+				to: 1,
+			},
+			delay: 1000,
+			onComplete: () => {
+				this.attack()
+			},
+		})
+	}
+
+	enemyDamage = (enemy: string, sprite: GameObjects.Sprite) => {
+		const currentX = sprite.x
+		// Enemy recoils from damage
+		sprite.scene.tweens.add({
+			delay: 2450,
+			targets: sprite,
+			x: {
+				from: sprite.x - 6,
+				to: sprite.x + 6,
+			},
+			ease: 'Power1',
+			duration: 50,
+			repeat: 2,
+			yoyo: true,
+			onStart: () => {
+				// Display floating text for damage
+				this.events.emit('damage', this.defender, 10)
+			},
+			onComplete: () => {
+				sprite.x = currentX
+			},
+		})
+
+		// Slight camera shake
+		const camera = sprite.scene.cameras.main
+		sprite.scene.tweens.add({
+			delay: 2450,
+			targets: camera,
+			zoom: 1.03,
+			ease: 'Sine.easeInOut',
+			duration: 70,
+			repeat: 2,
+			yoyo: true,
+			onStart: () => {
+				// Add slight screen shake
+				camera.shake(100, 0.005)
+			},
+		})
+	}
+
+	attack = () => {
+		const attackerSprite = this.attackerComponent.sprite
 		attackerSprite.play('attack')
 		attackerSprite.chain('idle')
 	}
@@ -79,24 +139,6 @@ export class CombatAnimation implements IAction {
 			onStart: () => {
 				// Add slight screen shake
 				camera.shake(100, 0.005)
-			},
-		})
-	}
-
-	revealEnemy = (sprite: GameObjects.Sprite) => {
-		// Fade in enemy
-		sprite.scene.tweens.add({
-			delay: 0,
-			targets: sprite,
-			alpha: {
-				from: 0,
-				to: 1,
-			},
-			ease: 'Power1',
-			duration: 500,
-			repeat: 0,
-			onComplete: () => {
-				this.finished = true
 			},
 		})
 	}

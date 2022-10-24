@@ -80,9 +80,9 @@ export class AnimationSystem implements ISystem {
 				)
 
 				// Start moving the player to the destination
-				this.actions.add(
-					new MoveAnimation(sprite, startLocation, actionLocation)
-				)
+				// this.actions.add(
+				// 	new MoveAnimation(sprite, startLocation, actionLocation)
+				// )
 				// Await the next event (e.g. combat)
 				// HACK
 				this.events.emit('combat', entity, dst, 'skeleton')
@@ -143,7 +143,7 @@ export class AnimationSystem implements ISystem {
 			// Get player's sprite
 			const sprite = this.ecs.getComponent(entity, 'sprite') as Sprite
 			this.actions.add(
-				new CombatAnimation(entity, sprite, enemy, enemyComponent)
+				new CombatAnimation(entity, sprite, enemy, enemyComponent, this.events)
 			)
 
 			// // Move the player fo the final destination
