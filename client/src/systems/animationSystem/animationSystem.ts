@@ -91,7 +91,9 @@ export class AnimationSystem implements ISystem {
 
 				// Await the next event (e.g. combat)
 				// HACK - pass in the action location as the destination
-				this.events.emit('combat', entity, actionLocation, dst, 'skeleton')
+				// HACK - generate enemy via random number
+				const enemy = this.getRandomEnemy()
+				this.events.emit('combat', entity, actionLocation, dst, enemy)
 			}
 		} catch (e) {
 			console.error(e)
@@ -183,4 +185,18 @@ export class AnimationSystem implements ISystem {
 	}
 
 	// Helper funftions
+	getRandomEnemy = (): string => {
+		const rng = Math.floor(Math.random() * 3 + 1)
+		switch (rng) {
+		case 1:
+			return 'skeleton'
+			break
+		case 2:
+			return 'oldman'
+			break
+		case 3:
+			return 'ghost'
+			break
+		}
+	}
 }

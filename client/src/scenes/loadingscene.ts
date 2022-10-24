@@ -49,6 +49,8 @@ export class LoadingScene extends Scene {
 
 		// Load enemies
 		this.load.image('skeleton', 'sprites/enemies/skeleton.png')
+		this.load.image('ghost', 'sprites/enemies/ghost.png')
+		this.load.image('oldman', 'sprites/enemies/oldman.png')
 
 		// Load environment sprites
 		this.load.image('treasurechest', 'sprites/environment/treasurechest.png')
