@@ -7,12 +7,14 @@ import { Sprite } from '../../components/sprite'
 import { getLocation } from '../utils/getLocation'
 import { Graph } from '../../components/graph'
 import { ActionQueue } from '../../engine/actionQueue'
+import { Transform } from '../../components/transform'
 
 // Animations
 import { MoveAnimation } from './actions/moveAnimation'
 import { OpenDoorAnimation } from './actions/openDoorAnimation'
 import { RevealAnimation } from './actions/revealAnimation'
 import { CombatAnimation } from './actions/combatAnimation'
+import { TurnCompleteAction } from './actions/turnCompleteAction'
 
 export class AnimationSystem implements ISystem {
 	private ecs: Registry
@@ -51,6 +53,9 @@ export class AnimationSystem implements ISystem {
 	// Player moves to a new node
 	handleMove = (entity: string, src: number, dst: number): void => {
 		try {
+			// HACK - Deselect path so it doesn't obscure our player / enemy
+			this.events.emit('deselectNodes')
+
 			const sprite = (this.ecs.getComponent(entity, 'sprite') as Sprite).sprite
 
 			// Kick off (slow) move tween
@@ -80,12 +85,13 @@ export class AnimationSystem implements ISystem {
 				)
 
 				// Start moving the player to the destination
-				// this.actions.add(
-				// 	new MoveAnimation(sprite, startLocation, actionLocation)
-				// )
+				this.actions.add(
+					new MoveAnimation(sprite, startLocation, actionLocation)
+				)
+
 				// Await the next event (e.g. combat)
-				// HACK
-				this.events.emit('combat', entity, dst, 'skeleton')
+				// HACK - pass in the action location as the destination
+				this.events.emit('combat', entity, actionLocation, dst, 'skeleton')
 			}
 		} catch (e) {
 			console.error(e)
@@ -93,7 +99,12 @@ export class AnimationSystem implements ISystem {
 	}
 
 	// Plays the reveal -> Combat animation then moves the player to their destination
-	handleCombat = (entity: string, node: number, enemyName: string) => {
+	handleCombat = (
+		entity: string,
+		currentLocation: Phaser.Math.Vector2,
+		node: number,
+		enemyName: string
+	) => {
 		if (node != undefined) {
 			// Keep track of our door
 			let doorSprite: Sprite
@@ -147,11 +158,23 @@ export class AnimationSystem implements ISystem {
 			)
 
 			// // Move the player fo the final destination
-			// const playerLocation = new Phaser.Math.Vector2(sprite.x, sprite.y)
+			const playerLocation = new Phaser.Math.Vector2(
+				sprite.sprite.x,
+				sprite.sprite.y
+			)
 
-			// const finishMove = this.actions.add(
-			// 	new MoveAnimation(sprite, playerLocation, getLocation(node, this.graph))
-			// )
+			const finishMove = this.actions.add(
+				new MoveAnimation(
+					sprite.sprite,
+					currentLocation,
+					getLocation(node, this.graph)
+				)
+			)
+
+			const transform = this.ecs.getComponent(entity, 'transform') as Transform
+			const finishTurn = this.actions.add(
+				new TurnCompleteAction(entity, transform, this.events)
+			)
 		}
 	}
 

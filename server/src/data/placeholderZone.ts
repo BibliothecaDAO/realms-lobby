@@ -26,7 +26,7 @@
 			],
 		},
 		{
-			base: 'enemies/skeleton',
+			base: 'environment/door',
 			components: [
 				{
 					type: 'transform',

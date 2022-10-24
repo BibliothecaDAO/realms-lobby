@@ -57,14 +57,14 @@ export class CombatAnimation implements IAction {
 	) => {
 		// Dramatic Pause
 		// Player attacks an enemy
-		this.dramaticPause(attackerComponent.sprite)
+		this.playerAttack(attackerComponent.sprite)
 		this.enemyDamage(defender, defenderComponent.sprite)
-		// Enemy attacks the player
-		// Player attacks the enemy
 		// Enemy dies
+		this.enemyDeath(defender, defenderComponent.sprite)
 	}
 
-	dramaticPause = (sprite: GameObjects.Sprite) => {
+	playerAttack = (sprite: GameObjects.Sprite) => {
+		// Dramatic Pause
 		this.attackerComponent.sprite.scene.tweens.add({
 			targets: this.attackerComponent.sprite,
 			alpha: {
@@ -76,6 +76,12 @@ export class CombatAnimation implements IAction {
 				this.attack()
 			},
 		})
+	}
+
+	attack = () => {
+		const attackerSprite = this.attackerComponent.sprite
+		attackerSprite.play('attack')
+		attackerSprite.chain('idle')
 	}
 
 	enemyDamage = (enemy: string, sprite: GameObjects.Sprite) => {
@@ -117,29 +123,47 @@ export class CombatAnimation implements IAction {
 			},
 		})
 	}
-
-	attack = () => {
-		const attackerSprite = this.attackerComponent.sprite
-		attackerSprite.play('attack')
-		attackerSprite.chain('idle')
-	}
-
-	shakeCamera = (sprite: GameObjects.Sprite) => {
-		const camera = sprite.scene.cameras.main
-
-		// Slight camera zoom in/out
+	enemyDeath = (enemy: string, sprite: GameObjects.Sprite) => {
+		// Enemy dies - A bit like final fantasy 4?
+		// Fade enemy out top to bottom
 		sprite.scene.tweens.add({
-			delay: 400,
-			targets: camera,
-			zoom: 1.05,
-			ease: 'Sine.easeInOut',
-			duration: 120,
+			delay: 3500,
+			targets: sprite,
+			alphaTopLeft: 0,
+			alphaTopRight: 0,
+			ease: 'Power1',
+			duration: 1000,
+			repeat: 0,
+			onComplete: () => {},
+		})
+
+		sprite.scene.tweens.add({
+			delay: 4000,
+			targets: sprite,
+			alphaBottomLeft: 0,
+			alphaBottomRight: 0,
+			ease: 'Power1',
+			duration: 1000,
+			repeat: 0,
+			onComplete: () => {
+				// Remove the enemy from the map
+				sprite.destroy()
+				this.finished = true
+			},
+		})
+
+		// Shake enemy as it does
+		sprite.scene.tweens.add({
+			delay: 3500,
+			targets: sprite,
+			x: {
+				from: sprite.x - 2,
+				to: sprite.x + 2,
+			},
+			ease: 'Power1',
+			duration: 1000,
 			repeat: 2,
 			yoyo: true,
-			onStart: () => {
-				// Add slight screen shake
-				camera.shake(100, 0.005)
-			},
 		})
 	}
 
