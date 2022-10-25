@@ -42,7 +42,7 @@ export class FloatingTextUI {
 
 			const floater = targetSprite.sprite.scene.add.text(x, y, `-${damage}`, {
 				color: '#a71442',
-				fontSize: '2em',
+				fontSize: '3.5em',
 			})
 			// this.spawnQueue.set(target, { type: 'text', sender: attacker, recipient: target, amount: damage })
 

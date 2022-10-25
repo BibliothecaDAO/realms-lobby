@@ -161,7 +161,7 @@
 			],
 		},
 		{
-			base: 'environment/door',
+			base: 'enemies/skeleton',
 			components: [
 				{
 					type: 'transform',
@@ -206,7 +206,7 @@
 			],
 		},
 		{
-			base: 'environment/door',
+			base: 'enemies/skeleton',
 			components: [
 				{
 					type: 'transform',

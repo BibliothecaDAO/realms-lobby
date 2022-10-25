@@ -132,7 +132,7 @@ export class CombatAnimation implements IAction {
 			alphaTopLeft: 0,
 			alphaTopRight: 0,
 			ease: 'Power1',
-			duration: 1000,
+			duration: 1200,
 			repeat: 0,
 			onComplete: () => {},
 		})
@@ -143,7 +143,7 @@ export class CombatAnimation implements IAction {
 			alphaBottomLeft: 0,
 			alphaBottomRight: 0,
 			ease: 'Power1',
-			duration: 1000,
+			duration: 1200,
 			repeat: 0,
 			onComplete: () => {
 				// Remove the enemy from the map
@@ -152,7 +152,7 @@ export class CombatAnimation implements IAction {
 			},
 		})
 
-		// Shake enemy as it does
+		// Shake enemy as it dies
 		sprite.scene.tweens.add({
 			delay: 3500,
 			targets: sprite,
@@ -161,7 +161,7 @@ export class CombatAnimation implements IAction {
 				to: sprite.x + 2,
 			},
 			ease: 'Power1',
-			duration: 1000,
+			duration: 1200,
 			repeat: 2,
 			yoyo: true,
 		})
