@@ -9,15 +9,23 @@ export class Connection {
 	events: Phaser.Events.EventEmitter
 
 	constructor(events: Phaser.Events.EventEmitter) {
-		this.events = events
+		try {
+			this.events = events
 
-		// Connect to the server
-		// HACK - server was reconnecting repeatedly so we pass in reconnection: false
-		this.socket = io(process.env.WS_URL, { reconnection: false })
+			// Connect to the server
+			// HACK - server was reconnecting repeatedly so we pass in reconnection: false
+			this.socket = io(process.env.WS_URL, { reconnection: false })
+		} catch (e) {
+			console.error(e)
+		}
 
 		this.socket.on('connect', () => {
-			console.log(`💻 connected to server ${process.env.WS_URL}`)
-			// Any logic to make sure we stay connected goes here
+			try {
+				console.log(`💻 connected to server ${process.env.WS_URL}`)
+				// Any logic to make sure we stay connected goes here
+			} catch (e) {
+				console.error(e)
+			}
 		})
 
 		// DEBUG - Enable this flag in config.ts to see all events in console.log
@@ -30,23 +38,42 @@ export class Connection {
 		// Server -> Client Events
 		// Load initial game state onto client (so we can only update deltas afterwards)
 		this.socket.on('snapshot', (playerId, state) => {
-			this.events.emit('snapshot', playerId, JSON.parse(state))
+			try {
+				this.events.emit('snapshot', playerId, JSON.parse(state))
+			} catch (e) {
+				console.error(e)
+			}
 		})
 
 		// Tell clients about new entities that connect or spawn
 		this.socket.on('spawnSuccess', (entity, components) => {
-			this.events.emit('spawn', entity, JSON.parse(components))
+			try {
+				this.events.emit('spawn', entity, JSON.parse(components))
+			} catch (e) {
+				console.error(e)
+			}
 		})
 
 		// Tell clients about new entities that connect or spawn
 		this.socket.on('despawnSuccess', (entity) => {
-			this.events.emit('despawn', entity)
+			try {
+				this.events.emit('despawn', entity)
+			} catch (e) {
+				console.error(e)
+			}
 		})
 
 		// Move a character around the map
-		this.socket.on('moveSuccess', (uid: string, index: number) => {
-			this.events.emit('moveSuccess', uid, index)
-		})
+		this.socket.on(
+			'moveSuccess',
+			(entity: string, srcNode: number, dstNode: number) => {
+				try {
+					this.events.emit('moveSuccess', entity, srcNode, dstNode)
+				} catch (e) {
+					console.error(e)
+				}
+			}
+		)
 
 		// Client -> Server events
 		// Send move to the server

@@ -39,7 +39,7 @@ export class RenderSystem implements ISystem {
 		this.events.on('spawnSuccess', this.handleSpawn)
 
 		// Draw the entity at the current node
-		this.events.on('moveAttempt', this.handleMove)
+		this.events.on('moveSuccess', this.handleMove)
 	}
 
 	update = () => {
@@ -76,6 +76,7 @@ export class RenderSystem implements ISystem {
 			const sprite = this.ecs.getComponent(entity, 'sprite') as Sprite
 			// Make sure we have a sprite
 			if (sprite != undefined) {
+				console.log(`Moving ${entity} from ${srcNode} to ${dstNode}`)
 				this.drawSprite(entity, dstNode, sprite)
 			} else {
 				throw new Error(`Entity ${entity} does not have a sprite`)

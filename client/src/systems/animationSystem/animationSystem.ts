@@ -37,7 +37,7 @@ export class AnimationSystem implements ISystem {
 
 		// Event Listeners
 		this.events.on('spawnZone', this.setupGraph)
-		this.events.on('moveAttempt', this.handleMove)
+		this.events.on('moveSuccess', this.handleMove)
 		this.events.on('combat', this.handleCombat)
 	}
 

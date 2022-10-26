@@ -15,7 +15,7 @@ declare global {
 		snapshot: (playerId: string, state: string) => void
 
 		// Entity updates
-		moveSuccess: (uid: string, index: number) => void
+		moveSuccess: (entity: string, srcNode: number, dstNode: number) => void
 
 		// noArg: () => void
 		// basicEmit: (a: number, b: string, c: Buffer) => void

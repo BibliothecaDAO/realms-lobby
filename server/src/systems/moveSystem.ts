@@ -42,8 +42,9 @@ export class MoveSystem implements ISystem {
 				const currentNode = graph.adjacency.get(transform.node)
 				// Make sure the node is adjacent to the current node
 				if (currentNode && currentNode.includes(node)) {
+					const srcNode = transform.node
 					transform.node = node
-					this.events.emit('moveSuccess', entity, node)
+					this.events.emit('moveSuccess', entity, srcNode, transform.node)
 				}
 			} else {
 				throw new Error('cannot load graph during move')
