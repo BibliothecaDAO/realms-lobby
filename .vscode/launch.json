@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "client (via chrome)",
+            "type": "chrome",
+            "request": "launch",
+            "url": "https://localhost:8080/",
+            "webRoot": "${workspaceFolder}"
+        },
+        {
+            "name": "server (via npm run server:dev)",
+            "request": "launch",
+            "runtimeArgs": ["run", "server:dev"],
+            "runtimeExecutable": "npm",
+            "skipFiles": ["<node_internals>/**"],
+            "type": "node"
+        },
+    ]
+}
