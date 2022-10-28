@@ -94,9 +94,12 @@ export class Connections {
 			this.io.emit('despawnSuccess', entity)
 		})
 
-		this.events.on('moveSuccess', (entity: string, node: number) => {
-			this.io.emit('moveSuccess', entity, node)
-		})
+		this.events.on(
+			'moveSuccess',
+			(entity: string, srcNode: number, dstNode: number) => {
+				this.io.emit('moveSuccess', entity, srcNode, dstNode)
+			}
+		)
 
 		this.events.on('snapshot', (playerId: string, state) => {
 			const socket = this.getSocketByUid(playerId)

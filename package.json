@@ -6,6 +6,7 @@
   "author": "threepwave <threepwave@gmail.com>",
   "license": "MIT",
   "scripts": {
+    "build": "npx tsc --build tsconfig.json --clean",
     "client:debug": "export DEBUG='express:*'; cross-env NODE_ENV=development webpack serve",
     "client:dev": "cross-env NODE_ENV=development webpack serve",
     "client:build": "cross-env NODE_ENV=production webpack --progress",

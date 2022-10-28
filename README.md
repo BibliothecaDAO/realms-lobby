@@ -85,6 +85,18 @@ A common workflow looks like this:
 The connections classes act as routers between client an server.
 
 
+## VSCode Debugging 
+
+You can debug the client and server at the same time.
+
+1. Open the Debugger tab in VSCode
+2. Launch the server first (select 'server (via npm run server:dev)')
+3. Hit 'Play' which will start the server in debug mode. It will now respect any server-side breakpoints you set.
+4. In a new terminal window, Run `npm run client:dev` to start the 'server' that serves client
+5. Open the Debugger tab in VSCode
+6. Launch the client (select 'client (via Chrome)') which will open a new browser. It will now respect any client-side breakpoints you set.
+
+
 # Getting Help
 If you're stuck or have questions, ask @threepwave on the Realms discord.
 
