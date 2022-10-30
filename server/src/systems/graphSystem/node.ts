@@ -5,6 +5,7 @@ export class Node {
 	index: number
 	x: number
 	y: number
+	revealed = false // Nodes are not revealed by default
 
 	constructor(index: number) {
 		this.index = index

@@ -53,7 +53,7 @@ export class Connections {
 
 			// Handle client requesting a snapshot of state
 			socket.on('requestSnapshot', () => {
-				this.events.emit('requestSnapshot', playerId)
+				this.events.emit('setupPlayer', playerId)
 			})
 
 			// Client is trying to move

@@ -8,6 +8,7 @@ import { ISystem, Registry } from '../engine/registry'
 // Components
 import { Transform } from '../components/transform'
 import { Graph } from '../components/graph'
+import { Reveal } from '../components/reveal'
 
 export class MoveSystem implements ISystem {
 	private events: EventEmitter
@@ -20,7 +21,7 @@ export class MoveSystem implements ISystem {
 		this.ecs = ecs
 
 		// Event responders
-		this.events.on('moveAttempt', this.moveEntity)
+		this.events.on('moveAttempt', this.moveAttempt)
 		this.events.on('spawnSuccess', this.checkForDuplicates)
 	}
 
@@ -30,18 +31,31 @@ export class MoveSystem implements ISystem {
 
 	// Utility functions
 	// Process a move for a player to an adjacent node
-	moveEntity = (entity: string, node: number) => {
+	moveAttempt = (entity: string, node: number) => {
 		// Keep track of current location to calculate if this is a valid move
 		const transform = this.ecs.getComponent(entity, 'transform') as Transform
 
 		if (transform.node != undefined) {
 			// Calculate valid move
 			const graph = this.ecs.getComponentsByType('graph')[0] as Graph
-
 			if (graph != undefined) {
 				const currentNode = graph.adjacency.get(transform.node)
 				// Make sure the node is adjacent to the current node
 				if (currentNode && currentNode.includes(node)) {
+					// Check if node is revealed
+					const entitiesAtLocation = this.ecs.filterLocation(node)
+					const revealed = this.ecs.getComponent(
+						entitiesAtLocation[0],
+						'reveal'
+					) as Reveal
+					if (revealed == undefined) {
+						// Hasn't been revealed, reveal the node
+						const reveal = new Reveal()
+						// There should only be one door at this node, so we can safely call [0]
+						this.ecs.addComponent(entitiesAtLocation[0], reveal)
+					}
+
+					// Move the player to the node
 					const srcNode = transform.node
 					transform.node = node
 					this.events.emit('moveSuccess', entity, srcNode, transform.node)

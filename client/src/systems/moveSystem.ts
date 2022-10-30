@@ -79,8 +79,6 @@ export class MoveSystem implements ISystem {
 	}
 
 	selectNode = (entity: string, srcNode: number, dstNode: number) => {
-		console.log(srcNode)
-		console.log(dstNode)
 		try {
 			// Note: entity is null here
 			const playerTransform = this.ecs.getComponent(
@@ -171,7 +169,7 @@ export class MoveSystem implements ISystem {
 				this.scene.input.setDefaultCursor('grab')
 			})
 		} catch (e) {
-			console.log(e)
+			console.error(e)
 		}
 	}
 

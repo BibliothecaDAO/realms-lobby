@@ -101,9 +101,14 @@ export class LoadData {
 	}
 
 	// Loads the data for a single entity and then spawns it
-	loadEntity = async (template: string, entity?: string) => {
+	loadEntity = async (entity: string, template: string, override?) => {
 		// Grab a template and pull components
-		const components = this.clone(this.templates.get(`${template}.ts`))
+		let components = this.clone(this.templates.get(`${template}.ts`))
+
+		// Check if we're loading any custom components
+		if (override != undefined) {
+			components = this.merge(components, override, template)
+		}
 
 		// Make sure the template loads correctly
 		if (!components) {

@@ -64,7 +64,6 @@ export class FloatingTextUI {
 			// TODO - figure out why our alpha isn't going to zero
 			// Fade out the text object on completion
 			onStart: () => {
-				console.log('got here')
 				targetSprite.sprite.scene.tweens.add({
 					delay: 300,
 					targets: floater,

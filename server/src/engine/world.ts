@@ -40,7 +40,7 @@ export class World {
 		this.events.on('connect', this.addPlayer)
 
 		// Handle client requesting snapshot
-		this.events.on('requestSnapshot', (playerId) => {
+		this.events.on('setupPlayer', (playerId) => {
 			// send down initial state (we'll send deltas from here on out)
 			this.events.emit('snapshot', playerId, this.getState())
 		})
@@ -54,7 +54,7 @@ export class World {
 	// Create a new player and add it to our list of players
 	addPlayer = (entity: string) => {
 		// Hardcode spawn values for now
-		this.loadData.loadEntity('characters/warrior', entity)
+		this.loadData.loadEntity(entity, 'characters/warrior')
 	}
 
 	// Remove a player that times out
