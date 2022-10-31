@@ -86,6 +86,7 @@ export class CombatSystem implements ISystem {
 						secondEntityHealth
 					)
 
+					// TODO - why isn't the monster atacking?
 					// Second character atacks
 					this.attackAttempt(
 						secondEntity,

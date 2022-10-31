@@ -27,6 +27,7 @@ export class DeathSystem implements ISystem {
 				// If an entity dies, remove it from the game
 				if (health.amount <= 0) {
 					// Call the despawn system so we can remove the entity from the game
+					console.log(`${entity} has died!`)
 					this.events.emit('despawnAttempt', entity)
 				}
 			})
