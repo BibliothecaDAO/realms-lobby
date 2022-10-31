@@ -80,8 +80,6 @@ export class Connections {
 			// Tell every other player to spawn this player as a 3rd party
 			// socket.broadcast('newPlayer', id, charClass, x, y) // HACK - We should switch to broadcast asap
 			socket.emit('newPlayer', id, charClass, x, y)
-
-			console.log(`connected: ${id}`)
 		})
 
 		// Clients: Spawn a new entity (e.g. player) into the scene

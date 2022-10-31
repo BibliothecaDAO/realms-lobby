@@ -11,6 +11,15 @@
 			name: 'skeleton',
 		},
 		{
+			type: 'health',
+			amount: '5',
+		},
+		{
+			type: 'weapon',
+			damage: '2',
+			delay: '10',
+		},
+		{
 			type: 'inventory',
 			items: [], // Monsters spawn w/ empty inventory (can be overridden by loot tables)
 		},

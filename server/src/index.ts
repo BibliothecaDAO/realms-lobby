@@ -11,6 +11,7 @@ import { SpawnSystem } from './systems/spawnSystem'
 import { GraphSystem } from './systems/graphSystem/graphSystem'
 import { RevealSystem } from './systems/revealSystem'
 import { CombatSystem } from './systems/combatSystem'
+import { DeathSystem } from './systems/deathSystem'
 
 export default class Server {
 	private world: World
@@ -36,6 +37,7 @@ export default class Server {
 		this.ecs.addSystem(new GraphSystem(this.events, this.ecs))
 		this.ecs.addSystem(new RevealSystem(this.events, this.ecs))
 		this.ecs.addSystem(new CombatSystem(this.events, this.ecs))
+		this.ecs.addSystem(new DeathSystem(this.events, this.ecs))
 
 		// Start accepting connections from player
 		// TODO - Consider splitting this out into its own server (proxy connections between client/game server)

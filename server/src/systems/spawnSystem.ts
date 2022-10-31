@@ -8,9 +8,11 @@ import { Registry } from '../engine/registry'
 import * as _ from 'lodash'
 
 // Hardcode components for our lookup table - typescript doesn't like importing generic components
+import { Health } from '../components/health'
 import { Inventory } from '../components/inventory'
 import { Sprite } from '../components/sprite'
 import { Transform } from '../components/transform'
+import { Weapon } from '../components/weapon'
 import { Zone } from '../components/zone'
 
 interface gameObject {
@@ -50,6 +52,9 @@ export class SpawnSystem implements ISystem {
 			// Determine which type of component to create
 			// Hacky lookup table for our components
 			switch (components[i].type) {
+			case 'health':
+				component = new Health(components[i].amount)
+				break
 			case 'inventory':
 				component = new Inventory(components[i].items)
 				break
@@ -58,6 +63,9 @@ export class SpawnSystem implements ISystem {
 				break
 			case 'transform':
 				component = new Transform(components[i].node)
+				break
+			case 'weapon':
+				component = new Weapon(components[i].damage, components[i].delay)
 				break
 			case 'zone':
 				component = new Zone(components[i].seed, components[i].length)

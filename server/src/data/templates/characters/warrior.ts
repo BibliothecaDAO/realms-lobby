@@ -11,6 +11,15 @@
 			name: 'warrior',
 		},
 		{
+			type: 'health',
+			amount: '10',
+		},
+		{
+			type: 'weapon',
+			damage: '5',
+			delay: '12',
+		},
+		{
 			type: 'inventory',
 			items: [], // Player spawns w/ empty inventory
 		},

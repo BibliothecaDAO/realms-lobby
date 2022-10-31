@@ -5,11 +5,13 @@ import { Registry } from '../engine/registry'
 import { DEPTH } from '../config'
 
 // Hardcode components for our lookup table
+import { Health } from '../components/health'
 import { Inventory } from '../components/inventory'
-import { Zone } from '../components/zone'
 import { Player } from '../components/player'
 import { Sprite } from '../components/sprite'
 import { Transform } from '../components/transform'
+import { Weapon } from '../components/weapon'
+import { Zone } from '../components/zone'
 
 export class SpawnSystem implements ISystem {
 	private events: Phaser.Events.EventEmitter
@@ -44,15 +46,11 @@ export class SpawnSystem implements ISystem {
 				// Determine which type of component to create
 				// Hacky lookup table for our components
 				switch (index) {
+				case 'health':
+					component = new Health(components[index].amount)
+					break
 				case 'inventory':
 					component = new Inventory(components[index].items)
-					break
-				case 'zone':
-					component = new Zone(
-						components[index].width,
-						components[index].height,
-						components[index].graph
-					)
 					break
 				case 'player':
 					component = new Player()
@@ -69,6 +67,19 @@ export class SpawnSystem implements ISystem {
 
 					break
 				}
+				case 'weapon':
+					component = new Weapon(
+						components[index].damage,
+						components[index].delay
+					)
+					break
+				case 'zone':
+					component = new Zone(
+						components[index].width,
+						components[index].height,
+						components[index].graph
+					)
+					break
 				default:
 					throw new Error(`component '${index}' not found`)
 				}
