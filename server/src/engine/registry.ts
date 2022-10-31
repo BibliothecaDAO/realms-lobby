@@ -267,22 +267,23 @@ export class Registry {
 		}
 	}
 
-	// Query system
+	// Query system - AND
 	// Query - a string of the form 'component1,component2,component3'
 	// Returns an array of entities that have all of the components
-	// Exapmle: query('transform, sprite') returns all entities with both a transform and a sprite
+	// Example: query('transform', 'sprite') returns all entities with both a transform and a sprite
+	query = (...componentTypes: Array<string>) => {
+		// First create an array with sub-arrays containing entities with each component type
+		// e.g. [['transformentity1', 'transformentity2'], ['healthentity1', 'healthentity3']]
+		const entities = []
+			.concat(
+				componentTypes.map((type) => this.componentTypesToEntities.get(type))
+			)
+			// Then find the intersection of those two arrays
+			.reduce((a, b) => a.filter((c) => b.includes(c)))
 
-	// query = (...componentTypes: Array<string>) => {
-	// 	// Grab a list of entities which have ALL of these types
-	// 	const entities = []
-	// 	for (let i = 0; i < componentTypes.length; i++) {
-	// 		entities.push(this.componentTypesToEntities.get(componentTypes[i]))
-	// 	}
+		return entities
+	}
 
-	// 	console.log(entities)
-
-	// 	// Figure out how to filter this list of n arrayas
-	// }
 	// Filters - Search for entities based on a specific criteria (e.g. "get me all the entities with Transform position (3, 6)")
 	filter = (components: Array<IComponent>, parameter: string, value) => {
 		const entities = []
